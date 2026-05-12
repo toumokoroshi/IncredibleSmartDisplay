@@ -3,6 +3,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import type { DisplayMode } from "../types/command";
 import type { HeaderStatus } from "../types/dashboard";
 import type { WidgetStatus } from "../types/widget";
+import { summarizeHeaderStatus } from "../utils/headerStatus";
 
 type DashboardContextValue = {
   displayMode: DisplayMode;
@@ -37,12 +38,10 @@ export function DashboardProvider({
   }, []);
 
   const headerStatus = useMemo<HeaderStatus>(
-    () => ({
-      online: typeof navigator === "undefined" ? true : navigator.onLine,
+    () => summarizeHeaderStatus({
       lastSyncedAt,
-      refreshingCount: Object.values(statuses).filter((status) => status === "loading").length,
-      errorCount: Object.values(statuses).filter((status) => status === "error").length,
-      staleCount: Object.values(statuses).filter((status) => status === "stale").length,
+      online: typeof navigator === "undefined" ? true : navigator.onLine,
+      statuses,
     }),
     [lastSyncedAt, statuses],
   );

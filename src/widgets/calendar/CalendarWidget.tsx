@@ -20,7 +20,7 @@ export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, st
       {data && status !== "error" && status !== "loading" && !isEmpty ? (
         <ul className="mt-4 space-y-3">
           {data.items.slice(0, 4).map((item) => (
-            <li key={item.id} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <li key={item.id} className="rounded-lg border border-white/10 bg-white/5 px-4 py-3">
               <p className="line-clamp-2 text-xl font-semibold text-white">{item.title}</p>
               <p className="mt-1 text-sm text-slate-400">{formatScheduleLabel(item.startsAt)}</p>
             </li>

@@ -19,8 +19,8 @@ export function DashboardShell() {
   const highlightedType = getHighlightedType(displayMode);
 
   return (
-    <main className="min-h-screen p-4 text-slate-100">
-      <section className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-[1600px] grid-cols-2 grid-rows-[0.45fr_1.8fr_1.45fr_0.8fr] gap-3">
+    <main className="min-h-screen overflow-hidden p-4 text-slate-100">
+      <section className="mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] grid-cols-2 grid-rows-[10fr_42fr_34fr_14fr] gap-3">
         <HeaderBar status={headerStatus} title="Living Dashboard" />
         {widgets.map((widget) => (
           <ErrorBoundary key={widget.id}>
@@ -45,14 +45,26 @@ function WidgetSlot({
     return <UnknownWidget title={widget.title} type={widget.type} />;
   }
 
+  return <RegisteredWidgetSlot definition={definition} isHighlighted={isHighlighted} widget={widget} />;
+}
+
+function RegisteredWidgetSlot({
+  definition,
+  widget,
+  isHighlighted,
+}: {
+  definition: (typeof widgetRegistry)[string];
+  widget: ReturnType<typeof validateDashboardConfig>["widgets"][number];
+  isHighlighted: boolean;
+}) {
   const { data, error, isEmpty, status } = useWidgetData(widget, definition);
   const Component = definition.component;
   const className =
     widget.area === "quick-area"
       ? "col-span-2"
       : widget.area === "main-left" || widget.area === "main-right"
-        ? "min-h-[240px]"
-        : "min-h-[180px]";
+        ? "min-h-0"
+        : "min-h-0";
 
   return (
     <div className={className}>

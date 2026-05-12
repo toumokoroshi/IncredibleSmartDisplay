@@ -20,7 +20,7 @@ export function NewsWidget({ config, data, error, isEmpty, isHighlighted, status
       {data && status !== "error" && status !== "loading" && !isEmpty ? (
         <ul className="mt-4 space-y-3">
           {data.items.slice(0, 5).map((item) => (
-            <li key={item.id} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <li key={item.id} className="rounded-lg border border-white/10 bg-white/5 px-4 py-3">
               <p className="line-clamp-2 text-lg font-semibold text-white">{item.title}</p>
               <p className="mt-2 text-sm text-slate-400">
                 {[item.source, item.publishedAt ? formatDistanceToNowLabel(item.publishedAt) : null].filter(Boolean).join(" / ")}

@@ -19,7 +19,7 @@ export function StocksWidget({ config, data, error, isEmpty, isHighlighted, stat
       {data && status !== "error" && status !== "loading" && !isEmpty ? (
         <ul className="mt-4 space-y-3">
           {data.items.slice(0, 5).map((item) => (
-            <li key={item.symbol} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <li key={item.symbol} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
               <div>
                 <p className="text-lg font-semibold text-white">{item.name}</p>
                 <p className="text-sm text-slate-400">{item.symbol}</p>

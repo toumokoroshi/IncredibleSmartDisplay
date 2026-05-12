@@ -15,7 +15,7 @@ export function QuickAreaWidget({ config }: WidgetProps<QuickAreaSettings, unkno
           <button
             key={button.label}
             type="button"
-            className={`min-h-11 rounded-2xl border px-4 py-3 text-base font-semibold ${
+            className={`min-h-11 rounded-lg border px-4 py-3 text-base font-semibold ${
               displayMode === button.displayMode
                 ? "border-cyan-300/60 bg-cyan-400/20 text-white"
                 : "border-white/10 bg-white/5 text-slate-200"
