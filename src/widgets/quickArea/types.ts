@@ -4,5 +4,6 @@ export type QuickAreaSettings = {
   buttons: Array<{
     label: string;
     displayMode: DisplayMode;
+    icon?: string;
   }>;
 };

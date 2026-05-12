@@ -8,14 +8,15 @@ export function QuickAreaWidget({ config }: WidgetProps<QuickAreaSettings, unkno
   const buttons = config.settings?.buttons ?? [];
 
   return (
-    <Card>
-      <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
-      <div className="mt-4 grid grid-cols-5 gap-3">
+    <Card className="flex items-center gap-3 px-5 py-3">
+      {/* Keep this as a thin command bar. Later these buttons should dispatch DashboardCommand objects so touch UI, Alexa, and webhooks share the same command path. */}
+      <p className="min-w-16 text-xs uppercase tracking-[0.2em] text-slate-500">{config.title}</p>
+      <div className="grid flex-1 grid-cols-5 gap-3">
         {buttons.map((button) => (
           <button
             key={button.label}
             type="button"
-            className={`min-h-11 rounded-lg border px-4 py-3 text-base font-semibold ${
+            className={`min-h-11 rounded-lg border px-4 py-2 text-base font-semibold ${
               displayMode === button.displayMode
                 ? "border-cyan-300/60 bg-cyan-400/20 text-white"
                 : "border-white/10 bg-white/5 text-slate-200"

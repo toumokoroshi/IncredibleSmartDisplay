@@ -20,7 +20,7 @@ export function DashboardShell() {
 
   return (
     <main className="min-h-screen overflow-hidden p-4 text-slate-100">
-      <section className="mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] grid-cols-2 grid-rows-[10fr_42fr_34fr_14fr] gap-3">
+      <section className="mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] grid-cols-2 grid-rows-[10fr_44fr_38fr_8fr] gap-3">
         <HeaderBar status={headerStatus} title="Living Dashboard" />
         {widgets.map((widget) => (
           <ErrorBoundary key={widget.id}>
