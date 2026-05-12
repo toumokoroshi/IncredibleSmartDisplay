@@ -15,7 +15,19 @@ export type WeatherData = {
   highTempC?: number;
   lowTempC?: number;
   conditionLabel: string;
+  conditionCode?: number;
   humidityPercent?: number;
   windSpeedKph?: number;
+  windDirectionDeg?: number;
+  precipitationProbabilityPercent?: number;
+  hourlyForecast?: WeatherHourlyPoint[];
   updatedAt: string;
+};
+
+export type WeatherHourlyPoint = {
+  time: string;
+  tempC: number;
+  windSpeedKph?: number;
+  windDirectionDeg?: number;
+  precipitationProbabilityPercent?: number;
 };
