@@ -19,10 +19,10 @@ export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, sta
       {data && status !== "error" && status !== "loading" && !isEmpty ? (
         <div className="mt-4">
           <p className="text-xl text-slate-300">{data.locationName}</p>
-          <p className="mt-2 text-5xl font-semibold text-white">{data.currentTempC} deg</p>
+          <p className="mt-2 text-5xl font-semibold text-white">{data.currentTempC}℃</p>
           <p className="mt-2 text-lg text-slate-300">{data.conditionLabel}</p>
           <p className="mt-4 text-base text-slate-400">
-            H {data.highTempC ?? "--"} deg / L {data.lowTempC ?? "--"} deg
+            H {data.highTempC ?? "--"}℃ / L {data.lowTempC ?? "--"}℃
           </p>
         </div>
       ) : null}
