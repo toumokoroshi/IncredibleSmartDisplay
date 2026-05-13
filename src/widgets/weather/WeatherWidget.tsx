@@ -4,7 +4,6 @@ import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { MaterialSymbol } from "../../components/MaterialSymbol";
 import { StaleBadge } from "../../components/StaleBadge";
 import type { WidgetProps } from "../../types/widget";
 import type { WeatherData, WeatherHourlyPoint, WeatherSettings } from "./types";
@@ -18,7 +17,6 @@ export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, sta
         <div className="widget-heading flex items-center gap-3">
           <span className="widget-heading-icon">
             <CloudSun size={20} strokeWidth={1.8} />
-            <MaterialSymbol className="material-widget-icon">partly_cloudy_day</MaterialSymbol>
           </span>
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>
@@ -51,7 +49,6 @@ function WeatherQuickLook({ data }: { data: WeatherData }) {
         </div>
         <div className="weather-hero-icon rounded-full border border-cyan-300/20 bg-cyan-300/10 p-5 text-cyan-100">
           <WeatherIcon size={72} strokeWidth={1.5} type={iconType} />
-          <MaterialWeatherIcon type={iconType} />
         </div>
       </div>
 
@@ -79,7 +76,6 @@ function WeatherDetail({ data }: { data: WeatherData }) {
           </div>
           <div className="weather-hero-icon rounded-full border border-cyan-300/20 bg-cyan-300/10 p-5 text-cyan-100">
             <WeatherIcon size={92} strokeWidth={1.4} type={iconType} />
-            <MaterialWeatherIcon type={iconType} isLarge />
           </div>
         </div>
 
@@ -211,11 +207,6 @@ function WeatherIcon({ size, strokeWidth, type }: { size: number; strokeWidth: n
     return <CloudSun size={size} strokeWidth={strokeWidth} />;
   }
   return <Cloud size={size} strokeWidth={strokeWidth} />;
-}
-
-function MaterialWeatherIcon({ isLarge = false, type }: { isLarge?: boolean; type: WeatherIconType }) {
-  const symbol = type === "clear" ? "sunny" : type === "rain" ? "rainy" : type === "cloudy" ? "partly_cloudy_day" : "cloud";
-  return <MaterialSymbol className={`material-weather-icon ${isLarge ? "is-large" : ""}`}>{symbol}</MaterialSymbol>;
 }
 
 function getWeatherIconType(conditionCode?: number, conditionLabel = ""): WeatherIconType {

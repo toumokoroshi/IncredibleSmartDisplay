@@ -4,7 +4,6 @@ import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { MaterialSymbol } from "../../components/MaterialSymbol";
 import { StaleBadge } from "../../components/StaleBadge";
 import type { WidgetProps } from "../../types/widget";
 import type { StocksData, StocksSettings } from "./types";
@@ -16,7 +15,6 @@ export function StocksWidget({ config, data, error, isEmpty, isHighlighted, stat
         <div className="widget-heading flex items-center gap-3">
           <span className="widget-heading-icon">
             <ChartSpline size={20} strokeWidth={1.8} />
-            <MaterialSymbol className="material-widget-icon">monitoring</MaterialSymbol>
           </span>
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>
