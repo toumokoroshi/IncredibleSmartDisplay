@@ -4,6 +4,7 @@ import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { MaterialSymbol } from "../../components/MaterialSymbol";
 import { StaleBadge } from "../../components/StaleBadge";
 import type { WidgetProps } from "../../types/widget";
 import type { WeatherData, WeatherHourlyPoint, WeatherSettings } from "./types";
@@ -14,7 +15,13 @@ export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, sta
   return (
     <Card className={isHighlighted ? "ring-2 ring-cyan-400/60" : ""}>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
+        <div className="widget-heading flex items-center gap-3">
+          <span className="widget-heading-icon">
+            <CloudSun size={20} strokeWidth={1.8} />
+            <MaterialSymbol className="material-widget-icon">partly_cloudy_day</MaterialSymbol>
+          </span>
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
+        </div>
         {status === "stale" ? <StaleBadge /> : null}
       </div>
       {status === "loading" ? <LoadingState /> : null}
@@ -42,8 +49,9 @@ function WeatherQuickLook({ data }: { data: WeatherData }) {
           <p className="mt-2 text-5xl font-semibold leading-none text-white">{formatTemp(data.currentTempC)}</p>
           <p className="mt-3 text-lg text-slate-300">{data.conditionLabel}</p>
         </div>
-        <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 p-5 text-cyan-100">
+        <div className="weather-hero-icon rounded-full border border-cyan-300/20 bg-cyan-300/10 p-5 text-cyan-100">
           <WeatherIcon size={72} strokeWidth={1.5} type={iconType} />
+          <MaterialWeatherIcon type={iconType} />
         </div>
       </div>
 
@@ -69,8 +77,9 @@ function WeatherDetail({ data }: { data: WeatherData }) {
             <p className="mt-3 text-7xl font-semibold leading-none text-white">{formatTemp(data.currentTempC)}</p>
             <p className="mt-4 text-2xl text-slate-200">{data.conditionLabel}</p>
           </div>
-          <div className="rounded-full border border-cyan-300/20 bg-cyan-300/10 p-5 text-cyan-100">
+          <div className="weather-hero-icon rounded-full border border-cyan-300/20 bg-cyan-300/10 p-5 text-cyan-100">
             <WeatherIcon size={92} strokeWidth={1.4} type={iconType} />
+            <MaterialWeatherIcon type={iconType} isLarge />
           </div>
         </div>
 
@@ -182,7 +191,7 @@ function WindArrow({ degrees }: { degrees?: number }) {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
+    <div className="weather-metric rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
       <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{label}</p>
       <p className="mt-1 truncate text-lg font-semibold text-slate-100">{value}</p>
     </div>
@@ -202,6 +211,11 @@ function WeatherIcon({ size, strokeWidth, type }: { size: number; strokeWidth: n
     return <CloudSun size={size} strokeWidth={strokeWidth} />;
   }
   return <Cloud size={size} strokeWidth={strokeWidth} />;
+}
+
+function MaterialWeatherIcon({ isLarge = false, type }: { isLarge?: boolean; type: WeatherIconType }) {
+  const symbol = type === "clear" ? "sunny" : type === "rain" ? "rainy" : type === "cloudy" ? "partly_cloudy_day" : "cloud";
+  return <MaterialSymbol className={`material-weather-icon ${isLarge ? "is-large" : ""}`}>{symbol}</MaterialSymbol>;
 }
 
 function getWeatherIconType(conditionCode?: number, conditionLabel = ""): WeatherIconType {

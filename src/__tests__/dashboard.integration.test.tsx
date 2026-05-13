@@ -15,7 +15,7 @@ describe("dashboard integration", () => {
     expect(screen.getByRole("button", { name: "Markets" })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Weather" }));
-    expect(screen.getByRole("button", { name: "Weather" })).toHaveClass("border-cyan-300/60");
+    expect(screen.getByRole("button", { name: "Weather" })).toHaveAttribute("aria-pressed", "true");
     expect(await screen.findByText("Today Temperature")).toBeInTheDocument();
     expect(screen.getByText("Wind Direction")).toBeInTheDocument();
   });

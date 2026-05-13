@@ -21,8 +21,8 @@ export function DashboardShell() {
     highlightedType === null ? widgets : widgets.filter((widget) => widget.type === highlightedType || widget.area === "quick-area");
 
   return (
-    <main className="min-h-screen overflow-hidden p-4 text-slate-100">
-      <section className="mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] grid-cols-2 grid-rows-[10fr_44fr_38fr_8fr] gap-3">
+    <main className="min-h-screen overflow-hidden bg-[var(--app-bg)] p-4 text-slate-100">
+      <section className="dashboard-grid mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] gap-3">
         <HeaderBar status={headerStatus} title="Living Dashboard" />
         {visibleWidgets.map((widget) => (
           <ErrorBoundary key={widget.id}>
@@ -61,14 +61,14 @@ function RegisteredWidgetSlot({
 }) {
   const { data, error, isEmpty, status } = useWidgetData(widget, definition);
   const Component = definition.component;
-  const className =
-    isHighlighted && widget.area !== "quick-area"
-      ? "col-span-2 row-span-2 min-h-0"
-      : widget.area === "quick-area"
-      ? "col-span-2"
-      : widget.area === "main-left" || widget.area === "main-right"
-        ? "min-h-0"
-        : "min-h-0";
+  const className = [
+    "widget-slot min-h-0",
+    `widget-${widget.type}`,
+    widget.area ? `widget-area-${widget.area}` : "",
+    isHighlighted && widget.area !== "quick-area" ? "is-detail" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={className}>

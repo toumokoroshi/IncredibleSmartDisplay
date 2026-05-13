@@ -1,7 +1,10 @@
+import { Rss } from "lucide-react";
+
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { MaterialSymbol } from "../../components/MaterialSymbol";
 import { StaleBadge } from "../../components/StaleBadge";
 import { formatDistanceToNowLabel } from "../../utils/date";
 import type { WidgetProps } from "../../types/widget";
@@ -11,7 +14,13 @@ export function NewsWidget({ config, data, error, isEmpty, isHighlighted, status
   return (
     <Card className={isHighlighted ? "ring-2 ring-cyan-400/60" : ""}>
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
+        <div className="widget-heading flex items-center gap-3">
+          <span className="widget-heading-icon">
+            <Rss size={20} strokeWidth={1.8} />
+            <MaterialSymbol className="material-widget-icon">article</MaterialSymbol>
+          </span>
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
+        </div>
         {status === "stale" ? <StaleBadge /> : null}
       </div>
       {status === "loading" ? <LoadingState /> : null}
@@ -20,7 +29,7 @@ export function NewsWidget({ config, data, error, isEmpty, isHighlighted, status
       {data && status !== "error" && status !== "loading" && !isEmpty ? (
         <ul className="mt-4 space-y-3">
           {data.items.slice(0, 5).map((item) => (
-            <li key={item.id} className="rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+            <li key={item.id} className="widget-list-item rounded-lg border border-white/10 bg-white/5 px-4 py-3">
               <p className="line-clamp-2 text-lg font-semibold text-white">{item.title}</p>
               <p className="mt-2 text-sm text-slate-400">
                 {[item.source, item.publishedAt ? formatDistanceToNowLabel(item.publishedAt) : null].filter(Boolean).join(" / ")}

@@ -1,3 +1,5 @@
+import { HouseWifi } from "lucide-react";
+
 import { Card } from "../../components/Card";
 import { useDashboardContext } from "../../contexts/DashboardContext";
 import type { WidgetProps } from "../../types/widget";
@@ -16,13 +18,15 @@ export function QuickAreaWidget({ config }: WidgetProps<QuickAreaSettings, unkno
           <button
             key={button.label}
             type="button"
-            className={`min-h-11 rounded-lg border px-4 py-2 text-base font-semibold ${
+            aria-pressed={displayMode === button.displayMode}
+            className={`quick-command min-h-11 rounded-lg border px-4 py-2 text-base font-semibold ${
               displayMode === button.displayMode
-                ? "border-cyan-300/60 bg-cyan-400/20 text-white"
-                : "border-white/10 bg-white/5 text-slate-200"
+                ? "border-[color:var(--accent-border)] bg-[var(--accent-bg)] text-white"
+                : "border-[color:var(--panel-stroke)] bg-[var(--control-bg)] text-slate-200"
             }`}
             onClick={() => setDisplayMode(button.displayMode)}
           >
+            {button.displayMode === "home" ? <HouseWifi className="mr-2 inline-block align-[-0.2em]" size={20} strokeWidth={1.8} /> : null}
             {button.label}
           </button>
         ))}

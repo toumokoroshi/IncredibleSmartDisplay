@@ -1,18 +1,370 @@
 @import "tailwindcss";
 
 :root {
-  color: #eff4ff;
-  background:
+  --app-bg:
     radial-gradient(circle at top left, rgba(48, 81, 138, 0.35), transparent 32%),
     radial-gradient(circle at bottom right, rgba(21, 108, 100, 0.2), transparent 24%),
     #07111f;
-  font-family: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  --header-bg: rgba(2, 8, 23, 0.56);
+  --panel-bg: rgba(2, 8, 23, 0.48);
+  --control-bg: rgba(255, 255, 255, 0.05);
+  --accent-bg: rgba(34, 211, 238, 0.2);
+  --accent-border: rgba(103, 232, 249, 0.6);
+  --panel-stroke: rgba(255, 255, 255, 0.1);
+  --panel-shadow: 0 24px 60px rgba(2, 8, 23, 0.22);
+  --radius-card: 1.75rem;
+  --title-transform: uppercase;
+  --title-spacing: 0.2em;
+  --clock-size: 48px;
+  --clock-weight: 650;
+  --widget-title-size: 0.875rem;
+  --widget-title-color: #94a3b8;
+  --body-letter-spacing: 0;
+  color: #eff4ff;
+  background: var(--app-bg);
+  font-family: "Aptos Display", "Segoe UI Variable", "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-ui-theme="aurora"] {
+  --app-bg:
+    radial-gradient(circle at 12% 10%, rgba(45, 212, 191, 0.4), transparent 28%),
+    radial-gradient(circle at 82% 4%, rgba(251, 191, 36, 0.18), transparent 22%),
+    linear-gradient(135deg, #06141b 0%, #081f28 48%, #0d1515 100%);
+  --header-bg: rgba(6, 24, 32, 0.66);
+  --panel-bg: linear-gradient(150deg, rgba(8, 31, 40, 0.72), rgba(3, 12, 18, 0.5));
+  --control-bg: rgba(45, 212, 191, 0.08);
+  --accent-bg: linear-gradient(135deg, rgba(45, 212, 191, 0.28), rgba(251, 191, 36, 0.18));
+  --accent-border: rgba(94, 234, 212, 0.68);
+  --panel-stroke: rgba(153, 246, 228, 0.16);
+  --panel-shadow: 0 24px 70px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --radius-card: 2rem;
+  --title-transform: none;
+  --title-spacing: 0.08em;
+  --clock-size: 56px;
+  --clock-weight: 500;
+  --widget-title-size: 1rem;
+  --widget-title-color: #99f6e4;
+  --body-letter-spacing: 0.01em;
+  font-family: "Candara", "Aptos", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="graphite"] {
+  --app-bg:
+    linear-gradient(120deg, rgba(148, 163, 184, 0.08) 0 1px, transparent 1px 80px),
+    radial-gradient(circle at 92% 8%, rgba(59, 130, 246, 0.2), transparent 26%),
+    linear-gradient(135deg, #0b0f14 0%, #111827 54%, #070a0f 100%);
+  --header-bg: rgba(15, 23, 42, 0.78);
+  --panel-bg: rgba(15, 23, 42, 0.68);
+  --control-bg: rgba(148, 163, 184, 0.08);
+  --accent-bg: rgba(59, 130, 246, 0.24);
+  --accent-border: rgba(147, 197, 253, 0.62);
+  --panel-stroke: rgba(203, 213, 225, 0.13);
+  --panel-shadow: 0 18px 48px rgba(0, 0, 0, 0.36);
+  --radius-card: 1.1rem;
+  --title-transform: uppercase;
+  --title-spacing: 0.32em;
+  --clock-size: 44px;
+  --clock-weight: 750;
+  --widget-title-size: 0.75rem;
+  --widget-title-color: #cbd5e1;
+  --body-letter-spacing: 0.02em;
+  font-family: "Bahnschrift", "Cascadia Code", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="nest"] {
+  --app-bg:
+    radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.95), transparent 22%),
+    radial-gradient(circle at 88% 12%, rgba(187, 247, 208, 0.58), transparent 24%),
+    radial-gradient(circle at 78% 88%, rgba(191, 219, 254, 0.62), transparent 28%),
+    linear-gradient(135deg, #f8fafc 0%, #e9f2ee 45%, #eaf2ff 100%);
+  --header-bg: rgba(255, 255, 255, 0.74);
+  --panel-bg: rgba(255, 255, 255, 0.72);
+  --control-bg: rgba(15, 23, 42, 0.045);
+  --accent-bg: linear-gradient(135deg, rgba(66, 133, 244, 0.18), rgba(52, 168, 83, 0.18));
+  --accent-border: rgba(66, 133, 244, 0.38);
+  --panel-stroke: rgba(15, 23, 42, 0.08);
+  --panel-shadow: 0 18px 42px rgba(100, 116, 139, 0.16);
+  --radius-card: 1.6rem;
+  --title-transform: none;
+  --title-spacing: 0.01em;
+  --clock-size: 58px;
+  --clock-weight: 450;
+  --widget-title-size: 1.05rem;
+  --widget-title-color: #475569;
+  --body-letter-spacing: -0.01em;
+  --heading-icon-color: #2563eb;
+  --heading-icon-bg: rgba(66, 133, 244, 0.12);
+  --heading-icon-border: rgba(66, 133, 244, 0.18);
+  --heading-icon-radius: 999px;
+  --weather-icon-color: #2563eb;
+  --weather-icon-bg: rgba(66, 133, 244, 0.12);
+  --item-bg: rgba(15, 23, 42, 0.045);
+  --item-stroke: rgba(15, 23, 42, 0.08);
+  --quick-marker-display: inline-block;
+  --quick-marker-bg: #4285f4;
+  color: #0f172a;
+  font-family: "Google Sans", "Product Sans", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="nest-hub"] {
+  --app-bg:
+    radial-gradient(circle at 10% 14%, rgba(255, 255, 255, 0.98), transparent 24%),
+    radial-gradient(circle at 72% 18%, rgba(187, 247, 208, 0.68), transparent 28%),
+    radial-gradient(circle at 86% 82%, rgba(191, 219, 254, 0.74), transparent 28%),
+    linear-gradient(135deg, #fbfcf9 0%, #edf7ef 48%, #eaf3ff 100%);
+  --header-bg: rgba(255, 255, 255, 0.62);
+  --panel-bg: rgba(255, 255, 255, 0.76);
+  --control-bg: rgba(15, 23, 42, 0.045);
+  --accent-bg: linear-gradient(135deg, rgba(66, 133, 244, 0.18), rgba(52, 168, 83, 0.2));
+  --accent-border: rgba(66, 133, 244, 0.38);
+  --panel-stroke: rgba(15, 23, 42, 0.075);
+  --panel-shadow: 0 22px 54px rgba(100, 116, 139, 0.18);
+  --radius-card: 2.1rem;
+  --title-transform: none;
+  --title-spacing: 0;
+  --clock-size: 62px;
+  --clock-weight: 430;
+  --widget-title-size: 1.05rem;
+  --widget-title-color: #475569;
+  --body-letter-spacing: -0.015em;
+  --heading-icon-size: 2.25rem;
+  --heading-icon-color: #ffffff;
+  --heading-icon-bg: linear-gradient(135deg, #4285f4, #34a853);
+  --heading-icon-border: rgba(255, 255, 255, 0.72);
+  --heading-icon-radius: 999px;
+  --heading-icon-shadow: 0 10px 24px rgba(66, 133, 244, 0.18);
+  --weather-icon-color: #ffffff;
+  --weather-icon-bg: linear-gradient(135deg, #4285f4, #34a853);
+  --weather-icon-shadow: 0 16px 38px rgba(66, 133, 244, 0.22);
+  --item-bg: rgba(15, 23, 42, 0.04);
+  --item-stroke: rgba(15, 23, 42, 0.07);
+  --item-shadow: 0 6px 18px rgba(100, 116, 139, 0.08);
+  --quick-marker-display: inline-block;
+  --quick-marker-bg: #34a853;
+  color: #0f172a;
+  font-family: "Google Sans", "Product Sans", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="nest-gallery"] {
+  --app-bg:
+    linear-gradient(120deg, rgba(15, 23, 42, 0.14), rgba(15, 23, 42, 0.48)),
+    radial-gradient(circle at 18% 24%, rgba(251, 188, 5, 0.44), transparent 26%),
+    radial-gradient(circle at 76% 18%, rgba(66, 133, 244, 0.42), transparent 28%),
+    radial-gradient(circle at 78% 84%, rgba(52, 168, 83, 0.42), transparent 28%),
+    linear-gradient(135deg, #f7d7b5 0%, #b8d7e8 48%, #d8ead6 100%);
+  --header-bg: rgba(255, 255, 255, 0.2);
+  --panel-bg: rgba(255, 255, 255, 0.24);
+  --control-bg: rgba(255, 255, 255, 0.28);
+  --accent-bg: rgba(255, 255, 255, 0.42);
+  --accent-border: rgba(255, 255, 255, 0.6);
+  --panel-stroke: rgba(255, 255, 255, 0.34);
+  --panel-shadow: 0 28px 80px rgba(15, 23, 42, 0.2);
+  --radius-card: 2.4rem;
+  --title-transform: none;
+  --title-spacing: 0.02em;
+  --clock-size: 72px;
+  --clock-weight: 380;
+  --widget-title-size: 1rem;
+  --widget-title-color: rgba(255, 255, 255, 0.86);
+  --body-letter-spacing: -0.02em;
+  --heading-icon-size: 2.4rem;
+  --heading-icon-color: #ffffff;
+  --heading-icon-bg: rgba(255, 255, 255, 0.22);
+  --heading-icon-border: rgba(255, 255, 255, 0.42);
+  --heading-icon-radius: 1rem;
+  --heading-icon-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --weather-icon-color: #ffffff;
+  --weather-icon-bg: rgba(255, 255, 255, 0.22);
+  --weather-icon-shadow: 0 20px 60px rgba(15, 23, 42, 0.16);
+  --weather-icon-radius: 1.4rem;
+  --item-bg: rgba(255, 255, 255, 0.18);
+  --item-stroke: rgba(255, 255, 255, 0.26);
+  --quick-marker-display: inline-block;
+  --quick-marker-bg: rgba(255, 255, 255, 0.86);
+  color: #ffffff;
+  font-family: "Google Sans", "Product Sans", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="nest-control"] {
+  --app-bg:
+    linear-gradient(90deg, rgba(15, 23, 42, 0.05) 0 1px, transparent 1px 96px),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+  --header-bg: #ffffff;
+  --panel-bg: #ffffff;
+  --control-bg: #f1f5f9;
+  --accent-bg: #dbeafe;
+  --accent-border: rgba(37, 99, 235, 0.28);
+  --panel-stroke: rgba(15, 23, 42, 0.08);
+  --panel-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  --radius-card: 1.4rem;
+  --title-transform: none;
+  --title-spacing: 0.01em;
+  --clock-size: 46px;
+  --clock-weight: 520;
+  --widget-title-size: 0.95rem;
+  --widget-title-color: #334155;
+  --body-letter-spacing: -0.005em;
+  --heading-icon-size: 1.9rem;
+  --heading-icon-color: #1d4ed8;
+  --heading-icon-bg: #dbeafe;
+  --heading-icon-border: rgba(37, 99, 235, 0.2);
+  --heading-icon-radius: 0.7rem;
+  --weather-icon-color: #1d4ed8;
+  --weather-icon-bg: #dbeafe;
+  --weather-icon-radius: 0.9rem;
+  --item-bg: #f8fafc;
+  --item-stroke: rgba(15, 23, 42, 0.08);
+  --quick-marker-display: inline-block;
+  --quick-marker-size: 0.65rem;
+  --quick-marker-radius: 0.18rem;
+  --quick-marker-bg: #2563eb;
+  color: #0f172a;
+  font-family: "Google Sans", "Product Sans", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="nest-google"] {
+  --app-bg:
+    radial-gradient(circle at 6% 10%, rgba(66, 133, 244, 0.12), transparent 24%),
+    radial-gradient(circle at 92% 16%, rgba(52, 168, 83, 0.12), transparent 24%),
+    radial-gradient(circle at 80% 86%, rgba(251, 188, 5, 0.14), transparent 28%),
+    linear-gradient(135deg, #f8fafc 0%, #f1f5f9 42%, #eef6ff 100%);
+  --header-bg: rgba(255, 255, 255, 0.78);
+  --panel-bg: #ffffff;
+  --control-bg: #f1f5f9;
+  --accent-bg: #dbeafe;
+  --accent-border: rgba(66, 133, 244, 0.34);
+  --panel-stroke: rgba(15, 23, 42, 0.08);
+  --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+  --radius-card: 1.7rem;
+  --title-transform: none;
+  --title-spacing: 0;
+  --clock-size: 60px;
+  --clock-weight: 430;
+  --widget-title-size: 1rem;
+  --widget-title-color: #334155;
+  --body-letter-spacing: -0.01em;
+  --heading-icon-size: 2.25rem;
+  --heading-icon-color: #ffffff;
+  --heading-icon-bg: #4285f4;
+  --heading-icon-border: rgba(66, 133, 244, 0.22);
+  --heading-icon-radius: 999px;
+  --heading-icon-shadow: 0 10px 22px rgba(66, 133, 244, 0.16);
+  --weather-icon-color: #ffffff;
+  --weather-icon-bg: linear-gradient(135deg, #4285f4, #34a853);
+  --weather-icon-shadow: 0 18px 38px rgba(66, 133, 244, 0.2);
+  --item-bg: #f8fafc;
+  --item-stroke: rgba(15, 23, 42, 0.07);
+  --item-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+  --quick-marker-display: inline-block;
+  --quick-marker-bg: #4285f4;
+  color: #0f172a;
+  font-family: "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="nest-flat"] {
+  --app-bg: #f6f8fb;
+  --header-bg: #ffffff;
+  --panel-bg: #ffffff;
+  --control-bg: #f1f5f9;
+  --accent-bg: #e8f0fe;
+  --accent-border: #8ab4f8;
+  --panel-stroke: #e2e8f0;
+  --panel-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  --radius-card: 1.55rem;
+  --title-transform: none;
+  --title-spacing: 0;
+  --clock-size: 58px;
+  --clock-weight: 430;
+  --widget-title-size: 1rem;
+  --widget-title-color: #334155;
+  --body-letter-spacing: -0.01em;
+  --heading-icon-size: 2.2rem;
+  --heading-icon-color: #ffffff;
+  --heading-icon-bg: #4285f4;
+  --heading-icon-border: #4285f4;
+  --heading-icon-radius: 999px;
+  --weather-icon-color: #ffffff;
+  --weather-icon-bg: #4285f4;
+  --item-bg: #f8fafc;
+  --item-stroke: #e2e8f0;
+  --quick-marker-display: inline-block;
+  --quick-marker-bg: #4285f4;
+  color: #0f172a;
+  font-family: "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="nest-material"] {
+  --app-bg: #f6f8fb;
+  --header-bg: #ffffff;
+  --panel-bg: #ffffff;
+  --control-bg: #f1f5f9;
+  --accent-bg: #e8f0fe;
+  --accent-border: #8ab4f8;
+  --panel-stroke: #e2e8f0;
+  --panel-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  --radius-card: 1.55rem;
+  --title-transform: none;
+  --title-spacing: 0;
+  --clock-size: 58px;
+  --clock-weight: 430;
+  --widget-title-size: 1rem;
+  --widget-title-color: #334155;
+  --body-letter-spacing: -0.01em;
+  --heading-icon-size: 2.35rem;
+  --heading-icon-color: #ffffff;
+  --heading-icon-bg: #4285f4;
+  --heading-icon-border: #4285f4;
+  --heading-icon-radius: 1.15rem;
+  --weather-icon-color: #ffffff;
+  --weather-icon-bg: #4285f4;
+  --weather-icon-radius: 1.25rem;
+  --item-bg: #f8fafc;
+  --item-stroke: #e2e8f0;
+  --quick-marker-display: inline-block;
+  --quick-marker-bg: #4285f4;
+  color: #0f172a;
+  font-family: "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+}
+
+:root[data-ui-theme="nest-topglow"] {
+  --app-bg: #f6f8fb;
+  --header-bg: rgba(255, 255, 255, 0.78);
+  --panel-bg: #ffffff;
+  --control-bg: #f1f5f9;
+  --accent-bg: #e8f0fe;
+  --accent-border: rgba(66, 133, 244, 0.34);
+  --panel-stroke: rgba(15, 23, 42, 0.08);
+  --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+  --radius-card: 1.7rem;
+  --title-transform: none;
+  --title-spacing: 0;
+  --clock-size: 60px;
+  --clock-weight: 430;
+  --widget-title-size: 1rem;
+  --widget-title-color: #334155;
+  --body-letter-spacing: -0.01em;
+  --heading-icon-size: 2.25rem;
+  --heading-icon-color: #ffffff;
+  --heading-icon-bg: #4285f4;
+  --heading-icon-border: rgba(66, 133, 244, 0.22);
+  --heading-icon-radius: 999px;
+  --heading-icon-shadow: 0 10px 22px rgba(66, 133, 244, 0.16);
+  --weather-icon-color: #ffffff;
+  --weather-icon-bg: #4285f4;
+  --weather-icon-shadow: 0 18px 38px rgba(66, 133, 244, 0.2);
+  --item-bg: #f8fafc;
+  --item-stroke: rgba(15, 23, 42, 0.07);
+  --item-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+  --quick-marker-display: inline-block;
+  --quick-marker-bg: #4285f4;
+  color: #0f172a;
+  font-family: "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
 }
 
 * {
@@ -28,4 +380,1159 @@ body,
 
 body {
   margin: 0;
+  letter-spacing: var(--body-letter-spacing);
+}
+
+.dashboard-header {
+  position: relative;
+  overflow: hidden;
+  grid-area: header;
+}
+
+.dashboard-grid {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 10fr 44fr 38fr 8fr;
+  grid-template-areas:
+    "header header"
+    "weather calendar"
+    "stocks news"
+    "quick quick";
+}
+
+.widget-weather {
+  grid-area: weather;
+}
+
+.widget-calendar {
+  grid-area: calendar;
+}
+
+.widget-stocks {
+  grid-area: stocks;
+}
+
+.widget-news {
+  grid-area: news;
+}
+
+.widget-quickArea {
+  grid-area: quick;
+}
+
+.widget-slot.is-detail {
+  grid-area: detail;
+}
+
+.dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 10fr 82fr 8fr;
+  grid-template-areas:
+    "header header"
+    "detail detail"
+    "quick quick";
+}
+
+.dashboard-header::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background: var(--header-decoration, transparent);
+}
+
+.dashboard-header > div {
+  position: relative;
+}
+
+.app-title,
+.status-label,
+.widget-card > div:first-child > p:first-child {
+  color: var(--widget-title-color);
+  font-size: var(--widget-title-size);
+  letter-spacing: var(--title-spacing);
+  text-transform: var(--title-transform);
+}
+
+.app-clock {
+  font-size: var(--clock-size);
+  font-weight: var(--clock-weight);
+  letter-spacing: var(--clock-letter-spacing, -0.04em);
+  text-shadow: var(--clock-shadow, none);
+}
+
+.widget-card,
+.status-pill {
+  position: relative;
+}
+
+.widget-card::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background: var(--card-decoration, transparent);
+}
+
+.widget-card > * {
+  position: relative;
+}
+
+.widget-heading-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--heading-icon-size, 2rem);
+  height: var(--heading-icon-size, 2rem);
+  color: var(--heading-icon-color, #67e8f9);
+  background: var(--heading-icon-bg, rgba(34, 211, 238, 0.12));
+  border: 1px solid var(--heading-icon-border, rgba(103, 232, 249, 0.18));
+  border-radius: var(--heading-icon-radius, 999px);
+  box-shadow: var(--heading-icon-shadow, none);
+}
+
+.weather-hero-icon {
+  border-radius: var(--weather-icon-radius, 999px);
+  color: var(--weather-icon-color, #cffafe);
+  background: var(--weather-icon-bg, rgba(34, 211, 238, 0.1));
+  box-shadow: var(--weather-icon-shadow, none);
+}
+
+.widget-list-item,
+.weather-metric {
+  border-color: var(--item-stroke, rgba(255, 255, 255, 0.1));
+  background: var(--item-bg, rgba(255, 255, 255, 0.05));
+  box-shadow: var(--item-shadow, none);
+}
+
+.quick-command {
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-command::before {
+  display: var(--quick-marker-display, none);
+  width: var(--quick-marker-size, 0.45rem);
+  height: var(--quick-marker-size, 0.45rem);
+  margin-right: 0.55rem;
+  content: "";
+  background: var(--quick-marker-bg, currentColor);
+  border-radius: var(--quick-marker-radius, 999px);
+}
+
+.material-widget-icon,
+.material-weather-icon {
+  display: none;
+}
+
+.material-symbols-rounded {
+  direction: ltr;
+  display: inline-block;
+  font-family: "Material Symbols Rounded";
+  font-feature-settings: "liga";
+  font-size: 1.45rem;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: normal;
+  line-height: 1;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  -webkit-font-smoothing: antialiased;
+}
+
+:root[data-ui-theme="aurora"] .dashboard-header,
+:root[data-ui-theme="aurora"] .widget-card {
+  border-top-color: rgba(204, 251, 241, 0.34);
+}
+
+:root[data-ui-theme="aurora"] .dashboard-grid {
+  grid-template-columns: 1.2fr 0.78fr 0.92fr;
+  grid-template-rows: 11fr 38fr 33fr 10fr;
+  grid-template-areas:
+    "header header weather"
+    "calendar calendar weather"
+    "calendar calendar news"
+    "stocks quick quick";
+}
+
+:root[data-ui-theme="aurora"] .dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr 1fr 0.8fr;
+  grid-template-rows: 11fr 79fr 10fr;
+  grid-template-areas:
+    "header header header"
+    "detail detail detail"
+    "quick quick quick";
+}
+
+:root[data-ui-theme="aurora"] .app-title::after {
+  margin-left: 0.7rem;
+  color: #fbbf24;
+  content: " / ambient";
+  font-size: 0.85em;
+  letter-spacing: 0.16em;
+}
+
+:root[data-ui-theme="aurora"] {
+  --card-decoration:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 26%),
+    radial-gradient(circle at 92% 12%, rgba(251, 191, 36, 0.16), transparent 20%);
+  --header-decoration: linear-gradient(90deg, rgba(45, 212, 191, 0.12), transparent 48%);
+  --clock-shadow: 0 0 32px rgba(45, 212, 191, 0.25);
+}
+
+:root[data-ui-theme="graphite"] {
+  --card-decoration:
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 18%);
+  --header-decoration: repeating-linear-gradient(90deg, rgba(148, 163, 184, 0.08) 0 1px, transparent 1px 18px);
+  --clock-letter-spacing: 0.04em;
+}
+
+:root[data-ui-theme="graphite"] .widget-card,
+:root[data-ui-theme="graphite"] .dashboard-header,
+:root[data-ui-theme="graphite"] .status-pill {
+  border-style: solid;
+  backdrop-filter: none;
+}
+
+:root[data-ui-theme="graphite"] .dashboard-grid {
+  grid-template-columns: 1.05fr 1fr 1fr 0.95fr;
+  grid-template-rows: 10fr 35fr 35fr 10fr;
+  grid-template-areas:
+    "header header header header"
+    "weather weather calendar news"
+    "stocks stocks calendar news"
+    "quick quick quick quick";
+}
+
+:root[data-ui-theme="graphite"] .dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 10fr 80fr 10fr;
+  grid-template-areas:
+    "header header header header"
+    "detail detail detail detail"
+    "quick quick quick quick";
+}
+
+:root[data-ui-theme="graphite"] .app-title::before {
+  color: #93c5fd;
+  content: "SYS // ";
+}
+
+:root[data-ui-theme="graphite"] .status-value {
+  font-family: "Cascadia Code", "Consolas", monospace;
+}
+
+:root[data-ui-theme="nest"] .dashboard-header,
+:root[data-ui-theme="nest"] .widget-card,
+:root[data-ui-theme="nest"] .status-pill {
+  color: #0f172a;
+  backdrop-filter: blur(22px);
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .dashboard-header,
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card,
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .status-pill {
+  color: #0f172a;
+  backdrop-filter: blur(22px);
+}
+
+:root[data-ui-theme="nest-google"] .dashboard-header,
+:root[data-ui-theme="nest-google"] .widget-card,
+:root[data-ui-theme="nest-google"] .status-pill {
+  color: #0f172a;
+  backdrop-filter: blur(18px);
+}
+
+:root[data-ui-theme="nest-flat"] .dashboard-header,
+:root[data-ui-theme="nest-flat"] .widget-card,
+:root[data-ui-theme="nest-flat"] .status-pill {
+  color: #0f172a;
+  backdrop-filter: none;
+}
+
+:root[data-ui-theme="nest-gallery"] .dashboard-header,
+:root[data-ui-theme="nest-gallery"] .widget-card,
+:root[data-ui-theme="nest-gallery"] .status-pill {
+  color: #ffffff;
+  backdrop-filter: blur(30px) saturate(1.25);
+}
+
+:root[data-ui-theme="nest"] .dashboard-grid {
+  grid-template-columns: 1.55fr 0.95fr;
+  grid-template-rows: 24fr 31fr 31fr 10fr;
+  grid-template-areas:
+    "weather header"
+    "weather calendar"
+    "news stocks"
+    "quick quick";
+  max-width: 1500px;
+  gap: 1rem;
+}
+
+:root[data-ui-theme="nest-hub"] .dashboard-grid {
+  grid-template-columns: 1.42fr 0.95fr 0.75fr;
+  grid-template-rows: 20fr 32fr 32fr 10fr;
+  grid-template-areas:
+    "weather header header"
+    "weather calendar stocks"
+    "weather news news"
+    "quick quick quick";
+  max-width: 1520px;
+  gap: 1rem;
+}
+
+:root[data-ui-theme="nest-google"] .dashboard-grid {
+  grid-template-columns: 1.45fr 0.95fr 0.82fr;
+  grid-template-rows: 20fr 32fr 32fr 10fr;
+  grid-template-areas:
+    "weather header header"
+    "weather calendar stocks"
+    "weather news news"
+    "quick quick quick";
+  max-width: 1520px;
+  gap: 1rem;
+}
+
+:root[data-ui-theme="nest-flat"] .dashboard-grid {
+  grid-template-columns: 1.45fr 0.95fr 0.82fr;
+  grid-template-rows: 20fr 32fr 32fr 10fr;
+  grid-template-areas:
+    "weather header header"
+    "weather calendar stocks"
+    "weather news news"
+    "quick quick quick";
+  max-width: 1520px;
+  gap: 1rem;
+}
+
+:root[data-ui-theme="nest-gallery"] .dashboard-grid {
+  grid-template-columns: 1.2fr 0.82fr 0.82fr;
+  grid-template-rows: 34fr 26fr 26fr 10fr;
+  grid-template-areas:
+    "header weather weather"
+    "calendar weather weather"
+    "news stocks stocks"
+    "quick quick quick";
+  max-width: 1520px;
+  gap: 1.05rem;
+}
+
+:root[data-ui-theme="nest-control"] .dashboard-grid {
+  grid-template-columns: 0.62fr 1.1fr 1fr;
+  grid-template-rows: 16fr 36fr 36fr;
+  grid-template-areas:
+    "quick header header"
+    "quick weather calendar"
+    "quick stocks news";
+  max-width: 1520px;
+  gap: 1rem;
+}
+
+:root[data-ui-theme="nest"] .dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr;
+  grid-template-rows: 16fr 74fr 10fr;
+  grid-template-areas:
+    "header"
+    "detail"
+    "quick";
+  max-width: 1500px;
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-gallery"], [data-ui-theme="nest-control"]) .dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr;
+  grid-template-rows: 16fr 74fr 10fr;
+  grid-template-areas:
+    "header"
+    "detail"
+    "quick";
+  max-width: 1500px;
+}
+
+:root[data-ui-theme="nest-google"] .dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr;
+  grid-template-rows: 16fr 74fr 10fr;
+  grid-template-areas:
+    "header"
+    "detail"
+    "quick";
+  max-width: 1500px;
+}
+
+:root[data-ui-theme="nest-flat"] .dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr;
+  grid-template-rows: 16fr 74fr 10fr;
+  grid-template-areas:
+    "header"
+    "detail"
+    "quick";
+  max-width: 1500px;
+}
+
+:root[data-ui-theme="nest"] .dashboard-header {
+  --header-decoration:
+    linear-gradient(90deg, rgba(66, 133, 244, 0.13), transparent 28%),
+    radial-gradient(circle at 96% 12%, rgba(251, 188, 5, 0.2), transparent 20%);
+}
+
+:root[data-ui-theme="nest-hub"] .dashboard-header {
+  --header-decoration:
+    linear-gradient(110deg, rgba(66, 133, 244, 0.14), transparent 32%),
+    radial-gradient(circle at 92% 16%, rgba(251, 188, 5, 0.2), transparent 24%);
+}
+
+:root[data-ui-theme="nest-gallery"] .dashboard-header {
+  --header-decoration:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.22), transparent 38%),
+    radial-gradient(circle at 8% 12%, rgba(255, 255, 255, 0.28), transparent 22%);
+}
+
+:root[data-ui-theme="nest-control"] .dashboard-header {
+  --header-decoration: linear-gradient(90deg, rgba(37, 99, 235, 0.08), transparent 30%);
+}
+
+:root[data-ui-theme="nest-google"] .dashboard-header {
+  --header-decoration:
+    linear-gradient(90deg, rgba(66, 133, 244, 0.1), transparent 26%),
+    radial-gradient(circle at 92% 16%, rgba(251, 188, 5, 0.16), transparent 20%);
+}
+
+:root[data-ui-theme="nest-flat"] .dashboard-header {
+  --header-decoration: none;
+}
+
+:root[data-ui-theme="nest"] .widget-card {
+  --card-decoration:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.75), transparent 34%),
+    radial-gradient(circle at 100% 0%, rgba(66, 133, 244, 0.08), transparent 24%);
+}
+
+:root[data-ui-theme="nest-hub"] .widget-card {
+  --card-decoration:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), transparent 32%),
+    radial-gradient(circle at 92% 10%, rgba(52, 168, 83, 0.12), transparent 24%);
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card {
+  --card-decoration:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 34%),
+    radial-gradient(circle at 96% 8%, rgba(255, 255, 255, 0.22), transparent 22%);
+}
+
+:root[data-ui-theme="nest-control"] .widget-card {
+  --card-decoration: linear-gradient(180deg, rgba(37, 99, 235, 0.035), transparent 30%);
+}
+
+:root[data-ui-theme="nest-google"] .widget-card {
+  --card-decoration: linear-gradient(180deg, rgba(66, 133, 244, 0.035), transparent 28%);
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card {
+  --card-decoration: none;
+}
+
+:root[data-ui-theme="nest"] .app-title::before {
+  margin-right: 0.55rem;
+  color: #4285f4;
+  content: "Home";
+  font-weight: 700;
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .app-title::before {
+  margin-right: 0.55rem;
+  color: #4285f4;
+  content: "Home";
+  font-weight: 700;
+}
+
+:root[data-ui-theme="nest-google"] .app-title::before {
+  margin-right: 0.55rem;
+  color: #4285f4;
+  content: "Home";
+  font-weight: 700;
+}
+
+:root[data-ui-theme="nest-flat"] .app-title::before {
+  margin-right: 0.55rem;
+  color: #4285f4;
+  content: "Home";
+  font-weight: 700;
+}
+
+:root[data-ui-theme="nest-gallery"] .app-title::before {
+  margin-right: 0.55rem;
+  color: #ffffff;
+  content: "Ambient";
+  font-weight: 700;
+}
+
+:root[data-ui-theme="nest"] .app-title::after {
+  margin-left: 0.55rem;
+  color: #94a3b8;
+  content: "display";
+}
+
+:root[data-ui-theme="nest-hub"] .app-title::after {
+  margin-left: 0.55rem;
+  color: #94a3b8;
+  content: "hub";
+}
+
+:root[data-ui-theme="nest-gallery"] .app-title::after {
+  margin-left: 0.55rem;
+  color: rgba(255, 255, 255, 0.72);
+  content: "frame";
+}
+
+:root[data-ui-theme="nest-control"] .app-title::after {
+  margin-left: 0.55rem;
+  color: #64748b;
+  content: "control";
+}
+
+:root[data-ui-theme="nest-google"] .app-title::after {
+  margin-left: 0.55rem;
+  color: #64748b;
+  content: "display";
+}
+
+:root[data-ui-theme="nest-flat"] .app-title::after {
+  margin-left: 0.55rem;
+  color: #64748b;
+  content: "display";
+}
+
+:root[data-ui-theme="nest"] .app-clock,
+:root[data-ui-theme="nest"] .status-value,
+:root[data-ui-theme="nest"] .widget-card p,
+:root[data-ui-theme="nest"] .widget-card li {
+  color: #0f172a;
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .app-clock,
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .status-value,
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card p,
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card li {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-google"] .app-clock,
+:root[data-ui-theme="nest-google"] .status-value,
+:root[data-ui-theme="nest-google"] .widget-card p,
+:root[data-ui-theme="nest-google"] .widget-card li {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-flat"] .app-clock,
+:root[data-ui-theme="nest-flat"] .status-value,
+:root[data-ui-theme="nest-flat"] .widget-card p,
+:root[data-ui-theme="nest-flat"] .widget-card li {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-gallery"] .app-clock,
+:root[data-ui-theme="nest-gallery"] .status-value,
+:root[data-ui-theme="nest-gallery"] .widget-card p,
+:root[data-ui-theme="nest-gallery"] .widget-card li {
+  color: #ffffff;
+  text-shadow: 0 1px 18px rgba(15, 23, 42, 0.16);
+}
+
+:root[data-ui-theme="nest"] .widget-card > div:first-child > p:first-child,
+:root[data-ui-theme="nest"] .status-label {
+  color: #64748b;
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card > div:first-child > p:first-child,
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .status-label {
+  color: #64748b;
+}
+
+:root[data-ui-theme="nest-google"] .widget-card > div:first-child > p:first-child,
+:root[data-ui-theme="nest-google"] .status-label {
+  color: #475569;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card > div:first-child > p:first-child,
+:root[data-ui-theme="nest-flat"] .status-label {
+  color: #475569;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card > div:first-child > p:first-child,
+:root[data-ui-theme="nest-gallery"] .status-label {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+:root[data-ui-theme="nest"] .widget-card :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300) {
+  color: #0f172a;
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300) {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-google"] .widget-card :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300) {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300) {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300) {
+  color: #ffffff;
+}
+
+:root[data-ui-theme="nest"] .widget-card :is(.text-slate-400, .text-slate-500) {
+  color: #64748b;
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card :is(.text-slate-400, .text-slate-500) {
+  color: #64748b;
+}
+
+:root[data-ui-theme="nest-google"] .widget-card :is(.text-slate-400, .text-slate-500) {
+  color: #64748b;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card :is(.text-slate-400, .text-slate-500) {
+  color: #64748b;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card :is(.text-slate-400, .text-slate-500) {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+:root[data-ui-theme="nest"] .widget-card :is(.bg-white\/5, .bg-white\/\[0\.03\], .bg-white\/\[0\.04\]) {
+  background-color: rgba(15, 23, 42, 0.045);
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card :is(.bg-white\/5, .bg-white\/\[0\.03\], .bg-white\/\[0\.04\]) {
+  background-color: rgba(15, 23, 42, 0.045);
+}
+
+:root[data-ui-theme="nest-google"] .widget-card :is(.bg-white\/5, .bg-white\/\[0\.03\], .bg-white\/\[0\.04\]) {
+  background-color: #f8fafc;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card :is(.bg-white\/5, .bg-white\/\[0\.03\], .bg-white\/\[0\.04\]) {
+  background-color: #f8fafc;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card :is(.bg-white\/5, .bg-white\/\[0\.03\], .bg-white\/\[0\.04\]) {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+:root[data-ui-theme="nest"] .widget-card :is(.border-white\/10) {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card :is(.border-white\/10) {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-ui-theme="nest-google"] .widget-card :is(.border-white\/10) {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card :is(.border-white\/10) {
+  border-color: #e2e8f0;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card :is(.border-white\/10) {
+  border-color: rgba(255, 255, 255, 0.26);
+}
+
+:root[data-ui-theme="nest"] .widget-card .text-cyan-100,
+:root[data-ui-theme="nest"] .widget-card .text-cyan-200 {
+  color: #2563eb;
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card .text-cyan-100,
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card .text-cyan-200 {
+  color: #2563eb;
+}
+
+:root[data-ui-theme="nest-google"] .widget-card .text-cyan-100,
+:root[data-ui-theme="nest-google"] .widget-card .text-cyan-200 {
+  color: #2563eb;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card .text-cyan-100,
+:root[data-ui-theme="nest-flat"] .widget-card .text-cyan-200 {
+  color: #2563eb;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card .text-cyan-100,
+:root[data-ui-theme="nest-gallery"] .widget-card .text-cyan-200 {
+  color: #ffffff;
+}
+
+:root[data-ui-theme="nest"] .widget-card :is(.bg-cyan-300\/10, .bg-cyan-300\/70) {
+  background-color: rgba(66, 133, 244, 0.14);
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card :is(.bg-cyan-300\/10, .bg-cyan-300\/70) {
+  background-color: rgba(66, 133, 244, 0.14);
+}
+
+:root[data-ui-theme="nest-google"] .widget-card :is(.bg-cyan-300\/10, .bg-cyan-300\/70) {
+  background-color: rgba(66, 133, 244, 0.14);
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card :is(.bg-cyan-300\/10, .bg-cyan-300\/70) {
+  background-color: #e8f0fe;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card :is(.bg-cyan-300\/10, .bg-cyan-300\/70) {
+  background-color: rgba(255, 255, 255, 0.28);
+}
+
+:root[data-ui-theme="nest"] .widget-card :is(.border-cyan-300\/20) {
+  border-color: rgba(66, 133, 244, 0.18);
+}
+
+:root:is([data-ui-theme="nest-hub"], [data-ui-theme="nest-control"]) .widget-card :is(.border-cyan-300\/20) {
+  border-color: rgba(66, 133, 244, 0.18);
+}
+
+:root[data-ui-theme="nest-google"] .widget-card :is(.border-cyan-300\/20) {
+  border-color: rgba(66, 133, 244, 0.18);
+}
+
+:root[data-ui-theme="nest-flat"] .widget-card :is(.border-cyan-300\/20) {
+  border-color: #d2e3fc;
+}
+
+:root[data-ui-theme="nest-google"] .widget-weather .widget-card {
+  padding: 2rem;
+  border-top: 5px solid rgba(66, 133, 244, 0.42);
+}
+
+:root[data-ui-theme="nest-google"] .widget-calendar .widget-card {
+  border-top: 5px solid rgba(52, 168, 83, 0.36);
+}
+
+:root[data-ui-theme="nest-google"] .widget-news .widget-card {
+  border-top: 5px solid rgba(251, 188, 5, 0.42);
+}
+
+:root[data-ui-theme="nest-google"] .widget-stocks .widget-card {
+  border-top: 5px solid rgba(66, 133, 244, 0.28);
+}
+
+:root[data-ui-theme="nest-google"] .widget-calendar .widget-heading-icon {
+  background: #34a853;
+}
+
+:root[data-ui-theme="nest-google"] .widget-news .widget-heading-icon {
+  background: #fbbc05;
+  color: #1f2937;
+}
+
+:root[data-ui-theme="nest-google"] .widget-stocks .widget-heading-icon {
+  background: #4285f4;
+}
+
+:root[data-ui-theme="nest-google"] .widget-weather .text-5xl {
+  font-size: 6rem;
+  font-weight: 420;
+}
+
+:root[data-ui-theme="nest-google"] .quick-command[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1px rgba(66, 133, 244, 0.2), 0 10px 22px rgba(66, 133, 244, 0.12);
+}
+
+:root[data-ui-theme="nest-flat"] .widget-weather .widget-card {
+  padding: 2rem;
+  border-top: 5px solid #4285f4;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-calendar .widget-card {
+  border-top: 5px solid #34a853;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-news .widget-card {
+  border-top: 5px solid #fbbc05;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-stocks .widget-card {
+  border-top: 5px solid #4285f4;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-calendar .widget-heading-icon {
+  background: #34a853;
+  border-color: #34a853;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-news .widget-heading-icon {
+  background: #fbbc05;
+  border-color: #fbbc05;
+  color: #1f2937;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-stocks .widget-heading-icon {
+  background: #4285f4;
+  border-color: #4285f4;
+}
+
+:root[data-ui-theme="nest-flat"] .widget-weather .text-5xl {
+  font-size: 6rem;
+  font-weight: 420;
+}
+
+:root[data-ui-theme="nest-flat"] .quick-command[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1px #8ab4f8;
+}
+
+:root[data-ui-theme="nest-material"] .dashboard-header,
+:root[data-ui-theme="nest-material"] .widget-card,
+:root[data-ui-theme="nest-material"] .status-pill {
+  color: #0f172a;
+  backdrop-filter: none;
+}
+
+:root[data-ui-theme="nest-topglow"] .dashboard-header,
+:root[data-ui-theme="nest-topglow"] .widget-card,
+:root[data-ui-theme="nest-topglow"] .status-pill {
+  color: #0f172a;
+  backdrop-filter: blur(18px);
+}
+
+:root[data-ui-theme="nest-material"] .dashboard-grid {
+  grid-template-columns: 1.45fr 0.95fr 0.82fr;
+  grid-template-rows: 20fr 32fr 32fr 10fr;
+  grid-template-areas:
+    "weather header header"
+    "weather calendar stocks"
+    "weather news news"
+    "quick quick quick";
+  max-width: 1520px;
+  gap: 1rem;
+}
+
+:root[data-ui-theme="nest-topglow"] .dashboard-grid {
+  grid-template-columns: 1.45fr 0.95fr 0.82fr;
+  grid-template-rows: 20fr 32fr 32fr 10fr;
+  grid-template-areas:
+    "weather header header"
+    "weather calendar stocks"
+    "weather news news"
+    "quick quick quick";
+  max-width: 1520px;
+  gap: 1rem;
+}
+
+:root[data-ui-theme="nest-material"] .dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr;
+  grid-template-rows: 16fr 74fr 10fr;
+  grid-template-areas:
+    "header"
+    "detail"
+    "quick";
+  max-width: 1500px;
+}
+
+:root[data-ui-theme="nest-topglow"] .dashboard-grid:has(.widget-slot.is-detail) {
+  grid-template-columns: 1fr;
+  grid-template-rows: 16fr 74fr 10fr;
+  grid-template-areas:
+    "header"
+    "detail"
+    "quick";
+  max-width: 1500px;
+}
+
+:root[data-ui-theme="nest-material"] .dashboard-header {
+  --header-decoration: none;
+}
+
+:root[data-ui-theme="nest-topglow"] .dashboard-header {
+  --header-decoration:
+    linear-gradient(90deg, rgba(66, 133, 244, 0.1), transparent 26%),
+    radial-gradient(circle at 92% 16%, rgba(251, 188, 5, 0.16), transparent 20%);
+}
+
+:root[data-ui-theme="nest-material"] .widget-card {
+  --card-decoration: none;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card {
+  --card-decoration: linear-gradient(180deg, rgba(66, 133, 244, 0.035), transparent 28%);
+}
+
+:root[data-ui-theme="nest-material"] .app-title::before {
+  margin-right: 0.55rem;
+  color: #4285f4;
+  content: "Home";
+  font-weight: 700;
+}
+
+:root[data-ui-theme="nest-topglow"] .app-title::before {
+  margin-right: 0.55rem;
+  color: #4285f4;
+  content: "Home";
+  font-weight: 700;
+}
+
+:root[data-ui-theme="nest-material"] .app-title::after {
+  margin-left: 0.55rem;
+  color: #64748b;
+  content: "display";
+}
+
+:root[data-ui-theme="nest-topglow"] .app-title::after {
+  margin-left: 0.55rem;
+  color: #64748b;
+  content: "display";
+}
+
+:root[data-ui-theme="nest-material"] .app-clock,
+:root[data-ui-theme="nest-material"] .status-value,
+:root[data-ui-theme="nest-material"] .widget-card p,
+:root[data-ui-theme="nest-material"] .widget-card li {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-topglow"] .app-clock,
+:root[data-ui-theme="nest-topglow"] .status-value,
+:root[data-ui-theme="nest-topglow"] .widget-card p,
+:root[data-ui-theme="nest-topglow"] .widget-card li {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-material"] .widget-card > div:first-child > p:first-child,
+:root[data-ui-theme="nest-material"] .status-label {
+  color: #475569;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card > div:first-child > p:first-child,
+:root[data-ui-theme="nest-topglow"] .status-label {
+  color: #475569;
+}
+
+:root[data-ui-theme="nest-material"] .widget-card :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300) {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card :is(.text-white, .text-slate-100, .text-slate-200, .text-slate-300) {
+  color: #0f172a;
+}
+
+:root[data-ui-theme="nest-material"] .widget-card :is(.text-slate-400, .text-slate-500) {
+  color: #64748b;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card :is(.text-slate-400, .text-slate-500) {
+  color: #64748b;
+}
+
+:root[data-ui-theme="nest-material"] .widget-card :is(.bg-white\/5, .bg-white\/\[0\.03\], .bg-white\/\[0\.04\]) {
+  background-color: #f8fafc;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card :is(.bg-white\/5, .bg-white\/\[0\.03\], .bg-white\/\[0\.04\]) {
+  background-color: #f8fafc;
+}
+
+:root[data-ui-theme="nest-material"] .widget-card :is(.border-white\/10) {
+  border-color: #e2e8f0;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card :is(.border-white\/10) {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-ui-theme="nest-material"] .widget-card .text-cyan-100,
+:root[data-ui-theme="nest-material"] .widget-card .text-cyan-200 {
+  color: #2563eb;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card .text-cyan-100,
+:root[data-ui-theme="nest-topglow"] .widget-card .text-cyan-200 {
+  color: #2563eb;
+}
+
+:root[data-ui-theme="nest-material"] .widget-card :is(.bg-cyan-300\/10, .bg-cyan-300\/70) {
+  background-color: #e8f0fe;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card :is(.bg-cyan-300\/10, .bg-cyan-300\/70) {
+  background-color: #e8f0fe;
+}
+
+:root[data-ui-theme="nest-material"] .widget-card :is(.border-cyan-300\/20) {
+  border-color: #d2e3fc;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-card :is(.border-cyan-300\/20) {
+  border-color: #d2e3fc;
+}
+
+:root[data-ui-theme="nest-material"] .widget-weather .widget-card {
+  padding: 2rem;
+  border-top: 5px solid #4285f4;
+}
+
+:root[data-ui-theme="nest-material"] .widget-calendar .widget-card {
+  border-top: 5px solid #34a853;
+}
+
+:root[data-ui-theme="nest-material"] .widget-news .widget-card {
+  border-top: 5px solid #fbbc05;
+}
+
+:root[data-ui-theme="nest-material"] .widget-stocks .widget-card {
+  border-top: 5px solid #4285f4;
+}
+
+:root[data-ui-theme="nest-material"] .widget-calendar .widget-heading-icon {
+  background: #34a853;
+  border-color: #34a853;
+}
+
+:root[data-ui-theme="nest-material"] .widget-news .widget-heading-icon {
+  background: #fbbc05;
+  border-color: #fbbc05;
+  color: #1f2937;
+}
+
+:root[data-ui-theme="nest-material"] .widget-stocks .widget-heading-icon {
+  background: #4285f4;
+  border-color: #4285f4;
+}
+
+:root[data-ui-theme="nest-material"] .widget-weather .text-5xl {
+  font-size: 6rem;
+  font-weight: 420;
+}
+
+:root[data-ui-theme="nest-material"] .quick-command[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1px #8ab4f8;
+}
+
+:root[data-ui-theme="nest-material"] .widget-heading-icon > svg,
+:root[data-ui-theme="nest-material"] .weather-hero-icon > svg {
+  display: none;
+}
+
+:root[data-ui-theme="nest-material"] .material-widget-icon,
+:root[data-ui-theme="nest-material"] .material-weather-icon {
+  display: inline-block;
+}
+
+:root[data-ui-theme="nest-material"] .material-widget-icon {
+  font-size: 1.45rem;
+  font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
+}
+
+:root[data-ui-theme="nest-material"] .material-weather-icon {
+  font-size: 4.8rem;
+  font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 48;
+}
+
+:root[data-ui-theme="nest-material"] .material-weather-icon.is-large {
+  font-size: 6rem;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-weather .widget-card {
+  padding: 2rem;
+  border-top: 5px solid rgba(66, 133, 244, 0.42);
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-calendar .widget-card {
+  border-top: 5px solid rgba(52, 168, 83, 0.36);
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-news .widget-card {
+  border-top: 5px solid rgba(251, 188, 5, 0.42);
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-stocks .widget-card {
+  border-top: 5px solid rgba(66, 133, 244, 0.28);
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-calendar .widget-heading-icon {
+  background: #34a853;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-news .widget-heading-icon {
+  background: #fbbc05;
+  color: #1f2937;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-stocks .widget-heading-icon {
+  background: #4285f4;
+}
+
+:root[data-ui-theme="nest-topglow"] .widget-weather .text-5xl {
+  font-size: 6rem;
+  font-weight: 420;
+}
+
+:root[data-ui-theme="nest-topglow"] .quick-command[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1px rgba(66, 133, 244, 0.2), 0 10px 22px rgba(66, 133, 244, 0.12);
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-card :is(.border-cyan-300\/20) {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+:root[data-ui-theme="nest-hub"] .widget-weather .widget-card {
+  padding: 2rem;
+}
+
+:root[data-ui-theme="nest-hub"] .widget-weather .text-5xl {
+  font-size: 6rem;
+  font-weight: 420;
+}
+
+:root[data-ui-theme="nest-gallery"] .dashboard-header {
+  align-self: stretch;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-weather .widget-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.12));
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-weather .text-5xl {
+  font-size: 7rem;
+  font-weight: 360;
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-heading-icon svg,
+:root[data-ui-theme="nest-gallery"] .weather-hero-icon svg {
+  filter: drop-shadow(0 8px 18px rgba(15, 23, 42, 0.18));
+}
+
+:root[data-ui-theme="nest-gallery"] .widget-quickArea .widget-card {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+:root[data-ui-theme="nest-gallery"] .quick-command {
+  color: #ffffff;
+}
+
+:root[data-ui-theme="nest-control"] .widget-quickArea .widget-card {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 1rem;
+}
+
+:root[data-ui-theme="nest-control"] .widget-quickArea .widget-card > div {
+  grid-template-columns: 1fr;
+}
+
+:root[data-ui-theme="nest-control"] .widget-quickArea .widget-card button {
+  min-height: 4.6rem;
+  border-radius: 1rem;
+  text-align: left;
+}
+
+:root[data-ui-theme="nest-control"] .widget-heading-icon {
+  flex: 0 0 auto;
+}
+
+:root[data-ui-theme="nest-control"] .widget-list-item {
+  border-left: 4px solid rgba(37, 99, 235, 0.34);
 }
