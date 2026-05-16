@@ -1,4 +1,6 @@
 export type WeatherSettings = {
+  // Keep providers explicit because APIs that require secrets, such as Google Weather,
+  // should be routed through a server boundary instead of being called directly from GitHub Pages.
   provider: "openMeteo" | "mock";
   latitude: number;
   longitude: number;
