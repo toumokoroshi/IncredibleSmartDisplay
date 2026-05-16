@@ -18,6 +18,7 @@ export type WeatherData = {
   lowTempC?: number;
   conditionLabel: string;
   conditionCode?: number;
+  displayCondition?: WeatherDisplayCondition;
   humidityPercent?: number;
   windSpeedKph?: number;
   windDirectionDeg?: number;
@@ -32,4 +33,32 @@ export type WeatherHourlyPoint = {
   windSpeedKph?: number;
   windDirectionDeg?: number;
   precipitationProbabilityPercent?: number;
+};
+
+export type WeatherConditionKind =
+  | "clear"
+  | "mostlyClear"
+  | "partlyCloudy"
+  | "overcast"
+  | "fog"
+  | "drizzle"
+  | "rain"
+  | "heavyRain"
+  | "snow"
+  | "heavySnow"
+  | "sleet"
+  | "thunderstorm"
+  | "unknown";
+
+export type WeatherTransition = "stable" | "then" | "occasional" | "temporary";
+
+export type WeatherModifier = "rainChance" | "thunder" | "strongWind";
+
+export type WeatherDisplayCondition = {
+  kind: WeatherConditionKind;
+  label: string;
+  transition: WeatherTransition;
+  secondaryKind?: WeatherConditionKind;
+  modifiers: WeatherModifier[];
+  isDaytime: boolean;
 };

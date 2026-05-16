@@ -1,4 +1,4 @@
-import { Cloud, CloudRain, CloudSun, Sun, Wind } from "lucide-react";
+import { CloudSun, Wind } from "lucide-react";
 
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -6,9 +6,10 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { StaleBadge } from "../../components/StaleBadge";
 import type { WidgetProps } from "../../types/widget";
-import type { WeatherData, WeatherHourlyPoint, WeatherSettings } from "./types";
+import type { WeatherConditionKind, WeatherData, WeatherDisplayCondition, WeatherHourlyPoint, WeatherModifier, WeatherSettings, WeatherTransition } from "./types";
 
 const celsius = "\u2103";
+const meteoconsBaseUrl = "https://unpkg.com/@meteocons/svg@0.1.0/flat";
 
 export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<WeatherSettings, WeatherData>) {
   return (
@@ -37,7 +38,7 @@ export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, sta
 }
 
 function WeatherQuickLook({ data }: { data: WeatherData }) {
-  const iconType = getWeatherIconType(data.conditionCode, data.conditionLabel);
+  const condition = getDisplayCondition(data);
 
   return (
     <div className="mt-4 flex h-[calc(100%-2.25rem)] flex-col justify-between">
@@ -45,10 +46,11 @@ function WeatherQuickLook({ data }: { data: WeatherData }) {
         <div>
           <p className="text-xl text-slate-300">{data.locationName}</p>
           <p className="mt-2 text-5xl font-semibold leading-none text-white">{formatTemp(data.currentTempC)}</p>
-          <p className="mt-3 text-lg text-slate-300">{data.conditionLabel}</p>
+          <p className="mt-3 text-lg text-slate-300">{formatConditionLabel(condition)}</p>
+          <WeatherModifierBadges modifiers={condition.modifiers} />
         </div>
-        <div className="weather-hero-icon rounded-full border border-cyan-300/20 bg-cyan-300/10 p-5 text-cyan-100">
-          <WeatherIcon size={72} strokeWidth={1.5} type={iconType} />
+        <div className="weather-hero-icon p-1">
+          <WeatherConditionIcon condition={condition} size={82} />
         </div>
       </div>
 
@@ -62,7 +64,7 @@ function WeatherQuickLook({ data }: { data: WeatherData }) {
 }
 
 function WeatherDetail({ data }: { data: WeatherData }) {
-  const iconType = getWeatherIconType(data.conditionCode, data.conditionLabel);
+  const condition = getDisplayCondition(data);
   const hourly = data.hourlyForecast ?? [];
 
   return (
@@ -72,10 +74,11 @@ function WeatherDetail({ data }: { data: WeatherData }) {
           <div>
             <p className="text-2xl text-slate-300">{data.locationName}</p>
             <p className="mt-3 text-7xl font-semibold leading-none text-white">{formatTemp(data.currentTempC)}</p>
-            <p className="mt-4 text-2xl text-slate-200">{data.conditionLabel}</p>
+            <p className="mt-4 text-2xl text-slate-200">{formatConditionLabel(condition)}</p>
+            <WeatherModifierBadges modifiers={condition.modifiers} />
           </div>
-          <div className="weather-hero-icon rounded-full border border-cyan-300/20 bg-cyan-300/10 p-5 text-cyan-100">
-            <WeatherIcon size={92} strokeWidth={1.4} type={iconType} />
+          <div className="weather-hero-icon p-1">
+            <WeatherConditionIcon condition={condition} size={102} />
           </div>
         </div>
 
@@ -194,35 +197,218 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-type WeatherIconType = "clear" | "rain" | "cloudy" | "unknown";
+function WeatherConditionIcon({ condition, size }: { condition: WeatherDisplayCondition; size: number }) {
+  const primaryIconName = getMeteoconsIconName(condition.kind, condition.isDaytime);
+  const secondaryKind = condition.secondaryKind;
+  const secondaryIconName = secondaryKind ? getMeteoconsIconName(secondaryKind, condition.isDaytime) : undefined;
 
-function WeatherIcon({ size, strokeWidth, type }: { size: number; strokeWidth: number; type: WeatherIconType }) {
-  if (type === "clear") {
-    return <Sun size={size} strokeWidth={strokeWidth} />;
+  if (condition.transition === "stable" || secondaryKind === undefined || !secondaryIconName) {
+    return <WeatherIconImage iconName={primaryIconName} label={condition.label} size={size} />;
   }
-  if (type === "rain") {
-    return <CloudRain size={size} strokeWidth={strokeWidth} />;
+
+  if (condition.transition === "then") {
+    return (
+      <div className="flex items-center gap-1" aria-label={formatConditionLabel(condition)}>
+        <WeatherIconImage iconName={primaryIconName} label={condition.label} size={Math.round(size * 0.7)} />
+        <span className="text-xl font-semibold text-slate-500">-&gt;</span>
+        <WeatherIconImage iconName={secondaryIconName} label={getKindLabel(secondaryKind)} size={Math.round(size * 0.7)} />
+      </div>
+    );
   }
-  if (type === "cloudy") {
-    return <CloudSun size={size} strokeWidth={strokeWidth} />;
-  }
-  return <Cloud size={size} strokeWidth={strokeWidth} />;
+
+  return (
+    <div className="relative" aria-label={formatConditionLabel(condition)}>
+      <WeatherIconImage iconName={primaryIconName} label={condition.label} size={size} />
+      <div className="absolute -bottom-1 -right-2 rounded-full bg-white/90 p-1 shadow-sm">
+        <WeatherIconImage iconName={secondaryIconName} label={getKindLabel(secondaryKind)} size={Math.round(size * 0.44)} />
+      </div>
+    </div>
+  );
 }
 
-function getWeatherIconType(conditionCode?: number, conditionLabel = ""): WeatherIconType {
-  if (conditionCode === 0 || conditionLabel.toLowerCase().includes("clear")) {
+function WeatherIconImage({ iconName, label, size }: { iconName: string; label: string; size: number }) {
+  return <img alt={label} height={size} src={`${meteoconsBaseUrl}/${iconName}.svg`} style={{ height: size, width: size }} width={size} />;
+}
+
+function WeatherModifierBadges({ modifiers }: { modifiers: WeatherModifier[] }) {
+  if (modifiers.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-3 flex flex-wrap gap-2">
+      {modifiers.map((modifier) => (
+        <span key={modifier} className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+          {getModifierLabel(modifier)}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function getDisplayCondition(data: WeatherData): WeatherDisplayCondition {
+  return (
+    data.displayCondition ?? {
+      kind: mapLegacyConditionKind(data.conditionCode, data.conditionLabel),
+      label: data.conditionLabel,
+      transition: "stable",
+      modifiers: [],
+      isDaytime: true,
+    }
+  );
+}
+
+function mapLegacyConditionKind(conditionCode?: number, conditionLabel = ""): WeatherConditionKind {
+  const normalizedLabel = conditionLabel.toLowerCase();
+
+  switch (conditionCode) {
+    case 0:
+      return "clear";
+    case 1:
+      return "mostlyClear";
+    case 2:
+      return "partlyCloudy";
+    case 3:
+      return "overcast";
+    case 45:
+    case 48:
+      return "fog";
+    case 51:
+    case 53:
+    case 55:
+      return "drizzle";
+    case 56:
+    case 57:
+    case 66:
+    case 67:
+      return "sleet";
+    case 61:
+    case 63:
+    case 80:
+    case 81:
+      return "rain";
+    case 65:
+    case 82:
+      return "heavyRain";
+    case 71:
+    case 73:
+    case 85:
+      return "snow";
+    case 75:
+    case 77:
+    case 86:
+      return "heavySnow";
+    case 95:
+    case 96:
+    case 99:
+      return "thunderstorm";
+  }
+
+  if (normalizedLabel.includes("clear")) {
     return "clear";
   }
-  if (conditionCode !== undefined && conditionCode >= 50) {
-    return "rain";
+  if (normalizedLabel.includes("cloud")) {
+    return "partlyCloudy";
   }
-  if (conditionLabel.toLowerCase().includes("rain")) {
+  if (normalizedLabel.includes("rain")) {
     return "rain";
-  }
-  if (conditionLabel.toLowerCase().includes("cloud")) {
-    return "cloudy";
   }
   return "unknown";
+}
+
+function getMeteoconsIconName(kind: WeatherConditionKind, isDaytime: boolean) {
+  const dayPart = isDaytime ? "day" : "night";
+
+  switch (kind) {
+    case "clear":
+      return `clear-${dayPart}`;
+    case "mostlyClear":
+      return `mostly-clear-${dayPart}`;
+    case "partlyCloudy":
+      return `partly-cloudy-${dayPart}`;
+    case "overcast":
+      return `overcast-${dayPart}`;
+    case "fog":
+      return `fog-${dayPart}`;
+    case "drizzle":
+      return "drizzle";
+    case "rain":
+      return "rain";
+    case "heavyRain":
+      return "extreme-rain";
+    case "snow":
+      return "snow";
+    case "heavySnow":
+      return "extreme-snow";
+    case "sleet":
+      return "sleet";
+    case "thunderstorm":
+      return `thunderstorms-${dayPart}-rain`;
+    case "unknown":
+      return "not-available";
+  }
+}
+
+function formatConditionLabel(condition: WeatherDisplayCondition) {
+  if (condition.transition === "stable" || condition.secondaryKind === undefined) {
+    return condition.label;
+  }
+
+  return `${condition.label} ${getTransitionLabel(condition.transition)} ${getKindLabel(condition.secondaryKind)}`;
+}
+
+function getTransitionLabel(transition: WeatherTransition) {
+  switch (transition) {
+    case "stable":
+      return "";
+    case "then":
+      return "のち";
+    case "occasional":
+      return "時々";
+    case "temporary":
+      return "一時";
+  }
+}
+
+function getKindLabel(kind: WeatherConditionKind) {
+  switch (kind) {
+    case "clear":
+    case "mostlyClear":
+      return "晴れ";
+    case "partlyCloudy":
+      return "晴れ時々くもり";
+    case "overcast":
+      return "くもり";
+    case "fog":
+      return "霧";
+    case "drizzle":
+      return "霧雨";
+    case "rain":
+      return "雨";
+    case "heavyRain":
+      return "大雨";
+    case "snow":
+      return "雪";
+    case "heavySnow":
+      return "大雪";
+    case "sleet":
+      return "みぞれ";
+    case "thunderstorm":
+      return "雷雨";
+    case "unknown":
+      return "不明";
+  }
+}
+
+function getModifierLabel(modifier: WeatherModifier) {
+  switch (modifier) {
+    case "rainChance":
+      return "雨の可能性";
+    case "thunder":
+      return "雷";
+    case "strongWind":
+      return "強風";
+  }
 }
 
 function formatTemp(value?: number) {

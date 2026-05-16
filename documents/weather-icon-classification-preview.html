@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Icon Classification Preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1020;
+        --line: rgba(255, 255, 255, 0.1);
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --blue: #4285f4;
+        --green: #34a853;
+        --yellow: #fbbc04;
+        --red: #ea4335;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 18% 0%, rgba(66, 133, 244, 0.2), transparent 34rem),
+          radial-gradient(circle at 82% 8%, rgba(52, 168, 83, 0.14), transparent 30rem),
+          var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, "Noto Sans JP", "Yu Gothic UI", Meiryo, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        line-height: 1.5;
+      }
+
+      main {
+        width: min(1280px, calc(100% - 40px));
+        margin: 0 auto;
+        padding: 36px 0 56px;
+      }
+
+      header {
+        margin-bottom: 28px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 30px;
+        font-weight: 760;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin-top: 34px;
+        font-size: 20px;
+        font-weight: 720;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin-top: 18px;
+        color: #dbeafe;
+        font-size: 15px;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin-top: 8px;
+        color: var(--muted);
+      }
+
+      code {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 1px 6px;
+        color: #dbeafe;
+      }
+
+      .summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .summary span,
+      .chip,
+      .state {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.055);
+        padding: 4px 9px;
+        color: #cbd5e1;
+        font-size: 12px;
+      }
+
+      .state {
+        border-color: rgba(66, 133, 244, 0.28);
+        background: rgba(66, 133, 244, 0.16);
+        color: #bfdbfe;
+        font-weight: 700;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .wide-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(256px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .matrix-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .card {
+        min-height: 190px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035));
+        padding: 14px;
+        box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+      }
+
+      .matrix-card {
+        min-height: 152px;
+        padding: 12px;
+      }
+
+      .icon-stage,
+      .combo-stage {
+        display: grid;
+        min-height: 96px;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.045);
+      }
+
+      .combo-stage {
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        padding: 10px;
+      }
+
+      .combo-stage[data-transition="stable"] {
+        grid-template-columns: 1fr;
+      }
+
+      .combo-stage[data-transition="occasional"] .secondary,
+      .combo-stage[data-transition="temporary"] .secondary {
+        align-self: end;
+        justify-self: end;
+      }
+
+      .combo-stage[data-transition="occasional"] .secondary .weather-icon,
+      .combo-stage[data-transition="temporary"] .secondary .weather-icon {
+        width: 42px;
+        height: 42px;
+      }
+
+      .weather-icon {
+        width: 82px;
+        height: 82px;
+      }
+
+      .matrix-card .weather-icon {
+        width: 62px;
+        height: 62px;
+      }
+
+      .primary,
+      .secondary {
+        display: grid;
+        place-items: center;
+      }
+
+      .separator {
+        display: grid;
+        min-width: 50px;
+        place-items: center;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+
+      .arrow {
+        color: #dbeafe;
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .label {
+        margin-top: 12px;
+        font-size: 15px;
+        font-weight: 720;
+      }
+
+      .sub {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .aux-badge {
+        display: inline-grid;
+        min-width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        font-size: 18px;
+        font-weight: 760;
+      }
+
+      .aux-rain {
+        background: rgba(66, 133, 244, 0.72);
+      }
+
+      .aux-thunder {
+        background: rgba(251, 188, 4, 0.82);
+        color: #1f2937;
+      }
+
+      .aux-wind {
+        background: rgba(52, 168, 83, 0.72);
+      }
+
+      .aux-alert {
+        background: rgba(234, 67, 53, 0.78);
+      }
+
+      .aux-stack {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-top: -12px;
+      }
+
+      .note {
+        border-left: 4px solid var(--blue);
+        margin-top: 18px;
+        padding: 10px 14px;
+        background: rgba(66, 133, 244, 0.09);
+        color: #dbeafe;
+      }
+
+      @media (max-width: 720px) {
+        main {
+          width: min(100% - 24px, 1280px);
+          padding-top: 24px;
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>天気アイコン分類プレビュー</h1>
+        <p>
+          Meteocons の <code>flat</code> animated SVG を使った、14分類、補助分類、transition の全体一覧です。
+        </p>
+        <div class="summary" id="summary"></div>
+      </header>
+
+      <section>
+        <h2>14分類</h2>
+        <p>Open-Meteo の weather code からまずこの分類へ落とし、基本アイコンを決めます。</p>
+        <div class="grid" id="baseGrid"></div>
+      </section>
+
+      <section>
+        <h2>補助分類</h2>
+        <p>
+          Yahoo!天気の「雨の可能性あり」「雷を伴う」「暴風雨/暴風雪」に相当する情報は、基本分類とは別の状態として重ねます。
+        </p>
+        <div class="wide-grid" id="auxGrid"></div>
+      </section>
+
+      <section>
+        <h2>transition 単体ルール</h2>
+        <p>
+          <code>stable</code>、<code>then</code>、<code>occasional</code>、<code>temporary</code> の4種類をすべて表示します。
+        </p>
+        <div class="wide-grid" id="transitionRuleGrid"></div>
+      </section>
+
+      <section>
+        <h2>transition 全組み合わせ</h2>
+        <p>
+          14分類を <code>primary kind</code> とし、同じ分類を除く13分類を <code>secondaryKind</code> にした全組み合わせです。
+          <code>then</code>、<code>occasional</code>、<code>temporary</code> の各パターンを生成しています。
+        </p>
+        <div class="summary" id="matrixSummary"></div>
+        <h3>then: のち</h3>
+        <div class="matrix-grid" id="thenGrid"></div>
+        <h3>occasional: 時々</h3>
+        <div class="matrix-grid" id="occasionalGrid"></div>
+        <h3>temporary: 一時</h3>
+        <div class="matrix-grid" id="temporaryGrid"></div>
+        <div class="note">
+          実装では全組み合わせを個別定義せず、<code>kind</code>、<code>transition</code>、<code>secondaryKind</code> から表示を合成するのがよいです。
+        </div>
+      </section>
+    </main>
+
+    <template id="baseCardTemplate">
+      <article class="card">
+        <div class="icon-stage">
+          <img class="weather-icon" alt="" />
+        </div>
+        <div class="label"></div>
+        <div class="sub"></div>
+        <div class="chips"></div>
+      </article>
+    </template>
+
+    <template id="auxCardTemplate">
+      <article class="card">
+        <div class="icon-stage">
+          <div>
+            <img class="weather-icon" alt="" />
+            <div class="aux-stack"></div>
+          </div>
+        </div>
+        <div class="label"></div>
+        <div class="sub"></div>
+        <div class="chips"></div>
+      </article>
+    </template>
+
+    <template id="comboCardTemplate">
+      <article class="card">
+        <div class="combo-stage">
+          <div class="primary">
+            <img class="weather-icon primary-icon" alt="" />
+          </div>
+          <div class="separator">
+            <div class="arrow"></div>
+            <div class="separator-label"></div>
+          </div>
+          <div class="secondary">
+            <img class="weather-icon secondary-icon" alt="" />
+          </div>
+        </div>
+        <div class="label"></div>
+        <div class="sub"></div>
+        <div class="chips"></div>
+      </article>
+    </template>
+
+    <script>
+      const iconBaseUrl = "https://unpkg.com/@meteocons/svg@0.1.0/flat";
+
+      const kinds = [
+        { kind: "clear", label: "晴れ", icon: "clear-day", codes: "0" },
+        { kind: "mostlyClear", label: "晴れ多め", icon: "mostly-clear-day", codes: "1" },
+        { kind: "partlyCloudy", label: "晴れ時々くもり", icon: "partly-cloudy-day", codes: "2" },
+        { kind: "cloudy", label: "くもり", icon: "cloudy", codes: "補助分類" },
+        { kind: "overcast", label: "くもり強め", icon: "overcast-day", codes: "3" },
+        { kind: "fog", label: "霧", icon: "fog-day", codes: "45, 48" },
+        { kind: "drizzle", label: "霧雨", icon: "drizzle", codes: "51, 53, 55" },
+        { kind: "rain", label: "雨", icon: "rain", codes: "61, 63" },
+        { kind: "heavyRain", label: "大雨", icon: "extreme-rain", codes: "65, 80, 81, 82" },
+        { kind: "snow", label: "雪", icon: "snow", codes: "71, 73" },
+        { kind: "heavySnow", label: "大雪", icon: "extreme-snow", codes: "75, 77, 85, 86" },
+        { kind: "sleet", label: "みぞれ", icon: "sleet", codes: "56, 57, 66, 67" },
+        { kind: "thunderstorm", label: "雷雨", icon: "thunderstorms-day-rain", codes: "95, 96, 99" },
+        { kind: "unknown", label: "不明", icon: "not-available", codes: "fallback" },
+      ];
+
+      const auxiliaryKinds = [
+        { key: "hasRainChance", label: "雨の可能性あり", mark: "%", className: "aux-rain", base: "partlyCloudy" },
+        { key: "hasThunder", label: "雷を伴う", mark: "⚡", className: "aux-thunder", base: "rain" },
+        { key: "hasStrongWind", label: "強風を伴う", mark: "W", className: "aux-wind", base: "rain" },
+        { key: "hasWeatherAlert", label: "荒天注意", mark: "!", className: "aux-alert", base: "heavyRain" },
+      ];
+
+      const auxiliaryCombinations = [
+        { label: "晴れ、にわか雨の可能性", base: "mostlyClear", flags: ["hasRainChance"] },
+        { label: "くもり、雨の可能性", base: "cloudy", flags: ["hasRainChance"] },
+        { label: "雨、雷を伴う", base: "rain", flags: ["hasThunder"] },
+        { label: "雪、強風を伴う", base: "snow", flags: ["hasStrongWind"] },
+        { label: "暴風雨", base: "heavyRain", flags: ["hasStrongWind", "hasWeatherAlert"] },
+        { label: "暴風雪", base: "heavySnow", flags: ["hasStrongWind", "hasWeatherAlert"] },
+        { label: "雷を伴う大雨", base: "heavyRain", flags: ["hasThunder", "hasWeatherAlert"] },
+        { label: "雨、雷と強風を伴う", base: "rain", flags: ["hasThunder", "hasStrongWind"] },
+      ];
+
+      const transitionRules = [
+        { transition: "stable", label: "安定", mark: "", primary: "clear" },
+        { transition: "then", label: "のち", mark: "->", primary: "rain", secondary: "clear" },
+        { transition: "occasional", label: "時々", mark: "+", primary: "cloudy", secondary: "rain" },
+        { transition: "temporary", label: "一時", mark: "1x", primary: "cloudy", secondary: "rain" },
+      ];
+
+      const transitions = [
+        { transition: "then", label: "のち", mark: "->", gridId: "thenGrid" },
+        { transition: "occasional", label: "時々", mark: "+", gridId: "occasionalGrid" },
+        { transition: "temporary", label: "一時", mark: "1x", gridId: "temporaryGrid" },
+      ];
+
+      const byKind = new Map(kinds.map((item) => [item.kind, item]));
+      const byAux = new Map(auxiliaryKinds.map((item) => [item.key, item]));
+
+      function iconUrl(icon) {
+        return `${iconBaseUrl}/${icon}.svg`;
+      }
+
+      function renderSummary() {
+        document.getElementById("summary").innerHTML = [
+          `<span>基本分類: ${kinds.length}</span>`,
+          `<span>補助分類: ${auxiliaryKinds.length}</span>`,
+          `<span>補助例: ${auxiliaryCombinations.length}</span>`,
+          `<span>transition: ${transitionRules.length}</span>`,
+        ].join("");
+
+        const matrixCount = transitions.length * kinds.length * (kinds.length - 1);
+        document.getElementById("matrixSummary").innerHTML = [
+          `<span>primary: ${kinds.length}</span>`,
+          `<span>secondary: ${kinds.length - 1} per primary</span>`,
+          `<span>transition kinds: ${transitions.length}</span>`,
+          `<span>generated cards: ${matrixCount}</span>`,
+        ].join("");
+      }
+
+      function renderBaseKinds() {
+        const grid = document.getElementById("baseGrid");
+        const template = document.getElementById("baseCardTemplate");
+
+        kinds.forEach((item) => {
+          const node = template.content.cloneNode(true);
+          const img = node.querySelector("img");
+          img.src = iconUrl(item.icon);
+          img.alt = item.label;
+          node.querySelector(".label").textContent = item.label;
+          node.querySelector(".sub").textContent = item.kind;
+          node.querySelector(".chips").innerHTML = `<span class="chip">Open-Meteo: ${item.codes}</span><span class="chip">${item.icon}.svg</span>`;
+          grid.appendChild(node);
+        });
+      }
+
+      function renderAuxiliaryKinds() {
+        const grid = document.getElementById("auxGrid");
+        const template = document.getElementById("auxCardTemplate");
+
+        auxiliaryKinds.forEach((item) => {
+          grid.appendChild(createAuxCard(template, item.label, item.base, [item.key], item.key));
+        });
+
+        auxiliaryCombinations.forEach((item) => {
+          grid.appendChild(createAuxCard(template, item.label, item.base, item.flags, item.flags.join(" + ")));
+        });
+      }
+
+      function createAuxCard(template, label, baseKind, flags, subText) {
+        const base = byKind.get(baseKind);
+        const node = template.content.cloneNode(true);
+        const img = node.querySelector("img");
+        img.src = iconUrl(base.icon);
+        img.alt = base.label;
+        node.querySelector(".label").textContent = label;
+        node.querySelector(".sub").textContent = subText;
+        node.querySelector(".aux-stack").innerHTML = flags
+          .map((flag) => {
+            const aux = byAux.get(flag);
+            return `<span class="aux-badge ${aux.className}" title="${aux.label}">${aux.mark}</span>`;
+          })
+          .join("");
+        node.querySelector(".chips").innerHTML = `<span class="chip">base: ${base.kind}</span>${flags.map((flag) => `<span class="chip">${flag}</span>`).join("")}`;
+        return node;
+      }
+
+      function renderTransitionRules() {
+        const grid = document.getElementById("transitionRuleGrid");
+        const template = document.getElementById("comboCardTemplate");
+
+        transitionRules.forEach((item) => {
+          grid.appendChild(createComboCard(template, item, false));
+        });
+      }
+
+      function renderTransitionMatrix() {
+        const template = document.getElementById("comboCardTemplate");
+
+        transitions.forEach((transition) => {
+          const grid = document.getElementById(transition.gridId);
+          kinds.forEach((primary) => {
+            kinds
+              .filter((secondary) => secondary.kind !== primary.kind)
+              .forEach((secondary) => {
+                grid.appendChild(
+                  createComboCard(
+                    template,
+                    {
+                      ...transition,
+                      primary: primary.kind,
+                      secondary: secondary.kind,
+                    },
+                    true,
+                  ),
+                );
+              });
+          });
+        });
+      }
+
+      function createComboCard(template, item, compact) {
+        const primary = byKind.get(item.primary);
+        const secondary = item.secondary ? byKind.get(item.secondary) : undefined;
+        const node = template.content.cloneNode(true);
+        const card = node.querySelector(".card");
+        const stage = node.querySelector(".combo-stage");
+        stage.dataset.transition = item.transition;
+
+        if (compact) {
+          card.classList.add("matrix-card");
+        }
+
+        const primaryIcon = node.querySelector(".primary-icon");
+        primaryIcon.src = iconUrl(primary.icon);
+        primaryIcon.alt = primary.label;
+
+        const secondaryWrap = node.querySelector(".secondary");
+        const separator = node.querySelector(".separator");
+        const secondaryIcon = node.querySelector(".secondary-icon");
+
+        if (secondary) {
+          secondaryIcon.src = iconUrl(secondary.icon);
+          secondaryIcon.alt = secondary.label;
+        } else {
+          secondaryWrap.remove();
+          separator.remove();
+        }
+
+        node.querySelector(".arrow").textContent = item.mark;
+        node.querySelector(".separator-label").textContent = item.label;
+        node.querySelector(".label").textContent = secondary ? `${primary.label} ${item.label} ${secondary.label}` : primary.label;
+        node.querySelector(".sub").textContent = secondary
+          ? `transition: ${item.transition}, secondaryKind: ${secondary.kind}`
+          : `transition: ${item.transition}, secondaryKind: undefined`;
+        node.querySelector(".chips").innerHTML = `<span class="state">${item.transition}</span><span class="chip">primary: ${primary.kind}</span>${
+          secondary ? `<span class="chip">secondary: ${secondary.kind}</span>` : ""
+        }`;
+
+        return node;
+      }
+
+      renderSummary();
+      renderBaseKinds();
+      renderAuxiliaryKinds();
+      renderTransitionRules();
+      renderTransitionMatrix();
+    </script>
+  </body>
+</html>

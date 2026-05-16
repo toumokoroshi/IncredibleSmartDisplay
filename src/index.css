@@ -232,9 +232,6 @@ body {
 
 .weather-hero-icon {
   color: var(--weather-icon-color);
-  background: var(--weather-icon-bg);
-  border-radius: 999px;
-  box-shadow: var(--weather-icon-shadow);
 }
 
 .widget-list-item,
