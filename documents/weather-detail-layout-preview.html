@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Detail Info Preview</title>
+    <style>
+      :root {
+        --bg: #e8eef5;
+        --panel: #f8fafc;
+        --panel-2: #f3f7fb;
+        --stroke: #d6e1ee;
+        --text: #0f172a;
+        --muted: #64748b;
+        --blue: #2563eb;
+        --sky: #0284c7;
+        --orange: #f97316;
+        --soft: #edf3f9;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .page {
+        display: grid;
+        gap: 28px;
+        padding: 24px;
+      }
+
+      .preview-title {
+        margin: 0 0 12px;
+        font-size: 20px;
+        letter-spacing: 0;
+      }
+
+      .canvas {
+        width: 1366px;
+        height: 768px;
+        border: 1px solid #cbd8e6;
+        border-radius: 28px;
+        background: var(--panel);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        padding: 22px;
+      }
+
+      .heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        height: 42px;
+      }
+
+      .heading-icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 999px;
+        background: #3b82f6;
+        color: white;
+        font-weight: 700;
+      }
+
+      .heading-text,
+      .label {
+        color: var(--muted);
+        font-size: 13px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+      }
+
+      .detail {
+        display: grid;
+        grid-template-rows: 140px 170px 1fr;
+        gap: 12px;
+        height: calc(100% - 52px);
+        margin-top: 14px;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .top-row {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 12px;
+        min-height: 0;
+        min-width: 0;
+      }
+
+      .now {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        background: var(--panel-2);
+        padding: 14px 22px;
+      }
+
+      .place {
+        margin: 4px 0 0;
+        font-size: 20px;
+      }
+
+      .temp-now {
+        margin: 4px 0 0;
+        font-size: 56px;
+        font-weight: 700;
+        line-height: 0.95;
+      }
+
+      .condition {
+        margin: 6px 0 0;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .inline-stats {
+        display: flex;
+        gap: 18px;
+        margin-top: 10px;
+      }
+
+      .inline-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .dot-icon,
+      .chip-icon {
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: white;
+        color: var(--blue);
+        box-shadow: 0 2px 7px rgba(15, 23, 42, 0.08);
+      }
+
+      .dot-icon {
+        width: 28px;
+        height: 28px;
+      }
+
+      .chip-icon {
+        width: 28px;
+        height: 28px;
+      }
+
+      .weather-icon {
+        width: 112px;
+        height: 112px;
+        filter: drop-shadow(0 3px 5px rgba(15, 23, 42, 0.2));
+      }
+
+      .daily-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .daily-card {
+        display: grid;
+        grid-template-columns: 112px 1fr;
+        align-items: center;
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        background: var(--panel-2);
+        padding: 16px 18px;
+      }
+
+      .daily-card img {
+        width: 104px;
+        height: 104px;
+        filter: drop-shadow(0 3px 5px rgba(15, 23, 42, 0.18));
+      }
+
+      .daily-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+      }
+
+      .daily-condition {
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .hi-low {
+        margin-top: 8px;
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .hi {
+        color: var(--orange);
+      }
+
+      .lo {
+        color: #0ea5e9;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .chip {
+        display: inline-flex;
+        min-width: 104px;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        background: var(--soft);
+        padding: 8px 12px;
+        font-weight: 600;
+      }
+
+      .chip small,
+      .inline-stat small {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .inline-stat {
+        font-weight: 600;
+      }
+
+      .info-card {
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        background: var(--panel-2);
+        padding: 12px 16px;
+      }
+
+      .info-title {
+        margin: 0 0 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .alert-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 7px 0;
+        border-top: 1px solid #e3ebf4;
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      .alert-line:first-of-type {
+        border-top: 0;
+      }
+
+      .badge {
+        border-radius: 999px;
+        background: white;
+        color: var(--blue);
+        padding: 4px 9px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .hourly {
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        background: var(--panel-2);
+        padding: 12px 14px 10px;
+      }
+
+      .hourly-section {
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      .hourly-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .hourly-title {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .yahoo-hourly {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 72px;
+        grid-template-columns: 58px;
+        align-items: stretch;
+        min-width: max-content;
+      }
+
+      .hourly-scroll {
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 6px;
+        scrollbar-color: rgba(100, 116, 139, 0.32) transparent;
+        scrollbar-width: thin;
+      }
+
+      .hourly-scroll::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .hourly-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .hourly-scroll::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        background: rgba(100, 116, 139, 0.24);
+      }
+
+      .hourly-scroll:hover::-webkit-scrollbar-thumb {
+        background: rgba(100, 116, 139, 0.38);
+      }
+
+      .time-cell,
+      .label-cell,
+      .hour-card {
+        min-width: 0;
+      }
+
+      .time-cell {
+        display: grid;
+        min-height: 26px;
+        place-items: center;
+        border-bottom: 2px solid #d8dee6;
+        color: #475569;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .time-cell.is-now {
+        border-bottom-color: #3b82f6;
+        color: #0f172a;
+        font-weight: 700;
+      }
+
+      .label-stack {
+        display: grid;
+        grid-template-rows: 30px 32px 33px 33px 33px 33px 54px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 600;
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: var(--panel-2);
+      }
+
+      .label-cell {
+        display: flex;
+        align-items: center;
+      }
+
+      .hour-card {
+        display: grid;
+        grid-template-rows: 30px 32px 33px 33px 33px 33px 54px;
+        justify-items: center;
+        color: #475569;
+        font-size: 18px;
+        font-weight: 400;
+      }
+
+      .hour-card.tomorrow {
+        background: rgba(15, 23, 42, 0.04);
+      }
+
+      .hour-card.past {
+        opacity: 0.38;
+        filter: grayscale(1);
+      }
+
+      .hour-card.day-marker {
+        background: rgba(15, 23, 42, 0.055);
+        color: #475569;
+      }
+
+      .weather-cell,
+      .value-cell,
+      .wind-cell {
+        display: grid;
+        place-items: center;
+        min-height: 0;
+      }
+
+      .weather-cell img {
+        width: 27px;
+        height: 27px;
+        filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.14));
+      }
+
+      .sun-event-icon {
+        width: 28px;
+        height: 28px;
+        filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.14));
+      }
+
+      .rain-value {
+        color: #1473e6;
+      }
+
+      .subtle {
+        color: #94a3b8;
+      }
+
+      .wind-cell {
+        color: #475569;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 1.15;
+      }
+
+      .wind-arrow {
+        color: #38a3ed;
+        font-size: 20px;
+        line-height: 1;
+      }
+
+      .sky {
+        color: var(--sky);
+      }
+
+      .orange {
+        color: var(--orange);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section>
+        <h1 class="preview-title">詳細画面 情報追加プレビュー</h1>
+        <div class="canvas">
+          <div class="heading">
+            <div class="heading-icon">☁</div>
+            <div class="heading-text">Weather</div>
+          </div>
+
+          <div class="detail">
+            <section class="top-row">
+              <article class="now">
+                <div>
+                  <div class="label">Now</div>
+                  <p class="place">Tokyo</p>
+                  <p class="temp-now">17℃</p>
+                  <p class="condition">晴れ</p>
+                  <div class="inline-stats">
+                    <div class="inline-stat"><span class="dot-icon">♧</span><span><small>Hum</small>80%</span></div>
+                    <div class="inline-stat"><span class="dot-icon">↖</span><span><small>Wind</small>1 m/s</span></div>
+                    <div class="inline-stat"><span class="dot-icon">↗</span><span><small>Feel</small>18℃</span></div>
+                  </div>
+                </div>
+                <img class="weather-icon" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="晴れ" />
+              </article>
+
+              <article class="info-card">
+                <p class="info-title">Alerts</p>
+                <div class="alert-line"><span>18時以降に雨の可能性</span><span class="badge">Rain</span></div>
+                <div class="alert-line"><span>昼は暑く感じる</span><span class="badge">Feel</span></div>
+                <div class="alert-line"><span>UV やや強め</span><span class="badge">UV 6</span></div>
+                <div class="alert-line"><span>明日は傘なしでも心配少なめ</span><span class="badge">Good</span></div>
+              </article>
+            </section>
+
+            <section class="daily-grid">
+              <article class="daily-card">
+                <img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" alt="晴れ時々くもり" />
+                <div>
+                  <div class="daily-head">
+                    <span class="label">Today</span>
+                    <span class="daily-condition">晴れ時々くもり</span>
+                  </div>
+                  <div class="hi-low"><span class="hi">26℃</span> / <span class="lo">13℃</span></div>
+                  <div class="chips">
+                    <div class="chip"><span class="chip-icon">☂</span><span><small>Rain</small>50%</span></div>
+                    <div class="chip"><span class="chip-icon">↖</span><span><small>Wind</small>5 m/s</span></div>
+                    <div class="chip"><span class="chip-icon">♧</span><span><small>Hum</small>80%</span></div>
+                    <div class="chip"><span class="chip-icon">↗</span><span><small>Feel</small><span class="orange">29℃</span> / <span class="lo">14℃</span></span></div>
+                  </div>
+                </div>
+              </article>
+
+              <article class="daily-card">
+                <img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="晴れ" />
+                <div>
+                  <div class="daily-head">
+                    <span class="label">Tomorrow</span>
+                    <span class="daily-condition">晴れ</span>
+                  </div>
+                  <div class="hi-low"><span class="hi">28℃</span> / <span class="lo">13℃</span></div>
+                  <div class="chips">
+                    <div class="chip"><span class="chip-icon">☂</span><span><small>Rain</small>10%</span></div>
+                    <div class="chip"><span class="chip-icon">↖</span><span><small>Wind</small>2 m/s</span></div>
+                    <div class="chip"><span class="chip-icon">♧</span><span><small>Hum</small>68%</span></div>
+                    <div class="chip"><span class="chip-icon">↗</span><span><small>Feel</small><span class="orange">30℃</span> / <span class="lo">14℃</span></span></div>
+                  </div>
+                </div>
+              </article>
+            </section>
+
+            <section class="hourly-section">
+              <article class="hourly">
+                <div class="hourly-head">
+                  <p class="hourly-title">Hourly Detail</p>
+                  <div class="label">Weather / Temp / Rain / Hum / Wind</div>
+                </div>
+                <div class="hourly-scroll">
+                  <div class="yahoo-hourly">
+                    <div class="label-stack">
+                      <div class="label-cell">時刻</div>
+                      <div class="label-cell">天気</div>
+                      <div class="label-cell">気温</div>
+                      <div class="label-cell">体感</div>
+                      <div class="label-cell">降水</div>
+                      <div class="label-cell">雨量</div>
+                      <div class="label-cell">風</div>
+                    </div>
+
+                    <div class="hour-card past"><div class="time-cell">12</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">26℃</div><div class="value-cell">29℃</div><div class="value-cell rain-value">20%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />4m</span></div></div>
+                    <div class="hour-card past"><div class="time-cell">13</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" alt="" /></div><div class="value-cell">26℃</div><div class="value-cell">28℃</div><div class="value-cell rain-value">20%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />5m</span></div></div>
+                    <div class="hour-card past"><div class="time-cell">14</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" alt="" /></div><div class="value-cell">25℃</div><div class="value-cell">27℃</div><div class="value-cell rain-value">30%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />5m</span></div></div>
+                    <div class="hour-card past"><div class="time-cell">15</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-day.svg" alt="" /></div><div class="value-cell">23℃</div><div class="value-cell">24℃</div><div class="value-cell rain-value">40%</div><div class="value-cell">0.1 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />5m</span></div></div>
+                    <div class="hour-card past"><div class="time-cell">16</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-day.svg" alt="" /></div><div class="value-cell">21℃</div><div class="value-cell">22℃</div><div class="value-cell rain-value">45%</div><div class="value-cell">0.2 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />5m</span></div></div>
+                    <div class="hour-card past"><div class="time-cell">17</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/rain.svg" alt="" /></div><div class="value-cell">19℃</div><div class="value-cell">19℃</div><div class="value-cell rain-value">50%</div><div class="value-cell">0.5 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />5m</span></div></div>
+                    <div class="hour-card past"><div class="time-cell">18</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/rain.svg" alt="" /></div><div class="value-cell">19℃</div><div class="value-cell">19℃</div><div class="value-cell rain-value">50%</div><div class="value-cell">0.8 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />5m</span></div></div>
+                    <div class="hour-card past"><div class="time-cell">18:42</div><div class="weather-cell"><img class="sun-event-icon" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/sunset.svg" alt="日の入り" /></div><div class="value-cell">日の入</div><div class="value-cell subtle">--</div><div class="value-cell rain-value">50%</div><div class="value-cell">0.1 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />5m</span></div></div>
+                    <div class="hour-card"><div class="time-cell is-now">19</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/rain.svg" alt="" /></div><div class="value-cell">18℃</div><div class="value-cell">18℃</div><div class="value-cell rain-value">50%</div><div class="value-cell">0.1 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />5m</span></div></div>
+                    <div class="hour-card"><div class="time-cell">20</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-day.svg" alt="" /></div><div class="value-cell">17℃</div><div class="value-cell">17℃</div><div class="value-cell rain-value">30%</div><div class="value-cell">0.1 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />4m</span></div></div>
+                    <div class="hour-card"><div class="time-cell">21</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-day.svg" alt="" /></div><div class="value-cell">15℃</div><div class="value-cell">15℃</div><div class="value-cell rain-value">20%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />2m</span></div></div>
+                    <div class="hour-card"><div class="time-cell">22</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-night.svg" alt="" /></div><div class="value-cell">15℃</div><div class="value-cell">15℃</div><div class="value-cell rain-value">20%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />2m</span></div></div>
+                    <div class="hour-card"><div class="time-cell">23</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-night.svg" alt="" /></div><div class="value-cell">15℃</div><div class="value-cell">15℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />1m</span></div></div>
+                    <div class="hour-card day-marker"><div class="time-cell">明日</div><div class="weather-cell">明日</div><div class="value-cell subtle">--</div><div class="value-cell subtle">--</div><div class="value-cell subtle">--</div><div class="value-cell subtle">--</div><div class="wind-cell subtle">--</div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">0</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-night.svg" alt="" /></div><div class="value-cell">15℃</div><div class="value-cell">15℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">1</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">14℃</div><div class="value-cell">14℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">2</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">14℃</div><div class="value-cell">14℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">3</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">14℃</div><div class="value-cell">14℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">4</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">14℃</div><div class="value-cell">14℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">5</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">14℃</div><div class="value-cell">14℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>東南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">4:36</div><div class="weather-cell"><img class="sun-event-icon" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/sunrise.svg" alt="日の出" /></div><div class="value-cell">日の出</div><div class="value-cell subtle">--</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">6</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">16℃</div><div class="value-cell">17℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">7</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">18℃</div><div class="value-cell">20℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">8</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">21℃</div><div class="value-cell">23℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">9</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">23℃</div><div class="value-cell">25℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">10</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">25℃</div><div class="value-cell">28℃</div><div class="value-cell rain-value">0%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">11</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">27℃</div><div class="value-cell">29℃</div><div class="value-cell rain-value">5%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">12</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">28℃</div><div class="value-cell">30℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">13</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">28℃</div><div class="value-cell">30℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">14</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" alt="" /></div><div class="value-cell">27℃</div><div class="value-cell">29℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">15</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" alt="" /></div><div class="value-cell">26℃</div><div class="value-cell">27℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">16</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" alt="" /></div><div class="value-cell">24℃</div><div class="value-cell">25℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">17</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" alt="" /></div><div class="value-cell">22℃</div><div class="value-cell">23℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">18</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-day.svg" alt="" /></div><div class="value-cell">21℃</div><div class="value-cell">22℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">18:43</div><div class="weather-cell"><img class="sun-event-icon" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/sunset.svg" alt="日の入り" /></div><div class="value-cell">日の入</div><div class="value-cell subtle">--</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">19</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">20℃</div><div class="value-cell">20℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />2m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">20</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">18℃</div><div class="value-cell">18℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">21</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">17℃</div><div class="value-cell">17℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">22</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">16℃</div><div class="value-cell">16℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />1m</span></div></div>
+                    <div class="hour-card tomorrow"><div class="time-cell">23</div><div class="weather-cell"><img src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" alt="" /></div><div class="value-cell">15℃</div><div class="value-cell">15℃</div><div class="value-cell rain-value">10%</div><div class="value-cell">0 mm</div><div class="wind-cell"><span class="wind-arrow">↖</span><span>南東<br />1m</span></div></div>
+                  </div>
+                </div>
+              </article>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script>
+      for (const scrollArea of document.querySelectorAll(".hourly-scroll")) {
+        const nowCell = scrollArea.querySelector(".time-cell.is-now");
+        if (!(nowCell instanceof HTMLElement)) {
+          continue;
+        }
+
+        const scrollAreaRect = scrollArea.getBoundingClientRect();
+        const nowRect = nowCell.getBoundingClientRect();
+        const targetLeft = nowCell.offsetLeft - scrollAreaRect.width * 0.42 + nowRect.width / 2;
+        scrollArea.scrollLeft = Math.max(0, targetLeft);
+      }
+    </script>
+  </body>
+</html>

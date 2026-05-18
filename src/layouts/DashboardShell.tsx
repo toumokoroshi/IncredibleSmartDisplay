@@ -17,13 +17,16 @@ export function DashboardShell() {
   const { displayMode, headerStatus } = useDashboardContext();
   const { widgets } = validateDashboardConfig();
   const highlightedType = getHighlightedType(displayMode);
+  const weatherWidget = widgets.find((widget) => widget.type === "weather");
+  const weatherSettings = weatherWidget?.settings as { locationName?: unknown } | undefined;
+  const weatherLocationName = typeof weatherSettings?.locationName === "string" ? weatherSettings.locationName : undefined;
   const visibleWidgets =
     highlightedType === null ? widgets : widgets.filter((widget) => widget.type === highlightedType || widget.area === "quick-area");
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--app-bg)] p-4 text-slate-100">
       <section className="dashboard-grid mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] gap-3">
-        <HeaderBar status={headerStatus} title="Living Dashboard" />
+        <HeaderBar locationName={weatherLocationName} status={headerStatus} />
         {visibleWidgets.map((widget) => (
           <ErrorBoundary key={widget.id}>
             <WidgetSlot widget={widget} isHighlighted={highlightedType === widget.type} />

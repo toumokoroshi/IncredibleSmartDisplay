@@ -1,23 +1,20 @@
-import { formatDistanceToNowLabel, formatTimeLabel } from "../utils/date";
+import { formatDistanceToNowLabel, formatHeaderDateLabel, formatTimeLabel } from "../utils/date";
 import type { HeaderStatus } from "../types/dashboard";
 
-export function HeaderBar({ status, title }: { status: HeaderStatus; title: string }) {
+export function HeaderBar({ locationName, status }: { locationName?: string; status: HeaderStatus }) {
+  const now = new Date();
+  const syncLabel = status.lastSyncedAt ? formatDistanceToNowLabel(status.lastSyncedAt) : "Waiting";
+
   return (
     <header className="dashboard-header col-span-2 rounded-[var(--radius-card)] border border-[color:var(--panel-stroke)] bg-[var(--header-bg)] px-6 py-3 shadow-[var(--panel-shadow)]">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="app-title text-sm uppercase tracking-[0.25em] text-slate-400">{title}</p>
-          <p className="app-clock mt-2 text-[48px] font-semibold leading-none text-white">{formatTimeLabel(new Date())}</p>
+          <p className="app-clock text-[48px] font-semibold leading-none text-white">{formatTimeLabel(now)}</p>
+          <p className="mt-2 text-sm font-semibold tracking-[0.04em] text-slate-500">{formatHeaderDateLabel(now)} · {locationName ?? "Tokyo"}</p>
         </div>
         <div className="status-grid flex flex-wrap justify-end gap-2 text-right text-sm text-slate-300">
           <StatusPill label={status.online ? "Online" : "Offline"} value={status.online ? "Connected" : "Disconnected"} />
-          <StatusPill label="Refreshing" value={String(status.refreshingCount)} />
-          <StatusPill label="Errors" value={String(status.errorCount)} />
-          <StatusPill label="Stale" value={String(status.staleCount)} />
-          <StatusPill
-            label="Last Sync"
-            value={status.lastSyncedAt ? formatDistanceToNowLabel(status.lastSyncedAt) : "Waiting"}
-          />
+          <StatusPill label="Last Sync" value={syncLabel} />
         </div>
       </div>
     </header>

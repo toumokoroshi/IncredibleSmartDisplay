@@ -14,25 +14,65 @@ export type WeatherSettings = {
 export type WeatherData = {
   locationName: string;
   currentTempC: number;
+  apparentTempC?: number;
   highTempC?: number;
   lowTempC?: number;
   conditionLabel: string;
   conditionCode?: number;
   displayCondition?: WeatherDisplayCondition;
+  todayCondition?: WeatherDisplayCondition;
   humidityPercent?: number;
   windSpeedKph?: number;
   windDirectionDeg?: number;
   precipitationProbabilityPercent?: number;
+  todayPrecipitationProbabilityPercent?: number;
+  todayMaxWindSpeedKph?: number;
+  dailyForecast?: WeatherDailySummary[];
   hourlyForecast?: WeatherHourlyPoint[];
   updatedAt: string;
+};
+
+export type WeatherDailySummary = {
+  label: string;
+  date?: string;
+  condition?: WeatherDisplayCondition;
+  highTempC?: number;
+  lowTempC?: number;
+  apparentHighTempC?: number;
+  apparentLowTempC?: number;
+  precipitationProbabilityPercent?: number;
+  maxWindSpeedKph?: number;
+  humidityPercent?: number;
+  windDirectionDeg?: number;
+  uvIndexMax?: number;
+  sunrise?: string;
+  sunset?: string;
 };
 
 export type WeatherHourlyPoint = {
   time: string;
   tempC: number;
+  apparentTempC?: number;
+  condition?: WeatherDisplayCondition;
   windSpeedKph?: number;
   windDirectionDeg?: number;
+  humidityPercent?: number;
   precipitationProbabilityPercent?: number;
+  precipitationMm?: number;
+};
+
+export type WeatherSunEventPoint = {
+  time: string;
+  event: "sunrise" | "sunset";
+};
+
+export type WeatherTimelinePoint =
+  | { kind: "hourly"; point: WeatherHourlyPoint }
+  | { event: WeatherSunEventPoint; kind: "sunEvent"; reference?: WeatherHourlyPoint };
+
+export type WeatherInsight = {
+  badge: string;
+  label: string;
 };
 
 export type WeatherConditionKind =

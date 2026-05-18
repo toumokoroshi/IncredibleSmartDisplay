@@ -10,6 +10,8 @@ Before making implementation changes, read:
 
 Follow the coding rules in documents/ProjectCodingRules.md.
 
+For weather widget layout changes, first create or update a comparison/debug HTML preview in documents/ and have the user review the layout before applying the change to the app.
+
 ## Verification
 
 Before committing code changes, run:

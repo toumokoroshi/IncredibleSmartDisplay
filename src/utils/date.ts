@@ -5,6 +5,14 @@ export function formatTimeLabel(date: Date) {
   }).format(date);
 }
 
+export function formatHeaderDateLabel(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
+
 export function formatDistanceToNowLabel(iso: string) {
   const deltaMs = Date.now() - new Date(iso).getTime();
   const minutes = Math.max(0, Math.floor(deltaMs / 60000));

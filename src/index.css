@@ -60,9 +60,9 @@ body {
 
 .dashboard-grid {
   grid-template-columns: 1.45fr 0.95fr 0.82fr;
-  grid-template-rows: 20fr 32fr 32fr 10fr;
+  grid-template-rows: 14fr 38fr 38fr 10fr;
   grid-template-areas:
-    "weather header header"
+    "header header header"
     "weather calendar stocks"
     "weather news news"
     "quick quick quick";
@@ -72,7 +72,7 @@ body {
 
 .dashboard-grid:has(.widget-slot.is-detail) {
   grid-template-columns: 1fr;
-  grid-template-rows: 16fr 74fr 10fr;
+  grid-template-rows: 14fr 76fr 10fr;
   grid-template-areas:
     "header"
     "detail"
@@ -124,6 +124,28 @@ body {
 
 .widget-slot.is-detail {
   grid-area: detail;
+}
+
+.weather-hourly-scroll {
+  scrollbar-color: rgba(100, 116, 139, 0.32) transparent;
+  scrollbar-width: thin;
+}
+
+.weather-hourly-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.weather-hourly-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.weather-hourly-scroll::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.24);
+  border-radius: 999px;
+}
+
+.weather-hourly-scroll:hover::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.38);
 }
 
 .app-title,

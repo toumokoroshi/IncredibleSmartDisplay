@@ -1,11 +1,12 @@
 import { mockWeatherData } from "../../test/mocks/weather";
 import type { WidgetService } from "../../types/widget";
 import { withTimeout } from "../../utils/timeout";
-import type { WeatherConditionKind, WeatherData, WeatherDisplayCondition, WeatherModifier, WeatherSettings } from "../../widgets/weather";
+import type { WeatherConditionKind, WeatherDailySummary, WeatherData, WeatherDisplayCondition, WeatherModifier, WeatherSettings } from "../../widgets/weather";
 
 type OpenMeteoResponse = {
   current?: {
     temperature_2m?: number;
+    apparent_temperature?: number;
     relative_humidity_2m?: number;
     weather_code?: number;
     is_day?: number;
@@ -13,15 +14,28 @@ type OpenMeteoResponse = {
     wind_direction_10m?: number;
   };
   daily?: {
+    time?: string[];
+    weather_code?: number[];
     temperature_2m_max?: number[];
     temperature_2m_min?: number[];
+    apparent_temperature_max?: number[];
+    apparent_temperature_min?: number[];
+    precipitation_probability_max?: number[];
+    wind_speed_10m_max?: number[];
+    uv_index_max?: number[];
+    sunrise?: string[];
+    sunset?: string[];
   };
   hourly?: {
     time?: string[];
     temperature_2m?: number[];
+    apparent_temperature?: number[];
+    relative_humidity_2m?: number[];
+    weather_code?: number[];
     wind_speed_10m?: number[];
     wind_direction_10m?: number[];
     precipitation_probability?: number[];
+    precipitation?: number[];
   };
 };
 
@@ -36,10 +50,10 @@ export function createWeatherService(): WidgetService<WeatherSettings, WeatherDa
         const url = new URL("https://api.open-meteo.com/v1/forecast");
         url.searchParams.set("latitude", String(settings.latitude));
         url.searchParams.set("longitude", String(settings.longitude));
-        url.searchParams.set("current", "temperature_2m,relative_humidity_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m");
-        url.searchParams.set("hourly", "temperature_2m,precipitation_probability,wind_speed_10m,wind_direction_10m");
-        url.searchParams.set("daily", "temperature_2m_max,temperature_2m_min");
-        url.searchParams.set("forecast_days", "1");
+        url.searchParams.set("current", "temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,wind_speed_10m,wind_direction_10m");
+        url.searchParams.set("hourly", "temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,precipitation_probability,precipitation,wind_speed_10m,wind_direction_10m");
+        url.searchParams.set("daily", "weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_max,wind_speed_10m_max,uv_index_max,sunrise,sunset");
+        url.searchParams.set("forecast_days", "2");
         url.searchParams.set("timezone", "Asia/Tokyo");
 
         const response = await withTimeout(fetch(url), 10000);
@@ -50,19 +64,27 @@ export function createWeatherService(): WidgetService<WeatherSettings, WeatherDa
         const payload = (await response.json()) as OpenMeteoResponse;
         const conditionCode = payload.current?.weather_code ?? 2;
         const displayCondition = mapWeatherCodeToDisplayCondition(conditionCode, payload.current?.is_day !== 0);
+        const todayConditionCode = payload.daily?.weather_code?.[0] ?? conditionCode;
+        const todayCondition = mapWeatherCodeToDisplayCondition(todayConditionCode, true);
+
         return {
           locationName: settings.locationName,
           currentTempC: Math.round(payload.current?.temperature_2m ?? mockWeatherData.currentTempC),
+          apparentTempC: payload.current?.apparent_temperature,
           highTempC: payload.daily?.temperature_2m_max?.[0],
           lowTempC: payload.daily?.temperature_2m_min?.[0],
           conditionLabel: displayCondition.label,
           conditionCode,
           displayCondition,
+          todayCondition,
           windSpeedKph: payload.current?.wind_speed_10m,
           windDirectionDeg: payload.current?.wind_direction_10m,
           humidityPercent: payload.current?.relative_humidity_2m ?? mockWeatherData.humidityPercent,
           precipitationProbabilityPercent: payload.hourly?.precipitation_probability?.[0],
-          hourlyForecast: mapHourlyForecast(payload).filter((_, index) => index % 3 === 0),
+          todayPrecipitationProbabilityPercent: payload.daily?.precipitation_probability_max?.[0],
+          todayMaxWindSpeedKph: payload.daily?.wind_speed_10m_max?.[0],
+          dailyForecast: mapDailyForecast(payload, payload.current?.relative_humidity_2m, payload.current?.wind_direction_10m),
+          hourlyForecast: mapHourlyForecast(payload),
           updatedAt: new Date().toISOString(),
         };
       } catch {
@@ -135,18 +157,76 @@ function mapWeatherCodeToKind(conditionCode: number): {
   }
 }
 
+function mapDailyForecast(payload: OpenMeteoResponse, currentHumidity?: number, currentWindDirection?: number): WeatherDailySummary[] {
+  // If another real provider is added, move the Open-Meteo mapping functions into a provider adapter.
+  const times = payload.daily?.time ?? [];
+  const conditionCodes = payload.daily?.weather_code ?? [];
+  const highTemps = payload.daily?.temperature_2m_max ?? [];
+  const lowTemps = payload.daily?.temperature_2m_min ?? [];
+  const apparentHighTemps = payload.daily?.apparent_temperature_max ?? [];
+  const apparentLowTemps = payload.daily?.apparent_temperature_min ?? [];
+  const precipitation = payload.daily?.precipitation_probability_max ?? [];
+  const maxWinds = payload.daily?.wind_speed_10m_max ?? [];
+  const uvIndex = payload.daily?.uv_index_max ?? [];
+  const sunrise = payload.daily?.sunrise ?? [];
+  const sunset = payload.daily?.sunset ?? [];
+
+  return times.slice(0, 2).map((date, index) => ({
+    label: index === 0 ? "Today" : "Tomorrow",
+    date,
+    condition: mapWeatherCodeToDisplayCondition(conditionCodes[index] ?? 2, true),
+    highTempC: highTemps[index],
+    lowTempC: lowTemps[index],
+    apparentHighTempC: apparentHighTemps[index],
+    apparentLowTempC: apparentLowTemps[index],
+    precipitationProbabilityPercent: precipitation[index],
+    maxWindSpeedKph: maxWinds[index],
+    humidityPercent: averageHourlyValueForDate(payload.hourly?.relative_humidity_2m, payload.hourly?.time, date) ?? (index === 0 ? currentHumidity : undefined),
+    windDirectionDeg: averageHourlyValueForDate(payload.hourly?.wind_direction_10m, payload.hourly?.time, date) ?? currentWindDirection,
+    uvIndexMax: uvIndex[index],
+    sunrise: sunrise[index],
+    sunset: sunset[index],
+  }));
+}
+
+function averageHourlyValueForDate(values: number[] | undefined, times: string[] | undefined, date: string) {
+  const matchingValues =
+    times
+      ?.map((time, index) => (time.startsWith(date) ? values?.[index] : undefined))
+      .filter((value): value is number => value !== undefined) ?? [];
+
+  if (matchingValues.length === 0) {
+    return undefined;
+  }
+
+  return Math.round(matchingValues.reduce((sum, value) => sum + value, 0) / matchingValues.length);
+}
+
 function mapHourlyForecast(payload: OpenMeteoResponse) {
   const times = payload.hourly?.time ?? [];
   const temps = payload.hourly?.temperature_2m ?? [];
+  const apparentTemps = payload.hourly?.apparent_temperature ?? [];
+  const conditionCodes = payload.hourly?.weather_code ?? [];
+  const humidity = payload.hourly?.relative_humidity_2m ?? [];
   const windSpeeds = payload.hourly?.wind_speed_10m ?? [];
   const windDirections = payload.hourly?.wind_direction_10m ?? [];
   const precipitation = payload.hourly?.precipitation_probability ?? [];
+  const precipitationMm = payload.hourly?.precipitation ?? [];
 
-  return times.slice(0, 24).map((time, index) => ({
+  return times.slice(0, 48).map((time, index) => ({
     time,
     tempC: Math.round(temps[index] ?? mockWeatherData.currentTempC),
+    apparentTempC: apparentTemps[index],
+    condition: mapWeatherCodeToDisplayCondition(conditionCodes[index] ?? 2, isDaytimeHour(time)),
+    humidityPercent: humidity[index],
     windSpeedKph: windSpeeds[index],
     windDirectionDeg: windDirections[index],
     precipitationProbabilityPercent: precipitation[index],
+    precipitationMm: precipitationMm[index],
   }));
+}
+
+function isDaytimeHour(time: string) {
+  const hour = new Date(time).getHours();
+  return hour >= 6 && hour < 18;
 }

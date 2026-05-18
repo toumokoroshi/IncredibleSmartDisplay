@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Quick Look Actual Layout Preview</title>
+    <style>
+      :root {
+        --app-bg: #edf1f7;
+        --panel-bg: rgba(255, 255, 255, 0.84);
+        --panel-stroke: #d8e0ea;
+        --panel-shadow: 0 18px 36px rgba(15, 23, 42, 0.09);
+        --control-bg: #eef3f9;
+        --radius-card: 24px;
+        --blue: #4285f4;
+        --orange: #f9a90f;
+        --sky: #72b9d4;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: var(--app-bg);
+        color: #0f172a;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .page { padding: 20px; }
+      h1 { margin: 0 0 12px; font-size: 20px; }
+      h2 { margin: 24px 0 12px; font-size: 18px; }
+
+      .dashboard-grid {
+        display: grid;
+        width: 1500px;
+        height: 820px;
+        grid-template-columns: 1.45fr 0.95fr 0.82fr;
+        grid-template-rows: 14fr 38fr 38fr 10fr;
+        grid-template-areas:
+          "header header header"
+          "weather calendar stocks"
+          "weather news news"
+          "quick quick quick";
+        gap: 1rem;
+        margin-bottom: 28px;
+      }
+
+      .card {
+        overflow: hidden;
+        border: 1px solid var(--panel-stroke);
+        border-radius: var(--radius-card);
+        background: var(--panel-bg);
+        box-shadow: var(--panel-shadow);
+      }
+
+      .header {
+        grid-area: header;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 24px;
+        background:
+          linear-gradient(90deg, rgba(66, 133, 244, 0.1), transparent 26%),
+          radial-gradient(circle at 92% 16%, rgba(251, 188, 5, 0.16), transparent 20%),
+          var(--panel-bg);
+      }
+
+      .clock { margin: 0; font-size: 48px; font-weight: 650; line-height: 1; }
+      .meta-line { margin: 8px 0 0; color: #64748b; font-size: 14px; font-weight: 650; }
+      .status { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; text-align: right; }
+      .pill { min-width: 112px; padding: 8px 12px; border: 1px solid var(--panel-stroke); border-radius: 14px; background: var(--control-bg); }
+      .pill span { display: block; color: #334155; font-size: 15px; }
+      .pill strong { display: block; margin-top: 4px; font-size: 15px; }
+
+      .weather-slot { grid-area: weather; min-height: 0; }
+      .widget-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 2rem;
+        border-top: 5px solid rgba(66, 133, 244, 0.42);
+      }
+
+      .widget-heading { display: flex; align-items: center; gap: 12px; }
+      .widget-heading-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: var(--blue); color: white; font-size: 18px; }
+      .widget-title { color: #64748b; font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; }
+
+      .quicklook {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-rows: minmax(0, 1fr) auto auto;
+        gap: 1rem;
+        margin-top: 1rem;
+        overflow: hidden;
+      }
+
+      .now { display: flex; min-height: 0; align-items: center; justify-content: space-between; gap: 24px; }
+      .now-label, .label { color: #64748b; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; }
+      .city { margin: 4px 0 0; color: #334155; font-size: 20px; }
+      .temp { margin: 8px 0 0; color: #0f172a; font-size: 72px; font-weight: 650; line-height: 1; }
+      .temp-row { display: flex; align-items: flex-end; gap: 20px; margin-top: 8px; }
+      .temp-row .temp { margin: 0; }
+      .condition { margin: 12px 0 0; color: #0f172a; font-size: 20px; }
+      .inline-stats { display: grid; gap: 8px; margin-bottom: 8px; font-size: 16px; font-weight: 650; }
+      .inline-stat-icon { display: inline-grid; width: 24px; height: 24px; place-items: center; margin-right: 6px; border-radius: 50%; background: #f1f5f9; color: #0b63ff; }
+      .stat-label { margin-right: 4px; color: #64748b; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+      .hero { flex-shrink: 0; transform: translate(-24px, 20px); color: var(--sky); font-size: 132px; filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18)); }
+
+      .weather-metric {
+        overflow: hidden;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.42);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.04);
+      }
+
+      .today {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+      }
+
+      .today-icon { margin-left: -8px; color: var(--orange); font-size: 104px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.18)); }
+      .today-header { display: flex; min-width: 0; align-items: baseline; gap: 12px; }
+      .today-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #0f172a; font-size: 16px; font-weight: 650; }
+      .range { margin-top: 4px; color: #0284c7; font-size: 16px; font-weight: 650; }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .chip {
+        min-width: 112px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #eef3f9;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .chip-icon { display: inline-grid; width: 24px; height: 24px; place-items: center; margin-right: 8px; border-radius: 50%; background: white; color: #0b63ff; box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08); }
+      .chip-label { display: inline-block; margin-right: 6px; color: #64748b; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+      .today.proposed {
+        grid-template-columns: auto minmax(0, 1fr);
+        padding: 16px 22px 16px 18px;
+      }
+
+      .today.proposed .chips {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(104px, 1fr));
+        max-width: 450px;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .today.proposed .chip {
+        min-width: 0;
+        padding: 9px 12px;
+        font-size: 15px;
+      }
+
+      .summary {
+        margin: 7px 0 0;
+        color: #475569;
+        font-size: 15px;
+        font-weight: 650;
+      }
+
+      .hours { padding: 14px 18px; }
+      .hours-head { display: flex; align-items: center; justify-content: space-between; }
+      .hours-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 10px; text-align: center; }
+      .hour { min-width: 0; padding: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.45); }
+      .hour-time { color: #64748b; font-size: 13px; font-weight: 650; }
+      .hour-icon { margin-top: 6px; color: var(--sky); font-size: 26px; }
+      .hour-temp { margin-top: 6px; font-size: 17px; font-weight: 700; }
+      .hour-rain { margin-top: 2px; font-size: 13px; }
+
+      .placeholder { display: flex; align-items: center; justify-content: center; padding: 24px; color: #334155; font-size: 22px; font-weight: 650; }
+      .calendar { grid-area: calendar; }
+      .stocks { grid-area: stocks; }
+      .news { grid-area: news; }
+      .quick { grid-area: quick; display: flex; align-items: center; gap: 14px; padding: 18px; }
+      .quick button { flex: 1; height: 44px; border: 1px solid #d8e0ea; border-radius: 8px; background: #eef3f9; color: #334155; font-size: 18px; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1>Actual-size Quick Look comparison</h1>
+      <h2>Current layout</h2>
+      <section class="dashboard-grid">
+        <header class="card header"><div><p class="clock">07:32</p><p class="meta-line">Mon, May 18 · Tokyo</p></div><div class="status"><div class="pill"><span>Online</span><strong>Connected</strong></div><div class="pill"><span>Last Sync</span><strong>Just now</strong></div></div></header>
+        <article class="weather-slot"><div class="card widget-card">
+          <div class="widget-heading"><span class="widget-heading-icon">W</span><span class="widget-title">Weather</span></div>
+          <div class="quicklook">
+            <div class="now"><div><div class="now-label">Now</div><p class="city">Tokyo</p><div class="temp-row"><p class="temp">22&#8451;</p><div class="inline-stats"><span><span class="inline-stat-icon">♧</span><span class="stat-label">Hum</span>73%</span><span><span class="inline-stat-icon">⌁</span><span class="stat-label">Wind</span>2 m/s</span></div></div><p class="condition">Sunny</p></div><div class="hero">◖</div></div>
+            <div class="weather-metric today"><div class="today-icon">☀</div><div><div class="today-header"><span class="label">Today</span><span class="today-name">Sunny</span></div><div class="range">28&#8451; / 14&#8451;</div><div class="chips"><span class="chip"><span class="chip-icon">☂</span><span class="chip-label">Rain</span>0%</span><span class="chip"><span class="chip-icon">⌁</span><span class="chip-label">Wind</span>2 m/s</span><span class="chip"><span class="chip-icon">♧</span><span class="chip-label">Hum</span>74%</span></div></div></div>
+            <div class="weather-metric hours"><div class="hours-head"><span class="label">Next Hours</span><span class="label">Rain / Temp</span></div><div class="hours-grid"><div class="hour"><div class="hour-time">00時</div><div class="hour-icon">☾</div><div class="hour-temp">17&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">01時</div><div class="hour-icon">☾</div><div class="hour-temp">16&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">02時</div><div class="hour-icon">☾</div><div class="hour-temp">16&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">03時</div><div class="hour-icon">☾</div><div class="hour-temp">15&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">04時</div><div class="hour-icon">☾</div><div class="hour-temp">14&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">05時</div><div class="hour-icon">☾</div><div class="hour-temp">14&#8451;</div><div class="hour-rain">0%</div></div></div></div>
+          </div>
+        </div></article>
+        <article class="card placeholder calendar">Calendar</article><article class="card placeholder stocks">Markets</article><article class="card placeholder news">News</article><nav class="card quick"><button>Home</button><button>Weather</button><button>Calendar</button><button>News</button><button>Markets</button></nav>
+      </section>
+
+      <h2>Proposed layout: summary line + balanced Today chips</h2>
+      <section class="dashboard-grid">
+        <header class="card header"><div><p class="clock">07:32</p><p class="meta-line">Mon, May 18 · Tokyo</p></div><div class="status"><div class="pill"><span>Online</span><strong>Connected</strong></div><div class="pill"><span>Last Sync</span><strong>Just now</strong></div></div></header>
+        <article class="weather-slot"><div class="card widget-card">
+          <div class="widget-heading"><span class="widget-heading-icon">W</span><span class="widget-title">Weather</span></div>
+          <div class="quicklook">
+            <div class="now"><div><div class="now-label">Now</div><p class="city">Tokyo</p><div class="temp-row"><p class="temp">22&#8451;</p><div class="inline-stats"><span><span class="inline-stat-icon">♧</span><span class="stat-label">Hum</span>73%</span><span><span class="inline-stat-icon">⌁</span><span class="stat-label">Wind</span>2 m/s</span></div></div><p class="condition">Sunny</p></div><div class="hero">◖</div></div>
+            <div class="weather-metric today proposed"><div class="today-icon">☀</div><div><div class="today-header"><span class="label">Today</span><span class="today-name">Sunny</span></div><div class="range">28&#8451; / 14&#8451;</div><p class="summary">No umbrella needed. Warm around midday.</p><div class="chips"><span class="chip"><span class="chip-icon">☂</span><span class="chip-label">Rain</span>0%</span><span class="chip"><span class="chip-icon">⌁</span><span class="chip-label">Wind</span>2 m/s</span><span class="chip"><span class="chip-icon">♧</span><span class="chip-label">Hum</span>74%</span></div></div></div>
+            <div class="weather-metric hours"><div class="hours-head"><span class="label">Next Hours</span><span class="label">Rain / Temp</span></div><div class="hours-grid"><div class="hour"><div class="hour-time">00時</div><div class="hour-icon">☾</div><div class="hour-temp">17&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">01時</div><div class="hour-icon">☾</div><div class="hour-temp">16&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">02時</div><div class="hour-icon">☾</div><div class="hour-temp">16&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">03時</div><div class="hour-icon">☾</div><div class="hour-temp">15&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">04時</div><div class="hour-icon">☾</div><div class="hour-temp">14&#8451;</div><div class="hour-rain">0%</div></div><div class="hour"><div class="hour-time">05時</div><div class="hour-icon">☾</div><div class="hour-temp">14&#8451;</div><div class="hour-rain">0%</div></div></div></div>
+          </div>
+        </div></article>
+        <article class="card placeholder calendar">Calendar</article><article class="card placeholder stocks">Markets</article><article class="card placeholder news">News</article><nav class="card quick"><button>Home</button><button>Weather</button><button>Calendar</button><button>News</button><button>Markets</button></nav>
+      </section>
+    </div>
+  </body>
+</html>

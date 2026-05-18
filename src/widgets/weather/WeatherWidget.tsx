@@ -1,4 +1,5 @@
-import { CloudSun, Wind } from "lucide-react";
+import { CloudSun, Droplets, Navigation, Umbrella } from "lucide-react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -6,15 +7,19 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { StaleBadge } from "../../components/StaleBadge";
 import type { WidgetProps } from "../../types/widget";
-import type { WeatherConditionKind, WeatherData, WeatherDisplayCondition, WeatherHourlyPoint, WeatherModifier, WeatherSettings, WeatherTransition } from "./types";
+import type { WeatherDailySummary, WeatherData, WeatherDisplayCondition, WeatherHourlyPoint, WeatherInsight, WeatherModifier, WeatherSettings, WeatherSunEventPoint, WeatherTimelinePoint } from "./types";
+import { formatConditionLabel, getDisplayCondition, getKindLabel, getMeteoconsIconName, getModifierLabel, unavailableCondition } from "./weatherConditionDisplay";
+import { getDailySummaries } from "./weatherDaily";
+import { formatHour, formatMeters, formatMetersPerSecond, formatPercent, formatPrecipitation, formatTemp, formatTimelineTime, formatWindDirection, getSunEventLabel } from "./weatherFormatters";
+import { getDailyJudgementSummary, getWeatherInsights } from "./weatherInsights";
+import { buildWeatherTimeline, getCurrentHourlyIndex, getDayMarkerIndexes, getTimelineKey } from "./weatherTimeline";
 
-const celsius = "\u2103";
 const meteoconsBaseUrl = "https://unpkg.com/@meteocons/svg@0.1.0/flat";
 
 export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<WeatherSettings, WeatherData>) {
   return (
-    <Card className={isHighlighted ? "ring-2 ring-cyan-400/60" : ""}>
-      <div className="flex items-start justify-between gap-3">
+    <Card className={`flex flex-col ${isHighlighted ? "ring-2 ring-cyan-400/60" : ""}`}>
+      <div className="shrink-0 flex items-start justify-between gap-3">
         <div className="widget-heading flex items-center gap-3">
           <span className="widget-heading-icon">
             <CloudSun size={20} strokeWidth={1.8} />
@@ -38,138 +43,184 @@ export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, sta
 }
 
 function WeatherQuickLook({ data }: { data: WeatherData }) {
-  const condition = getDisplayCondition(data);
-
   return (
-    <div className="mt-4 flex h-[calc(100%-2.25rem)] flex-col justify-between">
-      <div className="flex items-start justify-between gap-5">
-        <div>
-          <p className="text-xl text-slate-300">{data.locationName}</p>
-          <p className="mt-2 text-5xl font-semibold leading-none text-white">{formatTemp(data.currentTempC)}</p>
-          <p className="mt-3 text-lg text-slate-300">{formatConditionLabel(condition)}</p>
-          <WeatherModifierBadges modifiers={condition.modifiers} />
-        </div>
-        <div className="weather-hero-icon p-1">
-          <WeatherConditionIcon condition={condition} size={82} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 text-base">
-        <Metric label="High / Low" value={`${formatTemp(data.highTempC)} / ${formatTemp(data.lowTempC)}`} />
-        <Metric label="Rain" value={formatPercent(data.precipitationProbabilityPercent)} />
-        <Metric label="Wind" value={formatWind(data.windSpeedKph, data.windDirectionDeg)} />
-      </div>
+    <div className="mt-4 grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_auto] gap-4 overflow-hidden">
+      <NowWeatherSummary data={data} iconSize={163} iconClassName="-translate-x-6 translate-y-5" tempClassName="text-6xl" />
+      <DailyWeatherSummary judgementHourly={data.hourlyForecast} showSummary summary={getDailySummaries(data)[0]} />
+      <NextHoursStrip hourly={data.hourlyForecast ?? []} />
     </div>
   );
 }
 
 function WeatherDetail({ data }: { data: WeatherData }) {
-  const condition = getDisplayCondition(data);
   const hourly = data.hourlyForecast ?? [];
+  const daily = getDailySummaries(data).slice(0, 2);
+  const insights = getWeatherInsights(daily, hourly);
 
   return (
-    <div className="mt-4 grid h-[calc(100%-2.25rem)] grid-cols-[0.9fr_1.4fr] gap-5">
-      <div className="flex min-h-0 flex-col justify-between rounded-lg border border-white/10 bg-white/[0.03] p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-2xl text-slate-300">{data.locationName}</p>
-            <p className="mt-3 text-7xl font-semibold leading-none text-white">{formatTemp(data.currentTempC)}</p>
-            <p className="mt-4 text-2xl text-slate-200">{formatConditionLabel(condition)}</p>
-            <WeatherModifierBadges modifiers={condition.modifiers} />
-          </div>
-          <div className="weather-hero-icon p-1">
-            <WeatherConditionIcon condition={condition} size={102} />
-          </div>
+    <div className="mt-3 grid min-h-0 flex-1 grid-rows-[9.2rem_7.5rem_minmax(0,1fr)] gap-2 overflow-hidden">
+      <div className="grid min-h-0 grid-cols-[1.1fr_0.9fr] gap-2 overflow-hidden">
+        <div className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] px-5 py-2">
+          <NowWeatherSummary compact data={data} iconSize={88} showApparent tempClassName="text-[3.5rem]" />
         </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Metric label="High / Low" value={`${formatTemp(data.highTempC)} / ${formatTemp(data.lowTempC)}`} />
-          <Metric label="Humidity" value={formatPercent(data.humidityPercent)} />
-          <Metric label="Rain" value={formatPercent(data.precipitationProbabilityPercent)} />
-          <Metric label="Wind" value={formatWind(data.windSpeedKph, data.windDirectionDeg)} />
-        </div>
+        <WeatherAlertPanel insights={insights.slice(0, 4)} />
       </div>
 
-      <div className="grid min-h-0 grid-rows-[1.1fr_0.9fr] gap-4">
-        <TemperatureChart hourly={hourly} />
-        <WindPanel hourly={hourly} />
+      <div className="grid min-h-0 grid-cols-2 gap-3">
+        {daily.map((summary) => (
+          <DailyWeatherSummary compact key={summary.label} showApparent summary={summary} />
+        ))}
+      </div>
+
+      <div className="min-h-0 overflow-hidden">
+        <HourlyForecastTable daily={daily} hourly={hourly} />
       </div>
     </div>
   );
 }
 
-function TemperatureChart({ hourly }: { hourly: WeatherHourlyPoint[] }) {
-  const points = hourly.slice(0, 8);
-  const temps = points.map((point) => point.tempC);
-  const min = temps.length > 0 ? Math.min(...temps) : 0;
-  const max = temps.length > 0 ? Math.max(...temps) : 0;
-  const range = Math.max(max - min, 1);
-  const svgPoints = points
-    .map((point, index) => {
-      const x = points.length === 1 ? 50 : (index / (points.length - 1)) * 100;
-      const y = 82 - ((point.tempC - min) / range) * 58;
-      return `${x},${y}`;
-    })
-    .join(" ");
+function NowWeatherSummary({
+  data,
+  iconClassName = "",
+  iconSize,
+  compact = false,
+  showApparent = false,
+  tempClassName,
+}: {
+  compact?: boolean;
+  data: WeatherData;
+  iconClassName?: string;
+  iconSize: number;
+  showApparent?: boolean;
+  tempClassName: string;
+}) {
+  const condition = getDisplayCondition(data);
 
   return (
-    <div className="min-h-0 rounded-lg border border-white/10 bg-white/[0.03] p-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Today Temperature</p>
-        <p className="text-sm text-slate-400">
-          {formatTemp(min)} - {formatTemp(max)}
-        </p>
-      </div>
-      {points.length > 0 ? (
-        <div className="mt-3">
-          <svg className="h-32 w-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 100" aria-label="Hourly temperature chart">
-            <defs>
-              <linearGradient id="temperatureLine" x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor="#67e8f9" />
-                <stop offset="100%" stopColor="#fbbf24" />
-              </linearGradient>
-            </defs>
-            <polyline fill="none" points={svgPoints} stroke="url(#temperatureLine)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" vectorEffect="non-scaling-stroke" />
-          </svg>
-          <div className="grid grid-cols-8 gap-2 text-center text-sm text-slate-400">
-            {points.map((point) => (
-              <div key={point.time}>
-                <p className="text-slate-200">{formatTemp(point.tempC)}</p>
-                <p>{formatHour(point.time)}</p>
-              </div>
-            ))}
-          </div>
+    <div className="flex min-h-0 items-center justify-between gap-6">
+      <div className="min-w-0">
+        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Now</p>
+        <p className={`${compact ? "mt-0 text-lg" : "mt-1 text-xl"} text-slate-300`}>{data.locationName}</p>
+        <div className="mt-2 flex items-end gap-5">
+          <p className={`font-semibold leading-none text-white ${tempClassName}`}>{formatTemp(data.currentTempC)}</p>
+          {!compact ? (
+            <div className="mb-2 grid gap-2">
+              <InlineWeatherStat icon={<Droplets size={15} />} label="Hum" value={formatPercent(data.humidityPercent)} />
+              <InlineWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} />
+            </div>
+          ) : null}
         </div>
-      ) : (
-        <p className="mt-8 text-slate-400">No hourly forecast available.</p>
-      )}
+        <p className={`${compact ? "mt-1 text-lg" : "mt-3 text-xl"} text-slate-300`}>{formatConditionLabel(condition)}</p>
+        <div className={`${compact ? "mt-2" : "hidden"} flex flex-wrap gap-x-4 gap-y-1`}>
+          {compact ? <InlineWeatherStat icon={<Droplets size={15} />} label="Hum" value={formatPercent(data.humidityPercent)} /> : null}
+          {compact ? <InlineWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} /> : null}
+          {showApparent ? <InlineWeatherStat icon={<span className="text-sm leading-none">{"\u2197"}</span>} label="Feel" value={formatTemp(data.apparentTempC)} /> : null}
+        </div>
+        <WeatherModifierBadges modifiers={condition.modifiers} />
+      </div>
+      <div className={`weather-hero-icon shrink-0 p-1 ${iconClassName}`}>
+        <WeatherConditionIcon condition={condition} size={iconSize} />
+      </div>
     </div>
   );
 }
 
-function WindPanel({ hourly }: { hourly: WeatherHourlyPoint[] }) {
-  const points = hourly.slice(0, 8);
-  const maxWind = Math.max(...points.map((point) => point.windSpeedKph ?? 0), 1);
+function DailyWeatherSummary({
+  compact = false,
+  judgementHourly = [],
+  showApparent = false,
+  showSummary = false,
+  summary,
+}: {
+  compact?: boolean;
+  judgementHourly?: WeatherHourlyPoint[];
+  showApparent?: boolean;
+  showSummary?: boolean;
+  summary?: WeatherDailySummary;
+}) {
+  const condition = summary?.condition ?? unavailableCondition;
+  const summaryText = showSummary ? getDailyJudgementSummary(summary, judgementHourly) : "";
 
   return (
-    <div className="min-h-0 rounded-lg border border-white/10 bg-white/[0.03] p-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Wind Direction</p>
-        <Wind className="text-cyan-200" size={24} />
+    <div className={`${compact ? "px-3 py-2" : "px-5 py-4"} weather-metric overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]`}>
+      <div className={`grid grid-cols-[auto_1fr] items-center ${compact ? "gap-2" : "gap-3"}`}>
+        <div className="-ml-2">
+          <WeatherConditionIcon condition={condition} size={compact ? 82 : 104} />
+        </div>
+        <div className="min-w-0">
+          <div className="flex min-w-0 items-baseline gap-3">
+            <p className="shrink-0 text-xs uppercase tracking-[0.18em] text-slate-500">{summary?.label ?? "Today"}</p>
+            <p className="truncate text-base font-semibold text-slate-100">{formatConditionLabel(condition)}</p>
+          </div>
+          <p className="mt-1 text-base font-semibold text-slate-500">
+            <span className="text-orange-500">{formatTemp(summary?.highTempC)}</span>
+            <span className="mx-1 text-slate-400">/</span>
+            <span className="text-sky-500">{formatTemp(summary?.lowTempC)}</span>
+          </p>
+          {summaryText ? <p className="mt-1 truncate text-sm font-semibold text-slate-500">{summaryText}</p> : null}
+          <div className={`${compact ? "mt-2 flex flex-wrap gap-1.5" : "mt-2 grid max-w-[28rem] grid-cols-3 gap-2.5"}`}>
+            <QuickStatChip compact={compact} icon={<Umbrella size={15} />} label="Rain" value={formatPercent(summary?.precipitationProbabilityPercent)} />
+            <QuickStatChip compact={compact} icon={<WindDirectionIcon degrees={summary?.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(summary?.maxWindSpeedKph)} />
+            <QuickStatChip compact={compact} icon={<Droplets size={15} />} label="Hum" value={formatPercent(summary?.humidityPercent)} />
+            {showApparent ? <QuickStatChip compact={compact} icon={<span className="text-sm leading-none">{"\u2197"}</span>} label="Feel" value={`${formatTemp(summary?.apparentHighTempC)} / ${formatTemp(summary?.apparentLowTempC)}`} /> : null}
+          </div>
+        </div>
       </div>
-      <div className="mt-4 grid h-[calc(100%-2.25rem)] grid-cols-8 items-end gap-3">
+    </div>
+  );
+}
+
+function InlineWeatherStat({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className="inline-flex items-center gap-1.5 text-base font-semibold text-slate-100">
+      <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-100 text-blue-600 shadow-sm">{icon}</span>
+      <span>
+        <span className="mr-1 text-[0.62rem] uppercase tracking-[0.1em] text-slate-500">{label}</span>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function QuickStatChip({ compact = false, icon, label, value }: { compact?: boolean; icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className={`${compact ? "min-w-[6.2rem] px-2.5 py-1.5" : "min-w-0 px-3 py-2"} rounded-full bg-slate-100`}>
+      <div className="flex items-center gap-2">
+        <span className={`${compact ? "h-5 w-5" : "h-6 w-6"} grid place-items-center rounded-full bg-white text-blue-600 shadow-sm`}>{icon}</span>
+        <span className="min-w-0">
+          <span className={`${compact ? "text-[0.62rem]" : "text-[0.68rem]"} block uppercase tracking-[0.1em] text-slate-500`}>{label}</span>
+          <span className={`${compact ? "text-sm" : "text-base"} block truncate font-semibold leading-tight text-slate-100`}>{value}</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function NextHoursStrip({ hourly }: { hourly: WeatherHourlyPoint[] }) {
+  const points = hourly.slice(0, 6);
+
+  if (points.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="weather-metric rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
+      <div className="mb-2 flex items-center justify-between">
+        <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Next hours</p>
+        <p className="text-xs font-medium text-slate-500">Rain / Temp</p>
+      </div>
+      <div className="grid grid-cols-6 gap-2">
         {points.map((point) => {
-          const speed = point.windSpeedKph ?? 0;
-          const height = Math.max((speed / maxWind) * 100, 12);
+          const pointCondition = point.condition ?? unavailableCondition;
 
           return (
-            <div key={point.time} className="flex h-full flex-col items-center justify-end gap-2">
-              <div className="flex flex-1 items-end">
-                <div className="w-4 rounded-full bg-cyan-300/70" style={{ height: `${height}%` }} />
+            <div key={point.time} className="min-w-0 rounded-md bg-white/50 px-2 py-2 text-center">
+              <p className="text-xs font-medium text-slate-500">{formatHour(point.time)}</p>
+              <div className="mt-1 flex justify-center">
+                <WeatherConditionIcon condition={pointCondition} size={34} />
               </div>
-              <WindArrow degrees={point.windDirectionDeg} />
-              <p className="text-xs text-slate-300">{Math.round(speed)}k</p>
-              <p className="text-xs text-slate-500">{formatHour(point.time)}</p>
+              <p className="mt-1 text-sm font-semibold text-slate-100">{formatTemp(point.tempC)}</p>
+              <p className="text-xs text-sky-600">{formatPercent(point.precipitationProbabilityPercent)}</p>
             </div>
           );
         })}
@@ -178,23 +229,113 @@ function WindPanel({ hourly }: { hourly: WeatherHourlyPoint[] }) {
   );
 }
 
-function WindArrow({ degrees }: { degrees?: number }) {
+function WeatherAlertPanel({ insights }: { insights: WeatherInsight[] }) {
   return (
-    <span
-      aria-label={degrees === undefined ? "Unknown wind direction" : `Wind ${Math.round(degrees)} degrees`}
-      className="block h-0 w-0 border-x-[6px] border-b-[12px] border-x-transparent border-b-cyan-100"
-      style={{ transform: `rotate(${degrees ?? 0}deg)` }}
-    />
+    <div className="min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5">
+      <p className="mb-1 text-xs uppercase tracking-[0.18em] text-slate-500">Alerts</p>
+      {insights.map((insight) => (
+        <InsightLine insight={insight} key={insight.label} />
+      ))}
+    </div>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function InsightLine({ insight }: { insight: WeatherInsight }) {
   return (
-    <div className="weather-metric rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.18em] text-slate-500">{label}</p>
-      <p className="mt-1 truncate text-lg font-semibold text-slate-100">{value}</p>
+    <div className="flex items-center justify-between gap-2 border-t border-white/10 py-0.5 first:border-t-0">
+      <span className="min-w-0 truncate text-[0.82rem] font-medium text-slate-100">{insight.label}</span>
+      <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-blue-600">{insight.badge}</span>
     </div>
   );
+}
+
+function HourlyForecastTable({ daily, hourly }: { daily: WeatherDailySummary[]; hourly: WeatherHourlyPoint[] }) {
+  const points = buildWeatherTimeline(hourly.slice(0, 48), daily);
+  const currentIndex = getCurrentHourlyIndex(points);
+  const dayMarkers = getDayMarkerIndexes(points);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollArea = scrollRef.current;
+    const nowCell = scrollArea?.querySelector<HTMLElement>(".weather-hourly-now");
+    if (!scrollArea || !nowCell) {
+      return;
+    }
+
+    const targetLeft = nowCell.offsetLeft - scrollArea.clientWidth * 0.42 + nowCell.clientWidth / 2;
+    scrollArea.scrollLeft = Math.max(0, targetLeft);
+  }, [currentIndex, points.length]);
+
+  return (
+    <div className="grid h-full min-h-0 grid-rows-[minmax(0,1fr)] overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-2">
+      {points.length > 0 ? (
+        <div ref={scrollRef} className="weather-hourly-scroll min-h-0 overflow-x-auto overflow-y-hidden pb-8">
+          <div className="grid min-w-max grid-flow-col auto-cols-[4.5rem] items-stretch">
+            <div className="sticky left-0 z-10 grid w-[3.5rem] grid-rows-[1.45rem_1.55rem_1.55rem_1.55rem_1.55rem_3.6rem] bg-white/95 text-sm font-semibold text-slate-500">
+              <HourlyLabel>{"\u6642\u523b"}</HourlyLabel>
+              <HourlyLabel>{"\u5929\u6c17"}</HourlyLabel>
+              <HourlyLabel>{"\u6c17\u6e29"}</HourlyLabel>
+              <HourlyLabel>{"\u964d\u6c34"}</HourlyLabel>
+              <HourlyLabel>{"\u96e8\u91cf"}</HourlyLabel>
+              <HourlyLabel>{"\u98a8"}</HourlyLabel>
+            </div>
+            {points.map((timelinePoint, index) => {
+              const isPast = index < currentIndex;
+              const isNow = index === currentIndex;
+              const isDayMarker = dayMarkers.has(index);
+
+              return <HourlyColumn isDayMarker={isDayMarker} isNow={isNow} isPast={isPast} key={getTimelineKey(timelinePoint)} timelinePoint={timelinePoint} />;
+            })}
+          </div>
+        </div>
+      ) : (
+        <p className="rounded-lg border border-white/10 px-4 py-6 text-slate-400">No hourly forecast available.</p>
+      )}
+    </div>
+  );
+}
+
+function HourlyLabel({ children }: { children: ReactNode }) {
+  return <div className="flex items-center">{children}</div>;
+}
+
+function HourlyColumn({ isDayMarker, isNow, isPast, timelinePoint }: { isDayMarker: boolean; isNow: boolean; isPast: boolean; timelinePoint: WeatherTimelinePoint }) {
+  const isSunEvent = timelinePoint.kind === "sunEvent";
+  const point = timelinePoint.kind === "hourly" ? timelinePoint.point : timelinePoint.reference;
+  const condition = point?.condition ?? unavailableCondition;
+
+  return (
+    <div
+      className={[
+        "grid grid-rows-[1.45rem_1.55rem_1.55rem_1.55rem_1.55rem_3.6rem] justify-items-center text-center text-[0.82rem] font-normal text-slate-600",
+        isPast ? "opacity-40 grayscale" : "",
+        isDayMarker ? "bg-slate-950/[0.04]" : "",
+      ].join(" ")}
+    >
+      <div className={`grid w-full place-items-center border-b-2 ${isNow ? "weather-hourly-now border-blue-500 font-semibold text-slate-100" : "border-slate-300"}`}>{isDayMarker ? "\u660e\u65e5" : formatTimelineTime(timelinePoint)}</div>
+      <div className="grid place-items-center">
+        {isDayMarker ? <span className="text-xs text-slate-500">{"\u660e\u65e5"}</span> : isSunEvent ? <SunEventIcon event={timelinePoint.event.event} size={18} /> : <WeatherConditionIcon condition={condition} size={18} />}
+      </div>
+      <div className="grid place-items-center">{isDayMarker ? "--" : isSunEvent ? getSunEventLabel(timelinePoint.event.event) : formatTemp(point?.tempC)}</div>
+      <div className="grid place-items-center text-sky-600">{formatPercent(point?.precipitationProbabilityPercent)}</div>
+      <div className="grid place-items-center text-[0.72rem]">{formatPrecipitation(point?.precipitationMm)}</div>
+      <div className="grid place-items-center text-[0.7rem] leading-none">
+        <div className="text-sky-500">
+          <WindDirectionIcon degrees={point?.windDirectionDeg} size={12} />
+        </div>
+        <div>{formatWindDirection(point?.windDirectionDeg)}</div>
+        <div>{formatMeters(point?.windSpeedKph)}</div>
+      </div>
+    </div>
+  );
+}
+
+function SunEventIcon({ event, size }: { event: WeatherSunEventPoint["event"]; size: number }) {
+  return <WeatherIconImage iconName={event} label={getSunEventLabel(event)} size={size} />;
+}
+
+function WindDirectionIcon({ degrees, size }: { degrees?: number; size: number }) {
+  return <Navigation size={size} style={{ transform: `rotate(${degrees ?? 0}deg)` }} />;
 }
 
 function WeatherConditionIcon({ condition, size }: { condition: WeatherDisplayCondition; size: number }) {
@@ -227,7 +368,7 @@ function WeatherConditionIcon({ condition, size }: { condition: WeatherDisplayCo
 }
 
 function WeatherIconImage({ iconName, label, size }: { iconName: string; label: string; size: number }) {
-  return <img alt={label} height={size} src={`${meteoconsBaseUrl}/${iconName}.svg`} style={{ height: size, width: size }} width={size} />;
+  return <img alt={label} className="drop-shadow-[0_2px_3px_rgba(15,23,42,0.18)]" height={size} src={`${meteoconsBaseUrl}/${iconName}.svg`} style={{ height: size, width: size }} width={size} />;
 }
 
 function WeatherModifierBadges({ modifiers }: { modifiers: WeatherModifier[] }) {
@@ -244,195 +385,4 @@ function WeatherModifierBadges({ modifiers }: { modifiers: WeatherModifier[] }) 
       ))}
     </div>
   );
-}
-
-function getDisplayCondition(data: WeatherData): WeatherDisplayCondition {
-  return (
-    data.displayCondition ?? {
-      kind: mapLegacyConditionKind(data.conditionCode, data.conditionLabel),
-      label: data.conditionLabel,
-      transition: "stable",
-      modifiers: [],
-      isDaytime: true,
-    }
-  );
-}
-
-function mapLegacyConditionKind(conditionCode?: number, conditionLabel = ""): WeatherConditionKind {
-  const normalizedLabel = conditionLabel.toLowerCase();
-
-  switch (conditionCode) {
-    case 0:
-      return "clear";
-    case 1:
-      return "mostlyClear";
-    case 2:
-      return "partlyCloudy";
-    case 3:
-      return "overcast";
-    case 45:
-    case 48:
-      return "fog";
-    case 51:
-    case 53:
-    case 55:
-      return "drizzle";
-    case 56:
-    case 57:
-    case 66:
-    case 67:
-      return "sleet";
-    case 61:
-    case 63:
-    case 80:
-    case 81:
-      return "rain";
-    case 65:
-    case 82:
-      return "heavyRain";
-    case 71:
-    case 73:
-    case 85:
-      return "snow";
-    case 75:
-    case 77:
-    case 86:
-      return "heavySnow";
-    case 95:
-    case 96:
-    case 99:
-      return "thunderstorm";
-  }
-
-  if (normalizedLabel.includes("clear")) {
-    return "clear";
-  }
-  if (normalizedLabel.includes("cloud")) {
-    return "partlyCloudy";
-  }
-  if (normalizedLabel.includes("rain")) {
-    return "rain";
-  }
-  return "unknown";
-}
-
-function getMeteoconsIconName(kind: WeatherConditionKind, isDaytime: boolean) {
-  const dayPart = isDaytime ? "day" : "night";
-
-  switch (kind) {
-    case "clear":
-      return `clear-${dayPart}`;
-    case "mostlyClear":
-      return `mostly-clear-${dayPart}`;
-    case "partlyCloudy":
-      return `partly-cloudy-${dayPart}`;
-    case "overcast":
-      return `overcast-${dayPart}`;
-    case "fog":
-      return `fog-${dayPart}`;
-    case "drizzle":
-      return "drizzle";
-    case "rain":
-      return "rain";
-    case "heavyRain":
-      return "extreme-rain";
-    case "snow":
-      return "snow";
-    case "heavySnow":
-      return "extreme-snow";
-    case "sleet":
-      return "sleet";
-    case "thunderstorm":
-      return `thunderstorms-${dayPart}-rain`;
-    case "unknown":
-      return "not-available";
-  }
-}
-
-function formatConditionLabel(condition: WeatherDisplayCondition) {
-  if (condition.transition === "stable" || condition.secondaryKind === undefined) {
-    return condition.label;
-  }
-
-  return `${condition.label} ${getTransitionLabel(condition.transition)} ${getKindLabel(condition.secondaryKind)}`;
-}
-
-function getTransitionLabel(transition: WeatherTransition) {
-  switch (transition) {
-    case "stable":
-      return "";
-    case "then":
-      return "のち";
-    case "occasional":
-      return "時々";
-    case "temporary":
-      return "一時";
-  }
-}
-
-function getKindLabel(kind: WeatherConditionKind) {
-  switch (kind) {
-    case "clear":
-    case "mostlyClear":
-      return "晴れ";
-    case "partlyCloudy":
-      return "晴れ時々くもり";
-    case "overcast":
-      return "くもり";
-    case "fog":
-      return "霧";
-    case "drizzle":
-      return "霧雨";
-    case "rain":
-      return "雨";
-    case "heavyRain":
-      return "大雨";
-    case "snow":
-      return "雪";
-    case "heavySnow":
-      return "大雪";
-    case "sleet":
-      return "みぞれ";
-    case "thunderstorm":
-      return "雷雨";
-    case "unknown":
-      return "不明";
-  }
-}
-
-function getModifierLabel(modifier: WeatherModifier) {
-  switch (modifier) {
-    case "rainChance":
-      return "雨の可能性";
-    case "thunder":
-      return "雷";
-    case "strongWind":
-      return "強風";
-  }
-}
-
-function formatTemp(value?: number) {
-  return value === undefined ? `--${celsius}` : `${Math.round(value)}${celsius}`;
-}
-
-function formatPercent(value?: number) {
-  return value === undefined ? "--%" : `${Math.round(value)}%`;
-}
-
-function formatWind(speed?: number, direction?: number) {
-  const directionLabel = direction === undefined ? "" : ` ${toCompass(direction)}`;
-  return speed === undefined ? "--" : `${Math.round(speed)} km/h${directionLabel}`;
-}
-
-function toCompass(degrees: number) {
-  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-  return directions[Math.round(degrees / 45) % directions.length];
-}
-
-function formatHour(time: string) {
-  const date = new Date(time);
-  if (Number.isNaN(date.getTime())) {
-    return "--";
-  }
-  return new Intl.DateTimeFormat("ja-JP", { hour: "2-digit", hour12: false }).format(date);
 }
