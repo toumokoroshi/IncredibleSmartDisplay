@@ -140,7 +140,7 @@ export const dashboardConfig: DashboardConfig = {
           { label: "Home", displayMode: "home" },
           { label: "Weather", displayMode: "weather" },
           { label: "Traffic", displayMode: "traffic" },
-          { label: "News", displayMode: "news" },
+          { label: "ニュース", displayMode: "news" },
         ],
       },
     },

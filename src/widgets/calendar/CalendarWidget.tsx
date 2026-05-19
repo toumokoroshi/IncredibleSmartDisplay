@@ -1,9 +1,8 @@
-import { CalendarClock } from "lucide-react";
-
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
 import { formatScheduleLabel } from "../../utils/date";
 import type { WidgetProps } from "../../types/widget";
@@ -15,7 +14,7 @@ export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, st
       <div className="flex items-start justify-between gap-3">
         <div className="widget-heading flex items-center gap-3">
           <span className="widget-heading-icon">
-            <CalendarClock size={20} strokeWidth={1.8} />
+            <MaterialSymbolIcon name="calendar_month" />
           </span>
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>

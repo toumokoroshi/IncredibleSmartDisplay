@@ -1,9 +1,8 @@
-import { TrainFront } from "lucide-react";
-
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
 import type { WidgetProps } from "../../types/widget";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "./types";
@@ -102,7 +101,7 @@ export function TrafficWidget({ config, data, error, isEmpty, isHighlighted, sta
       <div className="flex items-start justify-between gap-3">
         <div className="widget-heading flex items-center gap-3">
           <span className="widget-heading-icon">
-            <TrainFront size={20} strokeWidth={1.8} />
+            <MaterialSymbolIcon name="train" />
           </span>
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>

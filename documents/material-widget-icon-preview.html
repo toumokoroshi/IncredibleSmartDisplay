@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Material Widget Icon Preview</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+      :root {
+        --app-bg: #f6f8fb;
+        --panel-bg: #ffffff;
+        --panel-stroke: rgba(15, 23, 42, 0.08);
+        --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+        --text: #0f172a;
+        --muted: #64748b;
+        --weather-border: #5b8def;
+        --weather-bg: #e8f0fe;
+        --weather-icon: #1a73e8;
+        --news-border: #e6a700;
+        --news-bg: #fef7e0;
+        --news-icon: #b06000;
+        --calendar-border: #5bb974;
+        --calendar-bg: #e6f4ea;
+        --calendar-icon: #188038;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        color: var(--text);
+        background: var(--app-bg);
+        font-family:
+          "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Aptos",
+          "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+      }
+
+      main {
+        width: min(1280px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 24px 0 32px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        font-size: 32px;
+        font-weight: 650;
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .material-symbols-outlined {
+        direction: ltr;
+        display: inline-block;
+        font-family: "Material Symbols Outlined";
+        font-feature-settings: "liga";
+        font-size: 24px;
+        font-style: normal;
+        font-weight: normal;
+        letter-spacing: 0;
+        line-height: 1;
+        text-transform: none;
+        white-space: nowrap;
+        -webkit-font-feature-settings: "liga";
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .panel {
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid var(--panel-stroke);
+        border-radius: 24px;
+        box-shadow: var(--panel-shadow);
+      }
+
+      .section-title {
+        margin-bottom: 12px;
+        color: #334155;
+        font-size: 16px;
+        font-weight: 850;
+      }
+
+      .options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .tile {
+        min-height: 160px;
+        padding: 16px;
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-stroke);
+        border-top: 5px solid var(--border);
+        border-radius: 18px;
+      }
+
+      .badge {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        color: var(--icon);
+        background: var(--icon-bg);
+        border: 1px solid color-mix(in srgb, var(--icon-bg) 72%, var(--icon));
+        border-radius: 999px;
+      }
+
+      .badge .material-symbols-outlined {
+        font-size: 26px;
+      }
+
+      .tile h3 {
+        margin-top: 12px;
+        font-size: 17px;
+        font-weight: 850;
+      }
+
+      .tile p {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 650;
+        line-height: 1.45;
+      }
+
+      .widget-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+        padding: 12px;
+        background: #f8fafc;
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 14px;
+      }
+
+      .widget-title {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 850;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .weather {
+        --border: var(--weather-border);
+        --icon-bg: var(--weather-bg);
+        --icon: var(--weather-icon);
+      }
+
+      .news {
+        --border: var(--news-border);
+        --icon-bg: var(--news-bg);
+        --icon: var(--news-icon);
+      }
+
+      .calendar {
+        --border: var(--calendar-border);
+        --icon-bg: var(--calendar-bg);
+        --icon: var(--calendar-icon);
+      }
+
+      @media (max-width: 900px) {
+        header,
+        .grid,
+        .options {
+          grid-template-columns: 1fr;
+        }
+
+        header {
+          align-items: start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Material Widget Icon Preview</h1>
+          <p class="note">Weather と News のWidget見出しに使う Material Symbols 候補です。</p>
+        </div>
+        <p class="note">Google Fonts web font preview</p>
+      </header>
+
+      <div class="grid">
+        <section class="panel">
+          <h2 class="section-title">Weather candidates</h2>
+          <div class="options">
+            <article class="tile weather">
+              <span class="badge"><span class="material-symbols-outlined">partly_cloudy_day</span></span>
+              <h3>partly_cloudy_day</h3>
+              <p>天気全般として最も自然。晴れと雲の両方が入り、Widget見出し向き。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">partly_cloudy_day</span></span><span class="widget-title">Weather</span></div>
+            </article>
+
+            <article class="tile weather">
+              <span class="badge"><span class="material-symbols-outlined">wb_sunny</span></span>
+              <h3>wb_sunny</h3>
+              <p>晴れの印象が強い。天気Widgetの代表としては明るく分かりやすい。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">wb_sunny</span></span><span class="widget-title">Weather</span></div>
+            </article>
+
+            <article class="tile weather">
+              <span class="badge"><span class="material-symbols-outlined">cloud</span></span>
+              <h3>cloud</h3>
+              <p>最もシンプル。小さくても読めるが、天気全般の楽しさは弱い。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">cloud</span></span><span class="widget-title">Weather</span></div>
+            </article>
+
+            <article class="tile weather">
+              <span class="badge"><span class="material-symbols-outlined">thunderstorm</span></span>
+              <h3>thunderstorm</h3>
+              <p>天気アイコンとしては強いが、通常時の見出しには注意喚起寄り。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">thunderstorm</span></span><span class="widget-title">Weather</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="section-title">News candidates</h2>
+          <div class="options">
+            <article class="tile news">
+              <span class="badge"><span class="material-symbols-outlined">newspaper</span></span>
+              <h3>newspaper</h3>
+              <p>ニュースとして最も直感的。Widget見出しの第一候補。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">newspaper</span></span><span class="widget-title">News</span></div>
+            </article>
+
+            <article class="tile news">
+              <span class="badge"><span class="material-symbols-outlined">article</span></span>
+              <h3>article</h3>
+              <p>記事・読み物の印象。ニュースより落ち着いた情報欄に見える。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">article</span></span><span class="widget-title">News</span></div>
+            </article>
+
+            <article class="tile news">
+              <span class="badge"><span class="material-symbols-outlined">breaking_news</span></span>
+              <h3>breaking_news</h3>
+              <p>速報感が強い。常時表示のWidgetには少し主張が強め。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">breaking_news</span></span><span class="widget-title">News</span></div>
+            </article>
+
+            <article class="tile news">
+              <span class="badge"><span class="material-symbols-outlined">feed</span></span>
+              <h3>feed</h3>
+              <p>情報フィード感はあるが、RSSや配信方式の印象が出やすい。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">feed</span></span><span class="widget-title">News</span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="section-title">Calendar candidates</h2>
+          <div class="options">
+            <article class="tile calendar">
+              <span class="badge"><span class="material-symbols-outlined">calendar_month</span></span>
+              <h3>calendar_month</h3>
+              <p>月間カレンダーとして最も直感的。予定Widgetの第一候補。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">calendar_month</span></span><span class="widget-title">Calendar</span></div>
+            </article>
+
+            <article class="tile calendar">
+              <span class="badge"><span class="material-symbols-outlined">calendar_today</span></span>
+              <h3>calendar_today</h3>
+              <p>今日の予定に寄る。現在日付の確認用途にも見える。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">calendar_today</span></span><span class="widget-title">Calendar</span></div>
+            </article>
+
+            <article class="tile calendar">
+              <span class="badge"><span class="material-symbols-outlined">event</span></span>
+              <h3>event</h3>
+              <p>予定・イベントの印象が強い。予定一覧Widgetに合いやすい。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">event</span></span><span class="widget-title">Calendar</span></div>
+            </article>
+
+            <article class="tile calendar">
+              <span class="badge"><span class="material-symbols-outlined">event_available</span></span>
+              <h3>event_available</h3>
+              <p>予定確認済みの印象。ステータス感が少し強い。</p>
+              <div class="widget-row"><span class="badge"><span class="material-symbols-outlined">event_available</span></span><span class="widget-title">Calendar</span></div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widget Color and Icon Preview</title>
+    <style>
+      :root {
+        --app-bg: #f6f8fb;
+        --panel-bg: #ffffff;
+        --control-bg: #f1f5f9;
+        --panel-stroke: rgba(15, 23, 42, 0.08);
+        --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+        --text: #0f172a;
+        --muted: #64748b;
+        --weather: #4285f4;
+        --calendar: #34a853;
+        --news: #fbbc05;
+        --traffic: #ea4335;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        min-height: 100vh;
+        color: var(--text);
+        background: var(--app-bg);
+        font-family:
+          "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Aptos",
+          "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+      }
+
+      main {
+        width: min(1440px, calc(100vw - 40px));
+        margin: 0 auto;
+        padding: 24px 0 32px;
+      }
+
+      header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 18px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        font-weight: 650;
+        letter-spacing: 0;
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 16px;
+      }
+
+      .panel {
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--panel-stroke);
+        border-radius: 24px;
+        box-shadow: var(--panel-shadow);
+        backdrop-filter: blur(18px);
+      }
+
+      .panel-body {
+        padding: 18px;
+      }
+
+      .section-title {
+        margin-bottom: 12px;
+        color: #334155;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .pattern-stack {
+        display: grid;
+        gap: 16px;
+      }
+
+      .pattern-header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 6px 0 12px;
+      }
+
+      .pattern-header h3 {
+        font-size: 18px;
+        font-weight: 800;
+      }
+
+      .pattern-header p {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .widget-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .widget-card {
+        min-height: 202px;
+        padding: 18px;
+        overflow: hidden;
+        background: var(--panel-bg);
+        border: 1px solid var(--panel-stroke);
+        border-top: 5px solid var(--border-accent, var(--accent));
+        border-radius: 24px;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+      }
+
+      .widget-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .icon-badge {
+        display: inline-grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        color: var(--icon-fg, #ffffff);
+        background: var(--icon-bg, var(--accent));
+        border: 1px solid color-mix(in srgb, var(--icon-bg, var(--accent)) 52%, white);
+        border-radius: 999px;
+        box-shadow: 0 10px 22px color-mix(in srgb, var(--border-accent, var(--accent)) 14%, transparent);
+      }
+
+      .icon-badge svg,
+      .icon-sample svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.9;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .eyebrow {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .primary {
+        margin-top: 18px;
+        font-size: 28px;
+        font-weight: 650;
+        line-height: 1.15;
+      }
+
+      .secondary {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.5;
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .chip {
+        min-height: 32px;
+        padding: 6px 10px;
+        color: var(--chip-fg, color-mix(in srgb, var(--accent) 75%, #0f172a));
+        background: var(--chip-bg, color-mix(in srgb, var(--accent) 14%, white));
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .icon-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .icon-option {
+        display: grid;
+        grid-template-columns: 48px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        min-height: 72px;
+        padding: 12px;
+        background: #ffffff;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 16px;
+      }
+
+      .icon-sample {
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        color: #ffffff;
+        background: var(--traffic);
+        border-radius: 999px;
+        box-shadow: 0 10px 22px rgba(234, 67, 53, 0.14);
+      }
+
+      .icon-name {
+        font-size: 17px;
+        font-weight: 800;
+      }
+
+      .icon-desc {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.4;
+      }
+
+      .tag {
+        padding: 6px 9px;
+        color: #334155;
+        background: var(--control-bg);
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .tag.recommended {
+        color: #991b1b;
+        background: #fee2e2;
+      }
+
+      .palette-grid {
+        display: grid;
+        gap: 14px;
+        margin-top: 16px;
+      }
+
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .swatch {
+        padding: 12px;
+        background: #ffffff;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 16px;
+      }
+
+      .swatch-color {
+        height: 42px;
+        margin-bottom: 10px;
+        background: var(--accent);
+        border-radius: 10px;
+      }
+
+      .swatch strong {
+        display: block;
+        font-size: 14px;
+      }
+
+      .swatch span {
+        display: block;
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .compact-grid .widget-card {
+        min-height: 168px;
+      }
+
+      .compact-grid .primary {
+        margin-top: 14px;
+        font-size: 22px;
+      }
+
+      .compact-grid .secondary {
+        font-size: 13px;
+      }
+
+      @media (max-width: 960px) {
+        .board,
+        .widget-grid,
+        .swatches,
+        .pattern-header {
+          grid-template-columns: 1fr;
+        }
+
+        header {
+          align-items: start;
+          flex-direction: column;
+        }
+
+        .pattern-header {
+          align-items: start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Widget Color and Icon Preview</h1>
+          <p class="note">カード端の色と交通アイコン候補の静的確認用。アプリ本体には未反映です。</p>
+        </div>
+        <p class="note">Target: 12.4 inch landscape / light dashboard style</p>
+      </header>
+
+      <div class="board">
+        <section class="panel">
+          <div class="panel-body">
+            <h2 class="section-title">Widget color proposal</h2>
+            <div class="pattern-stack">
+              <section>
+                <div class="pattern-header">
+                  <div>
+                    <h3>Pattern A: Google primary colors</h3>
+                    <p>ロゴ色に近い。識別性は高いが、カードUIではやや信号色っぽく見える。</p>
+                  </div>
+                  <p>Current reference</p>
+                </div>
+                <div class="widget-grid compact-grid">
+                  <article class="widget-card" style="--accent: var(--weather)">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M20 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"></path><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"></path></svg></span>
+                      <p class="eyebrow">Weather</p>
+                    </div>
+                    <p class="primary">26℃ / Sunny</p>
+                    <p class="secondary">#4285F4 / solid icon</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: var(--calendar)">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg></span>
+                      <p class="eyebrow">Calendar</p>
+                    </div>
+                    <p class="primary">今日の予定</p>
+                    <p class="secondary">#34A853 / solid icon</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: var(--news); --icon-fg: #1f2937">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M15 18h-5"></path><path d="M18 14h-8"></path><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"></path><rect width="8" height="4" x="10" y="6" rx="1"></rect></svg></span>
+                      <p class="eyebrow">News</p>
+                    </div>
+                    <p class="primary">主要ニュース</p>
+                    <p class="secondary">#FBBC05 / solid icon</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: var(--traffic)">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M2 22V12a10 10 0 1 1 20 0v10"></path><path d="M15 6.8v1.4a3 2.8 0 1 1-6 0V6.8"></path><path d="M10 15h.01"></path><path d="M14 15h.01"></path><path d="M10 19a4 4 0 0 1-4-4v-3a6 6 0 1 1 12 0v3a4 4 0 0 1-4 4Z"></path><path d="m9 19-2 3"></path><path d="m15 19 2 3"></path></svg></span>
+                      <p class="eyebrow">Traffic</p>
+                    </div>
+                    <p class="primary">運行状況</p>
+                    <p class="secondary">#EA4335 / solid icon</p>
+                  </article>
+                </div>
+              </section>
+
+              <section>
+                <div class="pattern-header">
+                  <div>
+                    <h3>Pattern B: Tonal flat colors</h3>
+                    <p>カード端は中彩度、アイコン背景は淡色、線だけ濃色。Google Workspace / Material You寄り。</p>
+                  </div>
+                  <p>Recommended</p>
+                </div>
+                <div class="widget-grid compact-grid">
+                  <article class="widget-card" style="--accent: #5b8def; --border-accent: #5b8def; --icon-bg: #e8f0fe; --icon-fg: #1a73e8; --chip-bg: #e8f0fe; --chip-fg: #1a73e8">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M20 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"></path><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"></path></svg></span>
+                      <p class="eyebrow">Weather</p>
+                    </div>
+                    <p class="primary">26℃ / Sunny</p>
+                    <p class="secondary">border #5B8DEF / icon bg #E8F0FE / icon #1A73E8</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: #5bb974; --border-accent: #5bb974; --icon-bg: #e6f4ea; --icon-fg: #188038; --chip-bg: #e6f4ea; --chip-fg: #188038">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg></span>
+                      <p class="eyebrow">Calendar</p>
+                    </div>
+                    <p class="primary">今日の予定</p>
+                    <p class="secondary">border #5BB974 / icon bg #E6F4EA / icon #188038</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: #e6a700; --border-accent: #e6a700; --icon-bg: #fef7e0; --icon-fg: #b06000; --chip-bg: #fef7e0; --chip-fg: #b06000">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M15 18h-5"></path><path d="M18 14h-8"></path><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"></path><rect width="8" height="4" x="10" y="6" rx="1"></rect></svg></span>
+                      <p class="eyebrow">News</p>
+                    </div>
+                    <p class="primary">主要ニュース</p>
+                    <p class="secondary">border #E6A700 / icon bg #FEF7E0 / icon #B06000</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: #e57368; --border-accent: #e57368; --icon-bg: #fce8e6; --icon-fg: #c5221f; --chip-bg: #fce8e6; --chip-fg: #c5221f">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M2 22V12a10 10 0 1 1 20 0v10"></path><path d="M15 6.8v1.4a3 2.8 0 1 1-6 0V6.8"></path><path d="M10 15h.01"></path><path d="M14 15h.01"></path><path d="M10 19a4 4 0 0 1-4-4v-3a6 6 0 1 1 12 0v3a4 4 0 0 1-4 4Z"></path><path d="m9 19-2 3"></path><path d="m15 19 2 3"></path></svg></span>
+                      <p class="eyebrow">Traffic</p>
+                    </div>
+                    <p class="primary">運行状況</p>
+                    <p class="secondary">border #E57368 / icon bg #FCE8E6 / icon #C5221F</p>
+                  </article>
+                </div>
+              </section>
+
+              <section>
+                <div class="pattern-header">
+                  <div>
+                    <h3>Pattern C: Soft border colors</h3>
+                    <p>カード端まで淡色。最もフラットで軽いが、Widget識別はやや弱い。</p>
+                  </div>
+                  <p>Subtle option</p>
+                </div>
+                <div class="widget-grid compact-grid">
+                  <article class="widget-card" style="--accent: #1a73e8; --border-accent: #d2e3fc; --icon-bg: #e8f0fe; --icon-fg: #1a73e8; --chip-bg: #e8f0fe; --chip-fg: #1a73e8">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M12 2v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="M20 12h2"></path><path d="m19.07 4.93-1.41 1.41"></path><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"></path><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"></path></svg></span>
+                      <p class="eyebrow">Weather</p>
+                    </div>
+                    <p class="primary">26℃ / Sunny</p>
+                    <p class="secondary">border #D2E3FC / icon #1A73E8</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: #188038; --border-accent: #ceead6; --icon-bg: #e6f4ea; --icon-fg: #188038; --chip-bg: #e6f4ea; --chip-fg: #188038">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg></span>
+                      <p class="eyebrow">Calendar</p>
+                    </div>
+                    <p class="primary">今日の予定</p>
+                    <p class="secondary">border #CEEAD6 / icon #188038</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: #b06000; --border-accent: #feefc3; --icon-bg: #fef7e0; --icon-fg: #b06000; --chip-bg: #fef7e0; --chip-fg: #b06000">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M15 18h-5"></path><path d="M18 14h-8"></path><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"></path><rect width="8" height="4" x="10" y="6" rx="1"></rect></svg></span>
+                      <p class="eyebrow">News</p>
+                    </div>
+                    <p class="primary">主要ニュース</p>
+                    <p class="secondary">border #FEEFC3 / icon #B06000</p>
+                  </article>
+
+                  <article class="widget-card" style="--accent: #c5221f; --border-accent: #fad2cf; --icon-bg: #fce8e6; --icon-fg: #c5221f; --chip-bg: #fce8e6; --chip-fg: #c5221f">
+                    <div class="widget-heading">
+                      <span class="icon-badge"><svg viewBox="0 0 24 24"><path d="M2 22V12a10 10 0 1 1 20 0v10"></path><path d="M15 6.8v1.4a3 2.8 0 1 1-6 0V6.8"></path><path d="M10 15h.01"></path><path d="M14 15h.01"></path><path d="M10 19a4 4 0 0 1-4-4v-3a6 6 0 1 1 12 0v3a4 4 0 0 1-4 4Z"></path><path d="m9 19-2 3"></path><path d="m15 19 2 3"></path></svg></span>
+                      <p class="eyebrow">Traffic</p>
+                    </div>
+                    <p class="primary">運行状況</p>
+                    <p class="secondary">border #FAD2CF / icon #C5221F</p>
+                  </article>
+                </div>
+              </section>
+            </div>
+
+            <div class="palette-grid">
+              <h2 class="section-title">Palette swatches</h2>
+              <div class="swatches">
+                <div class="swatch" style="--accent: #5b8def"><div class="swatch-color"></div><strong>Weather tonal</strong><span>#5B8DEF</span></div>
+                <div class="swatch" style="--accent: #5bb974"><div class="swatch-color"></div><strong>Calendar tonal</strong><span>#5BB974</span></div>
+                <div class="swatch" style="--accent: #e6a700"><div class="swatch-color"></div><strong>News tonal</strong><span>#E6A700</span></div>
+                <div class="swatch" style="--accent: #e57368"><div class="swatch-color"></div><strong>Traffic tonal</strong><span>#E57368</span></div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <aside class="panel">
+          <div class="panel-body">
+            <h2 class="section-title">Rail icon options</h2>
+            <div class="icon-list">
+              <article class="icon-option">
+                <span class="icon-sample"><svg viewBox="0 0 24 24"><path d="M2 22V12a10 10 0 1 1 20 0v10"></path><path d="M15 6.8v1.4a3 2.8 0 1 1-6 0V6.8"></path><path d="M10 15h.01"></path><path d="M14 15h.01"></path><path d="M10 19a4 4 0 0 1-4-4v-3a6 6 0 1 1 12 0v3a4 4 0 0 1-4 4Z"></path><path d="m9 19-2 3"></path><path d="m15 19 2 3"></path></svg></span>
+                <div><h3 class="icon-name">TrainFrontTunnel</h3><p class="icon-desc">駅・地下鉄・都市交通の印象が強い。今回の最有力候補。</p></div>
+                <span class="tag recommended">Recommended</span>
+              </article>
+
+              <article class="icon-option">
+                <span class="icon-sample"><svg viewBox="0 0 24 24"><path d="M5 15h14"></path><path d="M5 9h14"></path><path d="m14 20-5-5 6-6-5-5"></path></svg></span>
+                <div><h3 class="icon-name">RailSymbol</h3><p class="icon-desc">小さい表示でも記号として読みやすい。最もシンプル。</p></div>
+                <span class="tag">Clean</span>
+              </article>
+
+              <article class="icon-option">
+                <span class="icon-sample"><svg viewBox="0 0 24 24"><path d="M8 3.1V7a4 4 0 0 0 8 0V3.1"></path><path d="m9 15-1-1"></path><path d="m15 15 1-1"></path><path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5Z"></path><path d="m8 19-2 3"></path><path d="m16 19 2 3"></path></svg></span>
+                <div><h3 class="icon-name">TrainFront</h3><p class="icon-desc">現在案。電車であることは明快だが、少し一般的。</p></div>
+                <span class="tag">Current</span>
+              </article>
+
+              <article class="icon-option">
+                <span class="icon-sample"><svg viewBox="0 0 24 24"><path d="M2 17 17 2"></path><path d="m2 14 8 8"></path><path d="m5 11 8 8"></path><path d="m8 8 8 8"></path><path d="m11 5 8 8"></path><path d="m14 2 8 8"></path><path d="M7 22 22 7"></path></svg></span>
+                <div><h3 class="icon-name">TrainTrack</h3><p class="icon-desc">路線や線路の状態を見る印象。運行情報にはやや抽象的。</p></div>
+                <span class="tag">Route</span>
+              </article>
+
+              <article class="icon-option">
+                <span class="icon-sample"><svg viewBox="0 0 24 24"><rect width="16" height="16" x="4" y="3" rx="2"></rect><path d="M4 11h16"></path><path d="M12 3v8"></path><path d="m8 19-2 3"></path><path d="m18 22-2-3"></path><path d="M8 15h.01"></path><path d="M16 15h.01"></path></svg></span>
+                <div><h3 class="icon-name">TramFront</h3><p class="icon-desc">路面電車寄り。東京のJR/メトロ中心だと少しズレる。</p></div>
+                <span class="tag">Tram</span>
+              </article>
+
+              <article class="icon-option">
+                <span class="icon-sample"><svg viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"></circle><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path><circle cx="18" cy="5" r="3"></circle></svg></span>
+                <div><h3 class="icon-name">Route</h3><p class="icon-desc">鉄道以外も含む経路アイコン。将来バスや道路を混ぜるならあり。</p></div>
+                <span class="tag">General</span>
+              </article>
+
+              <article class="icon-option">
+                <span class="icon-sample"><svg viewBox="0 0 24 24"><path d="M16.05 10.966a5 2.5 0 0 1-8.1 0"></path><path d="m16.923 14.049 4.48 2.04a1 1 0 0 1 .001 1.831l-8.574 3.9a2 2 0 0 1-1.66 0l-8.574-3.91a1 1 0 0 1 0-1.83l4.484-2.04"></path><path d="M16.949 14.14a5 2.5 0 1 1-9.9 0L10.063 3.5a2 2 0 0 1 3.874 0z"></path><path d="M9.194 6.57a5 2.5 0 0 0 5.61 0"></path></svg></span>
+                <div><h3 class="icon-name">TrafficCone</h3><p class="icon-desc">道路工事の印象が強い。鉄道運行状況には不向き。</p></div>
+                <span class="tag">Road</span>
+              </article>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>

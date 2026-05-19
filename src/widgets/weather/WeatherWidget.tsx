@@ -1,10 +1,11 @@
-import { CloudSun, Droplets, Navigation, Umbrella } from "lucide-react";
+import { Droplets, Navigation, Umbrella } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
 import type { WidgetProps } from "../../types/widget";
 import type { WeatherDailySummary, WeatherData, WeatherDisplayCondition, WeatherHourlyPoint, WeatherInsight, WeatherModifier, WeatherSettings, WeatherSunEventPoint, WeatherTimelinePoint } from "./types";
@@ -22,7 +23,7 @@ export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, sta
       <div className="shrink-0 flex items-start justify-between gap-3">
         <div className="widget-heading flex items-center gap-3">
           <span className="widget-heading-icon">
-            <CloudSun size={20} strokeWidth={1.8} />
+            <MaterialSymbolIcon name="partly_cloudy_day" />
           </span>
           <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>

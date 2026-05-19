@@ -12,7 +12,7 @@ describe("dashboard integration", () => {
     expect(screen.getByText("Last Sync")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Weather" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Traffic" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "News" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "ニュース" })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Traffic" }));
     expect(screen.getByRole("button", { name: "Traffic" })).toHaveAttribute("aria-pressed", "true");

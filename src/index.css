@@ -256,6 +256,19 @@ body {
   box-shadow: var(--heading-icon-shadow);
 }
 
+.material-symbol-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-color: currentcolor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
 .weather-hero-icon {
   color: var(--weather-icon-color);
 }
@@ -269,15 +282,15 @@ body {
 
 .widget-weather .widget-card {
   padding: 2rem;
-  border-top: 5px solid rgba(66, 133, 244, 0.42);
+  border-top: 5px solid #5b8def;
 }
 
 .widget-calendar .widget-card {
-  border-top: 5px solid rgba(52, 168, 83, 0.36);
+  border-top: 5px solid #5bb974;
 }
 
 .widget-news .widget-card {
-  border-top: 5px solid rgba(251, 188, 5, 0.42);
+  border-top: 5px solid #e6a700;
 }
 
 .widget-stocks .widget-card {
@@ -285,16 +298,25 @@ body {
 }
 
 .widget-traffic .widget-card {
-  border-top: 5px solid rgba(234, 67, 53, 0.34);
+  border-top: 5px solid #e57368;
+}
+
+.widget-weather .widget-heading-icon {
+  color: #1a73e8;
+  background: #e8f0fe;
+  border-color: #d2e3fc;
 }
 
 .widget-calendar .widget-heading-icon {
-  background: #34a853;
+  color: #188038;
+  background: #e6f4ea;
+  border-color: #ceead6;
 }
 
 .widget-news .widget-heading-icon {
-  color: #1f2937;
-  background: #fbbc05;
+  color: #b06000;
+  background: #fef7e0;
+  border-color: #feefc3;
 }
 
 .widget-stocks .widget-heading-icon {
@@ -302,7 +324,9 @@ body {
 }
 
 .widget-traffic .widget-heading-icon {
-  background: #ea4335;
+  color: #c5221f;
+  background: #fce8e6;
+  border-color: #fad2cf;
 }
 
 .widget-traffic .traffic-card-compact {
