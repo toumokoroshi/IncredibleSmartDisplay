@@ -63,7 +63,7 @@ body {
   grid-template-rows: 14fr 38fr 38fr 10fr;
   grid-template-areas:
     "header header header"
-    "weather calendar stocks"
+    "weather calendar traffic"
     "weather news news"
     "quick quick quick";
   gap: 1rem;
@@ -112,6 +112,10 @@ body {
 
 .widget-stocks {
   grid-area: stocks;
+}
+
+.widget-traffic {
+  grid-area: traffic;
 }
 
 .widget-news {
@@ -280,6 +284,10 @@ body {
   border-top: 5px solid rgba(66, 133, 244, 0.28);
 }
 
+.widget-traffic .widget-card {
+  border-top: 5px solid rgba(234, 67, 53, 0.34);
+}
+
 .widget-calendar .widget-heading-icon {
   background: #34a853;
 }
@@ -291,6 +299,18 @@ body {
 
 .widget-stocks .widget-heading-icon {
   background: #4285f4;
+}
+
+.widget-traffic .widget-heading-icon {
+  background: #ea4335;
+}
+
+.widget-traffic .traffic-card-compact {
+  padding: 1rem;
+}
+
+.widget-traffic .traffic-detail-card {
+  padding: 1.25rem;
 }
 
 .widget-weather .text-5xl {

@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 import type { ZodType } from "zod";
 
 export type WidgetId = string;
-export type WidgetType = "header" | "weather" | "calendar" | "stocks" | "news" | "quickArea";
+export type WidgetType = "header" | "weather" | "calendar" | "stocks" | "news" | "traffic" | "quickArea";
 export type WidgetSize = "small" | "medium" | "large" | "wide";
 export type DashboardArea =
   | "header"

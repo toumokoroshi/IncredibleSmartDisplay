@@ -13,7 +13,7 @@ export function QuickAreaWidget({ config }: WidgetProps<QuickAreaSettings, unkno
     <Card className="flex items-center gap-3 px-5 py-3">
       {/* Keep this as a thin command bar. Later these buttons should dispatch DashboardCommand objects so touch UI, Alexa, and webhooks share the same command path. */}
       <p className="min-w-16 text-xs uppercase tracking-[0.2em] text-slate-500">{config.title}</p>
-      <div className="grid flex-1 grid-cols-5 gap-3">
+      <div className="grid flex-1 gap-3" style={{ gridTemplateColumns: `repeat(${Math.max(buttons.length, 1)}, minmax(0, 1fr))` }}>
         {buttons.map((button) => (
           <button
             key={button.label}

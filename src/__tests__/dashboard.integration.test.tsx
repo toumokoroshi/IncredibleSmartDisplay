@@ -11,12 +11,12 @@ describe("dashboard integration", () => {
     expect(await screen.findByText(/Tokyo/)).toBeInTheDocument();
     expect(screen.getByText("Last Sync")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Weather" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Calendar" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Traffic" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "News" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Markets" })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "Weather" }));
-    expect(screen.getByRole("button", { name: "Weather" })).toHaveAttribute("aria-pressed", "true");
-    expect(await screen.findByText("Tomorrow")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Traffic" }));
+    expect(screen.getByRole("button", { name: "Traffic" })).toHaveAttribute("aria-pressed", "true");
+    expect(await screen.findByText(/遅延 2\/8/)).toBeInTheDocument();
+    expect(screen.getByText(/通常 6\/8/)).toBeInTheDocument();
   });
 });

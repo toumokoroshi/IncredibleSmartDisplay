@@ -6,7 +6,7 @@ export const quickAreaSettingsSchema = z.object({
   buttons: z.array(
     z.object({
       label: z.string(),
-      displayMode: z.enum(["home", "weather", "calendar", "news", "stocks", "smartHome", "system"]),
+      displayMode: z.enum(["home", "weather", "calendar", "news", "traffic", "stocks", "smartHome", "system"]),
     }),
   ),
 });

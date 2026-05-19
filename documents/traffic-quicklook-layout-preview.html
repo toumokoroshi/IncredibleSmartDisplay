@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Traffic Quick Look Layout Preview</title>
+    <style>
+      :root {
+        --app-bg: #edf1f7;
+        --panel-bg: rgba(255, 255, 255, 0.86);
+        --panel-stroke: #d8e0ea;
+        --panel-shadow: 0 18px 36px rgba(15, 23, 42, 0.09);
+        --control-bg: #eef3f9;
+        --radius-card: 24px;
+        --blue: #4285f4;
+        --green: #34a853;
+        --yellow: #fbbc05;
+        --red: #ea4335;
+        color: #0f172a;
+        font-family:
+          "Google Sans", "Noto Sans JP", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--app-bg);
+      }
+
+      .page {
+        padding: 20px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 22px;
+        line-height: 1.25;
+      }
+
+      h2 {
+        margin: 24px 0 12px;
+        font-size: 18px;
+      }
+
+      .note {
+        max-width: 920px;
+        margin: 0 0 18px;
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        width: 1500px;
+        height: 820px;
+        grid-template-columns: 1.45fr 0.95fr 0.82fr;
+        grid-template-rows: 14fr 38fr 38fr 10fr;
+        grid-template-areas:
+          "header header header"
+          "weather calendar traffic"
+          "weather news news"
+          "quick quick quick";
+        gap: 1rem;
+        margin-bottom: 28px;
+      }
+
+      .card {
+        overflow: hidden;
+        border: 1px solid var(--panel-stroke);
+        border-radius: var(--radius-card);
+        background: var(--panel-bg);
+        box-shadow: var(--panel-shadow);
+      }
+
+      .header {
+        grid-area: header;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 24px;
+        background:
+          linear-gradient(90deg, rgba(66, 133, 244, 0.1), transparent 26%),
+          radial-gradient(circle at 92% 16%, rgba(251, 188, 5, 0.16), transparent 20%),
+          var(--panel-bg);
+      }
+
+      .clock {
+        margin: 0;
+        font-size: 48px;
+        font-weight: 650;
+        line-height: 1;
+      }
+
+      .meta-line {
+        margin: 8px 0 0;
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .status {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+        text-align: right;
+      }
+
+      .pill {
+        min-width: 112px;
+        padding: 8px 12px;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 14px;
+        background: var(--control-bg);
+      }
+
+      .pill span {
+        display: block;
+        color: #334155;
+        font-size: 15px;
+      }
+
+      .pill strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 15px;
+      }
+
+      .placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        color: #334155;
+        font-size: 22px;
+        font-weight: 650;
+      }
+
+      .weather {
+        grid-area: weather;
+      }
+
+      .calendar {
+        grid-area: calendar;
+      }
+
+      .news {
+        grid-area: news;
+      }
+
+      .traffic {
+        grid-area: traffic;
+      }
+
+      .traffic-card {
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        padding: 16px;
+        border-top: 5px solid rgba(234, 67, 53, 0.34);
+      }
+
+      .widget-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .heading-left {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .widget-heading-icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--red);
+        color: #fff;
+        font-size: 21px;
+        font-weight: 800;
+        box-shadow: 0 10px 22px rgba(234, 67, 53, 0.16);
+      }
+
+      .widget-title {
+        color: #64748b;
+        font-size: 14px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .update-time {
+        flex: 0 0 auto;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .traffic-compact-summary {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 10px;
+        padding-bottom: 7px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      }
+
+      .traffic-compact-summary strong {
+        color: #0f172a;
+        font-size: 21px;
+        line-height: 1;
+      }
+
+      .traffic-compact-summary span {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .traffic-compact-summary .warn {
+        color: #b3261e;
+      }
+
+      .traffic-compact-summary .ok {
+        color: #137333;
+      }
+
+      .compact-line-list {
+        display: grid;
+        min-height: 0;
+        gap: 0;
+        margin: 4px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .compact-list-header,
+      .compact-line-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 48px 58px;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .compact-list-header {
+        padding: 6px 0 2px;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+      }
+
+      .compact-list-header span:nth-child(2),
+      .compact-list-header span:nth-child(3) {
+        text-align: center;
+      }
+
+      .compact-line-item {
+        min-height: 22px;
+        padding: 2px 0;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+      }
+
+      .compact-line-name {
+        overflow: hidden;
+        margin: 0;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 500;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .compact-line-meta {
+        overflow: hidden;
+        margin: 2px 0 0;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 650;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .compact-line-meta.hidden {
+        display: none;
+      }
+
+      .compact-updated {
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .compact-status {
+        min-width: 58px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .compact-status.ok {
+        background: rgba(52, 168, 83, 0.12);
+        color: #137333;
+      }
+
+      .compact-status.warn {
+        background: rgba(234, 67, 53, 0.12);
+        color: #b3261e;
+      }
+
+      .compact-status.caution {
+        background: rgba(251, 188, 5, 0.2);
+        color: #8a5a00;
+      }
+
+      .compact-status.stale {
+        background: rgba(100, 116, 139, 0.14);
+        color: #475569;
+      }
+
+      .traffic-footer {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: auto;
+        padding-top: 14px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .traffic-footer strong {
+        color: #334155;
+      }
+
+      .quick {
+        grid-area: quick;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px;
+      }
+
+      .quick button {
+        flex: 1;
+        height: 44px;
+        border: 1px solid #d8e0ea;
+        border-radius: 8px;
+        background: #eef3f9;
+        color: #334155;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .quick .active {
+        border-color: rgba(66, 133, 244, 0.34);
+        background: #e8f0fe;
+        color: #0f172a;
+      }
+
+      .alternatives {
+        display: grid;
+        width: 1500px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      .mini-card {
+        min-height: 320px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1>Traffic Quick Look Preview</h1>
+      <p class="note">
+        登録路線の運行状況だけを対象にしたクイックルック案。クイックルックでは「異常があるか」「どの路線か」「いつ更新されたか」に絞り、影響区間や理由は詳細ページに回す想定。
+      </p>
+
+      <h2>Dashboard slot: compact status list</h2>
+      <section class="dashboard-grid">
+        <header class="card header">
+          <div>
+            <p class="clock">07:42</p>
+            <p class="meta-line">Tue, May 19 / Tokyo</p>
+          </div>
+          <div class="status">
+            <div class="pill"><span>Online</span><strong>Connected</strong></div>
+            <div class="pill"><span>Last Sync</span><strong>Just now</strong></div>
+          </div>
+        </header>
+
+        <article class="card placeholder weather">Weather</article>
+        <article class="card placeholder calendar">Calendar</article>
+        <article class="card traffic traffic-card">
+          <div class="widget-heading">
+            <div class="heading-left">
+              <span class="widget-heading-icon">T</span>
+              <span class="widget-title">Traffic</span>
+            </div>
+            <span class="update-time">07:40</span>
+          </div>
+
+          <div class="traffic-compact-summary">
+            <strong class="warn">遅延 2/8</strong>
+            <span>通常 6/8</span>
+          </div>
+
+          <div class="compact-list-header"><span>路線</span><span>更新</span><span>状態</span></div>
+          <ul class="compact-line-list">
+            <li class="compact-line-item">
+              <div>
+                <p class="compact-line-name">中央線快速</p>
+                <p class="compact-line-meta hidden">三鷹から東京方面</p>
+              </div>
+              <span class="compact-updated">07:38</span>
+              <span class="compact-status warn">+12</span>
+            </li>
+            <li class="compact-line-item">
+              <div>
+                <p class="compact-line-name">東京メトロ東西線</p>
+                <p class="compact-line-meta hidden">一部列車</p>
+              </div>
+              <span class="compact-updated">07:35</span>
+              <span class="compact-status caution">一部</span>
+            </li>
+            <li class="compact-line-item">
+              <div>
+                <p class="compact-line-name">山手線</p>
+                <p class="compact-line-meta hidden">内回り・外回り</p>
+              </div>
+              <span class="compact-updated">07:40</span>
+              <span class="compact-status ok">OK</span>
+            </li>
+            <li class="compact-line-item">
+              <div>
+                <p class="compact-line-name">総武線各駅停車</p>
+                <p class="compact-line-meta hidden">三鷹から千葉</p>
+              </div>
+              <span class="compact-updated">07:40</span>
+              <span class="compact-status ok">OK</span>
+            </li>
+            <li class="compact-line-item">
+              <div>
+                <p class="compact-line-name">丸ノ内線</p>
+                <p class="compact-line-meta hidden">荻窪から池袋</p>
+              </div>
+              <span class="compact-updated">07:39</span>
+              <span class="compact-status ok">OK</span>
+            </li>
+            <li class="compact-line-item">
+              <div>
+                <p class="compact-line-name">銀座線</p>
+                <p class="compact-line-meta hidden">渋谷から浅草</p>
+              </div>
+              <span class="compact-updated">07:39</span>
+              <span class="compact-status ok">OK</span>
+            </li>
+            <li class="compact-line-item">
+              <div>
+                <p class="compact-line-name">京王線</p>
+                <p class="compact-line-meta hidden">新宿から京王八王子</p>
+              </div>
+              <span class="compact-updated">07:36</span>
+              <span class="compact-status ok">OK</span>
+            </li>
+            <li class="compact-line-item">
+              <div>
+                <p class="compact-line-name">京王井の頭線</p>
+                <p class="compact-line-meta hidden">渋谷から吉祥寺</p>
+              </div>
+              <span class="compact-updated">07:36</span>
+              <span class="compact-status ok">OK</span>
+            </li>
+          </ul>
+
+          <div class="traffic-footer">
+            <span>JR東日本 / 東京メトロ</span>
+            <strong>詳細</strong>
+          </div>
+        </article>
+        <article class="card placeholder news">News</article>
+        <nav class="card quick">
+          <button>Home</button>
+          <button>Weather</button>
+          <button class="active">Traffic</button>
+          <button>News</button>
+        </nav>
+      </section>
+
+      <h2>State variants</h2>
+      <section class="alternatives">
+        <article class="card traffic-card mini-card">
+          <div class="widget-heading">
+            <div class="heading-left">
+              <span class="widget-heading-icon">T</span>
+              <span class="widget-title">Traffic</span>
+            </div>
+            <span class="update-time">07:40</span>
+          </div>
+          <div class="traffic-compact-summary">
+            <strong class="ok">通常 8/8</strong>
+            <span>異常 0/8</span>
+          </div>
+          <div class="compact-list-header"><span>路線</span><span>更新</span><span>状態</span></div>
+          <ul class="compact-line-list">
+            <li class="compact-line-item"><div><p class="compact-line-name">中央線快速</p><p class="compact-line-meta hidden">東京から高尾</p></div><span class="compact-updated">07:40</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">山手線</p><p class="compact-line-meta hidden">内回り・外回り</p></div><span class="compact-updated">07:40</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">東京メトロ東西線</p><p class="compact-line-meta hidden">中野から西船橋</p></div><span class="compact-updated">07:39</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">総武線各駅停車</p><p class="compact-line-meta hidden">三鷹から千葉</p></div><span class="compact-updated">07:39</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">丸ノ内線</p><p class="compact-line-meta hidden">荻窪から池袋</p></div><span class="compact-updated">07:38</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">銀座線</p><p class="compact-line-meta hidden">渋谷から浅草</p></div><span class="compact-updated">07:38</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">京王線</p><p class="compact-line-meta hidden">新宿から京王八王子</p></div><span class="compact-updated">07:37</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">京王井の頭線</p><p class="compact-line-meta hidden">渋谷から吉祥寺</p></div><span class="compact-updated">07:37</span><span class="compact-status ok">OK</span></li>
+          </ul>
+          <div class="traffic-footer"><span>登録路線のみ</span><strong>07:40更新</strong></div>
+        </article>
+
+        <article class="card traffic-card mini-card">
+          <div class="widget-heading">
+            <div class="heading-left">
+              <span class="widget-heading-icon">T</span>
+              <span class="widget-title">Traffic</span>
+            </div>
+            <span class="update-time">07:40</span>
+          </div>
+          <div class="traffic-compact-summary">
+            <strong class="warn">見合わせ 2/8</strong>
+            <span>通常 6/8</span>
+          </div>
+          <div class="compact-list-header"><span>路線</span><span>更新</span><span>状態</span></div>
+          <ul class="compact-line-list">
+            <li class="compact-line-item"><div><p class="compact-line-name">総武線各駅停車</p><p class="compact-line-meta hidden">復旧見込み 08:20</p></div><span class="compact-updated">07:39</span><span class="compact-status warn">停止</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">中央線快速</p><p class="compact-line-meta hidden">振替輸送あり</p></div><span class="compact-updated">07:38</span><span class="compact-status caution">遅延</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">山手線</p><p class="compact-line-meta hidden">内回り・外回り</p></div><span class="compact-updated">07:40</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">東京メトロ東西線</p><p class="compact-line-meta hidden">中野から西船橋</p></div><span class="compact-updated">07:39</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">丸ノ内線</p><p class="compact-line-meta hidden">荻窪から池袋</p></div><span class="compact-updated">07:38</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">銀座線</p><p class="compact-line-meta hidden">渋谷から浅草</p></div><span class="compact-updated">07:38</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">京王線</p><p class="compact-line-meta hidden">新宿から京王八王子</p></div><span class="compact-updated">07:37</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">京王井の頭線</p><p class="compact-line-meta hidden">渋谷から吉祥寺</p></div><span class="compact-updated">07:37</span><span class="compact-status ok">OK</span></li>
+          </ul>
+          <div class="traffic-footer"><span>影響順で表示</span><strong>詳細</strong></div>
+        </article>
+
+        <article class="card traffic-card mini-card">
+          <div class="widget-heading">
+            <div class="heading-left">
+              <span class="widget-heading-icon">T</span>
+              <span class="widget-title">Traffic</span>
+            </div>
+            <span class="update-time">07:18</span>
+          </div>
+          <div class="traffic-compact-summary">
+            <strong>情報が古い</strong>
+            <span>22分前</span>
+          </div>
+          <div class="compact-list-header"><span>路線</span><span>更新</span><span>状態</span></div>
+          <ul class="compact-line-list">
+            <li class="compact-line-item"><div><p class="compact-line-name">中央線快速</p><p class="compact-line-meta hidden">前回取得時点</p></div><span class="compact-updated">07:18</span><span class="compact-status stale">確認</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">山手線</p><p class="compact-line-meta hidden">前回取得時点</p></div><span class="compact-updated">07:18</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">東京メトロ東西線</p><p class="compact-line-meta hidden">前回取得時点</p></div><span class="compact-updated">07:18</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">総武線各駅停車</p><p class="compact-line-meta hidden">前回取得時点</p></div><span class="compact-updated">07:18</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">丸ノ内線</p><p class="compact-line-meta hidden">前回取得時点</p></div><span class="compact-updated">07:18</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">銀座線</p><p class="compact-line-meta hidden">前回取得時点</p></div><span class="compact-updated">07:18</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">京王線</p><p class="compact-line-meta hidden">前回取得時点</p></div><span class="compact-updated">07:18</span><span class="compact-status ok">OK</span></li>
+            <li class="compact-line-item"><div><p class="compact-line-name">京王井の頭線</p><p class="compact-line-meta hidden">前回取得時点</p></div><span class="compact-updated">07:18</span><span class="compact-status ok">OK</span></li>
+          </ul>
+          <div class="traffic-footer"><span>stale state</span><strong>22分前</strong></div>
+        </article>
+      </section>
+    </div>
+  </body>
+</html>

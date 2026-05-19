@@ -15,6 +15,8 @@ function getTtlHours(widgetType: string) {
     case "stocks":
     case "news":
       return 12;
+    case "traffic":
+      return 1;
     default:
       return 6;
   }
@@ -51,7 +53,8 @@ export function useWidgetData(
 
   const data = query.data ?? cache?.data;
   const items = data && typeof data === "object" ? (data as { items?: unknown[] }).items : undefined;
-  const isEmpty = Array.isArray(items) ? items.length === 0 : false;
+  const lines = data && typeof data === "object" ? (data as { lines?: unknown[] }).lines : undefined;
+  const isEmpty = Array.isArray(items) ? items.length === 0 : Array.isArray(lines) ? lines.length === 0 : false;
 
   let status: WidgetStatus;
   if (query.isFetched === false && query.isPending === true && cache?.data === undefined) {

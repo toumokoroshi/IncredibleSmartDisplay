@@ -3,6 +3,7 @@ export type DisplayMode =
   | "weather"
   | "calendar"
   | "news"
+  | "traffic"
   | "stocks"
   | "smartHome"
   | "system";
