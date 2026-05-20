@@ -33,6 +33,8 @@
 - `calendar`: CalendarWidgetを主表示し、他Widgetは縮小表示または非表示にできる
 - `news`: NewsWidgetを主表示し、他Widgetは縮小表示または非表示にできる
 - `stocks`: StocksWidgetを主表示し、他Widgetは縮小表示または非表示にできる
+- `traffic`: TrafficWidgetを主表示し、他Widgetは縮小表示または非表示にできる
+- `petPhoto`: PetPhotoWidgetを主表示し、他Widgetは縮小表示または非表示にできる
 - `smartHome`: 将来拡張用の予約モードとする
 - `system`: 将来の保守・設定・診断表示用の予約モードとする
 
@@ -41,7 +43,19 @@
 - `home` と各主表示モードの切り替えを実装する
 - 主表示モードでは対象Widgetを強調表示する
 - 画面再マウントではなく、state切り替えで表現する
-- QuickAreaのボタンは `displayMode` の変更のみを責務とする
+- 現行MVPではWidgetカードのタップで `displayMode` を変更する
+- QuickAreaは初期MVPの必須Widgetから外し、将来の明示的なコマンドバーとして追加する
+
+## 追記 2.1. 現行MVP表示構成
+
+現行実装に合わせ、初期MVPの表示構成を以下に固定する。
+
+- enabled: `weather`, `calendar`, `traffic`, `news`, `petPhoto`
+- registered but disabled: `stocks`
+- deferred: `quickArea`
+
+StocksWidgetは将来の市場情報枠としてRegistryと設定例を維持するが、初期MVPの通常画面では表示しない。
+TrafficWidgetとPetPhotoWidgetは現行MVPの一部として扱い、テストと完了条件の対象に含める。
 
 ## 追記 3. Widget状態遷移
 
@@ -198,6 +212,18 @@ type WidgetCacheRecord<TData> = {
 - displayMode変更時: 再取得は原則行わず、表示切替のみ行う
 - 手動refresh操作追加時: 対象Widgetのみ再取得する
 
+## 追記 8.1. MVP mock policy
+
+初期MVPの `mock` provider は、外部APIなしに安定表示するための正式な開発・運用providerとして扱う。
+
+- `mock` provider は Service層に閉じ込め、Widget層へ mock 固有の分岐を持ち込まない
+- 本番MVPでも使う mock データは `src/services/{widget}/mockData.ts` に置く
+- `src/test/mocks` はテスト専用fixtureに限定し、MVP実行時の Service から参照しない
+- 実データ化時は既存の `mock` provider を上書きせず、`staticJson` や `worker` などの新しい provider を追加する
+- Calendar / News / Stocks / Traffic は初期MVPでは `mock` provider を正式なデータソースとして扱う
+- PetPhoto は `mock` ではなく `staticManifest` provider として扱う
+- Weather は `openMeteo` を主providerとし、初回体験を守るための mock fallback を許容する
+
 ## 追記 9. Weather fallback 仕様
 
 Weatherは唯一の実API接続対象のため、失敗時の挙動を明記する。
@@ -266,7 +292,7 @@ MVP重視なら 1 を推奨する。
 - Registry経由でWidgetが正しく解決される
 - UnknownWidgetで全体が落ちない
 - Query結果に応じて Loading / Error / Empty / Stale が切り替わる
-- QuickArea操作で `displayMode` が更新される
+- Widgetカード操作で `displayMode` が更新される
 - Headerの集計値がWidget状態から正しく算出される
 
 #### 3. Thin E2E / Smoke Test
@@ -276,7 +302,7 @@ MVP重視なら 1 を推奨する。
 - アプリ起動
 - Dashboard表示
 - 主要Widget表示
-- QuickAreaによる表示切替
+- Widgetカードによる表示切替
 - build成功
 - test成功
 
@@ -323,12 +349,14 @@ src/
       WeatherWidget.test.tsx
     calendar/
       CalendarWidget.test.tsx
-    stocks/
-      StocksWidget.test.tsx
+    traffic/
+      TrafficWidget.test.tsx
+    petPhoto/
+      PetPhotoWidget.test.tsx
     news/
       NewsWidget.test.tsx
-    quickArea/
-      QuickAreaWidget.test.tsx
+    stocks/
+      StocksWidget.test.tsx
 ```
 
 ### coverage方針
