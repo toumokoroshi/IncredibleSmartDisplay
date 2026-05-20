@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { WidgetConfig } from "../../types/widget";
-import { mockNewsData } from "../../test/mocks/news";
+import { mockNewsData } from "../../services/news/mockData";
 import { NewsWidget } from "./NewsWidget";
 import type { NewsSettings } from "./types";
 

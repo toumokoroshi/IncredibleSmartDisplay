@@ -1,5 +1,5 @@
 import type { WidgetService } from "../../types/widget";
-import { mockTrafficLines } from "../../test/mocks/traffic";
+import { mockTrafficLines } from "./mockData";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "../../widgets/traffic";
 
 const statusOrder: Record<TrafficLineData["status"], number> = {
