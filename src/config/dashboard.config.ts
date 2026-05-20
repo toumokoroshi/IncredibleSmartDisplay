@@ -1,4 +1,4 @@
-import type { DashboardConfig } from "../types/dashboard";
+﻿import type { DashboardConfig } from "../types/dashboard";
 
 export const dashboardConfig: DashboardConfig = {
   app: {
@@ -127,21 +127,18 @@ export const dashboardConfig: DashboardConfig = {
       },
     },
     {
-      id: "quick-area-main",
-      type: "quickArea",
-      title: "Quick",
+      id: "pet-photo-main",
+      type: "petPhoto",
+      title: "Pet Photo",
       enabled: true,
-      size: "wide",
-      refreshIntervalSec: 0,
+      size: "medium",
+      refreshIntervalSec: 86400,
       order: 5,
-      area: "quick-area",
+      area: "sub-right",
       settings: {
-        buttons: [
-          { label: "Home", displayMode: "home" },
-          { label: "Weather", displayMode: "weather" },
-          { label: "Traffic", displayMode: "traffic" },
-          { label: "ニュース", displayMode: "news" },
-        ],
+        provider: "staticManifest",
+        manifestPath: "/pets/manifest.json",
+        selection: "daily",
       },
     },
   ],

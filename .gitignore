@@ -4,3 +4,4 @@ coverage/
 .vite/
 vite-dev*.log
 temp-scaffold/
+private-pet-photos/

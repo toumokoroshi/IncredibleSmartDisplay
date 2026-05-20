@@ -5,6 +5,7 @@ import { UnknownWidget } from "../components/UnknownWidget";
 import { useDashboardContext } from "../contexts/DashboardContext";
 import { useWidgetData } from "../hooks/useWidgetData";
 import { widgetRegistry } from "../registry/widgetRegistry";
+import type { DisplayMode } from "../types/command";
 
 function getHighlightedType(displayMode: string) {
   if (displayMode === "home") {
@@ -13,20 +14,26 @@ function getHighlightedType(displayMode: string) {
   return displayMode === "stocks" ? "stocks" : displayMode;
 }
 
+function getDetailModeForWidgetType(widgetType: string): DisplayMode | null {
+  if (widgetType === "weather" || widgetType === "calendar" || widgetType === "news" || widgetType === "traffic" || widgetType === "petPhoto" || widgetType === "stocks") {
+    return widgetType;
+  }
+  return null;
+}
+
 export function DashboardShell() {
-  const { displayMode, headerStatus } = useDashboardContext();
+  const { displayMode, headerStatus, setDisplayMode } = useDashboardContext();
   const { widgets } = validateDashboardConfig();
   const highlightedType = getHighlightedType(displayMode);
   const weatherWidget = widgets.find((widget) => widget.type === "weather");
   const weatherSettings = weatherWidget?.settings as { locationName?: unknown } | undefined;
   const weatherLocationName = typeof weatherSettings?.locationName === "string" ? weatherSettings.locationName : undefined;
-  const visibleWidgets =
-    highlightedType === null ? widgets : widgets.filter((widget) => widget.type === highlightedType || widget.area === "quick-area");
+  const visibleWidgets = highlightedType === null ? widgets : widgets.filter((widget) => widget.type === highlightedType);
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--app-bg)] p-4 text-slate-100">
       <section className="dashboard-grid mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] gap-3">
-        <HeaderBar locationName={weatherLocationName} status={headerStatus} />
+        <HeaderBar isDetailMode={displayMode !== "home"} locationName={weatherLocationName} onHomeClick={() => setDisplayMode("home")} status={headerStatus} />
         {visibleWidgets.map((widget) => (
           <ErrorBoundary key={widget.id}>
             <WidgetSlot widget={widget} isHighlighted={highlightedType === widget.type} />
@@ -45,36 +52,54 @@ function WidgetSlot({
   isHighlighted: boolean;
 }) {
   const definition = widgetRegistry[widget.type];
+  const detailMode = getDetailModeForWidgetType(widget.type);
+  const canOpenDetail = detailMode !== null && !isHighlighted;
+  const { setDisplayMode } = useDashboardContext();
 
   if (definition === undefined) {
     return <UnknownWidget title={widget.title} type={widget.type} />;
   }
 
-  return <RegisteredWidgetSlot definition={definition} isHighlighted={isHighlighted} widget={widget} />;
+  return (
+    <RegisteredWidgetSlot
+      canOpenDetail={canOpenDetail}
+      definition={definition}
+      isHighlighted={isHighlighted}
+      onOpenDetail={detailMode === null ? undefined : () => setDisplayMode(detailMode)}
+      widget={widget}
+    />
+  );
 }
 
 function RegisteredWidgetSlot({
+  canOpenDetail,
   definition,
   widget,
   isHighlighted,
+  onOpenDetail,
 }: {
+  canOpenDetail: boolean;
   definition: (typeof widgetRegistry)[string];
   widget: ReturnType<typeof validateDashboardConfig>["widgets"][number];
   isHighlighted: boolean;
+  onOpenDetail?: () => void;
 }) {
   const { data, error, isEmpty, status } = useWidgetData(widget, definition);
   const Component = definition.component;
   const className = [
-    "widget-slot min-h-0",
+    "widget-slot widget-touch-wrapper min-h-0",
     `widget-${widget.type}`,
     widget.area ? `widget-area-${widget.area}` : "",
-    isHighlighted && widget.area !== "quick-area" ? "is-detail" : "",
+    isHighlighted ? "is-detail" : "",
+    canOpenDetail ? "can-open-detail" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
   return (
     <div className={className}>
+      {/* Quick-look card taps are reserved for opening detail. Per-widget actions should live in detail views so future controls do not compete with card navigation. */}
+      {canOpenDetail ? <button type="button" className="widget-detail-touch-target" aria-label={`${widget.title} detail`} onClick={onOpenDetail} /> : null}
       <Component
         config={widget}
         data={data}

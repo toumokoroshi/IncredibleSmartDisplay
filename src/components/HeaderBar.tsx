@@ -1,7 +1,19 @@
+import { House } from "lucide-react";
+
 import { formatDistanceToNowLabel, formatHeaderDateLabel, formatTimeLabel } from "../utils/date";
 import type { HeaderStatus } from "../types/dashboard";
 
-export function HeaderBar({ locationName, status }: { locationName?: string; status: HeaderStatus }) {
+export function HeaderBar({
+  isDetailMode,
+  locationName,
+  onHomeClick,
+  status,
+}: {
+  isDetailMode: boolean;
+  locationName?: string;
+  onHomeClick: () => void;
+  status: HeaderStatus;
+}) {
   const now = new Date();
   const syncLabel = status.lastSyncedAt ? formatDistanceToNowLabel(status.lastSyncedAt) : "Waiting";
 
@@ -13,6 +25,16 @@ export function HeaderBar({ locationName, status }: { locationName?: string; sta
           <p className="mt-2 text-sm font-semibold tracking-[0.04em] text-slate-500">{formatHeaderDateLabel(now)} · {locationName ?? "Tokyo"}</p>
         </div>
         <div className="status-grid flex flex-wrap justify-end gap-2 text-right text-sm text-slate-300">
+          {isDetailMode ? (
+            <button
+              type="button"
+              className="home-command min-h-11 rounded-[calc(var(--radius-card)-10px)] border border-[color:var(--panel-stroke)] bg-[var(--control-bg)] px-4 py-2 text-sm font-semibold text-slate-900"
+              onClick={onHomeClick}
+              aria-label="Home"
+            >
+              <House aria-hidden="true" className="inline-block align-[-0.2em]" size={20} strokeWidth={1.8} />
+            </button>
+          ) : null}
           <StatusPill label={status.online ? "Online" : "Offline"} value={status.online ? "Connected" : "Disconnected"} />
           <StatusPill label="Last Sync" value={syncLabel} />
         </div>

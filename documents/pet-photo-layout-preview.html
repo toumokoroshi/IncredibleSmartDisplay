@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pet Photo Widget Layout Preview</title>
+    <style>
+      :root {
+        --app-bg: #f6f8fb;
+        --panel-bg: #ffffff;
+        --header-bg: rgba(255, 255, 255, 0.78);
+        --control-bg: #f1f5f9;
+        --panel-stroke: rgba(15, 23, 42, 0.08);
+        --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+        --accent: #4285f4;
+        --accent-soft: #e8f0fe;
+        --radius-card: 1.7rem;
+        color: #0f172a;
+        background: var(--app-bg);
+        font-family: "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 15% 8%, rgba(66, 133, 244, 0.12), transparent 28%),
+          linear-gradient(180deg, #fbfcfe, #eef2f7);
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      .page {
+        display: grid;
+        gap: 22px;
+        max-width: 1560px;
+        margin: 0 auto;
+      }
+
+      .intro {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .intro h1 {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0;
+      }
+
+      .intro p {
+        max-width: 780px;
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .preview-shell {
+        display: grid;
+        gap: 18px;
+      }
+
+      .label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .label-row h2 {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .note {
+        color: #64748b;
+        font-size: 13px;
+      }
+
+      .tablet {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        max-height: 860px;
+        padding: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 28px;
+        background: var(--app-bg);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+      }
+
+      .dashboard-grid {
+        display: grid;
+        height: 100%;
+        grid-template-columns: 1.35fr 0.9fr 0.9fr;
+        grid-template-rows: 14fr 43fr 43fr;
+        grid-template-areas:
+          "header header header"
+          "weather calendar traffic"
+          "weather news pet";
+        gap: 16px;
+      }
+
+      .detail-grid {
+        display: grid;
+        height: 100%;
+        grid-template-columns: 1fr;
+        grid-template-rows: 14fr 86fr;
+        grid-template-areas:
+          "header"
+          "detail";
+        gap: 16px;
+      }
+
+      .header,
+      .card {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--panel-stroke);
+        border-radius: var(--radius-card);
+        background: var(--panel-bg);
+        box-shadow: var(--panel-shadow);
+      }
+
+      .header {
+        grid-area: header;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 24px;
+        background: var(--header-bg);
+      }
+
+      .clock {
+        font-size: clamp(32px, 3.2vw, 54px);
+        font-weight: 650;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .date {
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .status {
+        display: flex;
+        gap: 8px;
+      }
+
+      .pill {
+        min-width: 116px;
+        padding: 8px 12px;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 16px;
+        background: var(--control-bg);
+      }
+
+      .pill span {
+        display: block;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .pill strong {
+        display: block;
+        margin-top: 3px;
+        font-size: 14px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .card.weather {
+        grid-area: weather;
+      }
+
+      .card.calendar {
+        grid-area: calendar;
+      }
+
+      .card.traffic {
+        grid-area: traffic;
+      }
+
+      .card.news {
+        grid-area: news;
+      }
+
+      .card.pet {
+        grid-area: pet;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        gap: 14px;
+        padding: 16px;
+      }
+
+      .card-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .icon-dot {
+        display: inline-grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--accent);
+        color: white;
+        font-size: 18px;
+      }
+
+      .placeholder {
+        display: grid;
+        min-height: 0;
+        place-items: center;
+        color: #64748b;
+        font-size: 18px;
+        font-weight: 700;
+        background: linear-gradient(180deg, rgba(66, 133, 244, 0.04), transparent);
+      }
+
+      .weather-value {
+        align-self: center;
+        font-size: clamp(64px, 7vw, 110px);
+        font-weight: 600;
+        letter-spacing: 0;
+      }
+
+      .mini-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .mini-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 14px;
+        background: #f8fafc;
+        font-weight: 650;
+      }
+
+      .photo-frame {
+        position: relative;
+        min-height: 0;
+        overflow: hidden;
+        border-radius: 20px;
+        background: #e2e8f0;
+      }
+
+      .photo-frame img,
+      .hero-photo img,
+      .thumb img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .photo-frame::after,
+      .hero-photo::after {
+        position: absolute;
+        inset: auto 0 0;
+        height: 38%;
+        pointer-events: none;
+        content: "";
+        background: linear-gradient(180deg, transparent, rgba(15, 23, 42, 0.48));
+      }
+
+      .pet-caption {
+        position: absolute;
+        right: 14px;
+        bottom: 12px;
+        left: 14px;
+        z-index: 1;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 12px;
+        color: white;
+      }
+
+      .pet-caption strong {
+        display: block;
+        font-size: 22px;
+        line-height: 1.1;
+      }
+
+      .pet-caption span {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 12px;
+        font-weight: 650;
+      }
+
+      .random-chip {
+        padding: 7px 10px;
+        border: 1px solid rgba(255, 255, 255, 0.36);
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.35);
+        color: white;
+        font-size: 12px;
+        font-weight: 750;
+        white-space: nowrap;
+      }
+
+      .pet-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .detail-card {
+        grid-area: detail;
+        padding: 0;
+      }
+
+      .hero-photo {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+        border-radius: var(--radius-card);
+        background: #e2e8f0;
+      }
+
+      .action {
+        min-height: 44px;
+        padding: 0 16px;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 16px;
+        background: var(--control-bg);
+        color: #0f172a;
+        font-weight: 800;
+      }
+
+      .action.primary {
+        border-color: rgba(66, 133, 244, 0.32);
+        background: var(--accent-soft);
+      }
+
+      @media (max-width: 980px) {
+        body {
+          padding: 14px;
+        }
+
+        .intro,
+        .label-row {
+          align-items: start;
+          flex-direction: column;
+        }
+
+        .tablet {
+          aspect-ratio: auto;
+          height: 920px;
+        }
+
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+          grid-template-rows: 96px 1.15fr 0.85fr 0.85fr 0.85fr 0.9fr;
+          grid-template-areas:
+            "header"
+            "weather"
+            "calendar"
+            "traffic"
+            "news"
+            "pet";
+        }
+
+        .status {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="intro">
+        <div>
+          <h1>Pet Photo Widget Layout Preview</h1>
+          <p>お気に入りのペット写真を、ホームのクイックルックにも出し、カードタップで詳細表示する案。写真は静的プレビュー用の仮画像です。</p>
+        </div>
+        <p class="note">想定: 12.4 inch landscape / no scroll / Quick Area removed</p>
+      </section>
+
+      <section class="preview-shell">
+        <div class="label-row">
+          <h2>クイックルックに追加した場合</h2>
+          <p class="note">右下に Pet Photo を独立カードとして追加。News は左下、天気は縦長のまま維持。</p>
+        </div>
+        <div class="tablet">
+          <div class="dashboard-grid">
+            <header class="header">
+              <div>
+                <p class="clock">07:42</p>
+                <p class="date">Wed, May 20 · Tokyo</p>
+              </div>
+              <div class="status">
+                <div class="pill"><span>Online</span><strong>Connected</strong></div>
+                <div class="pill"><span>Last Sync</span><strong>Just now</strong></div>
+              </div>
+            </header>
+
+            <article class="card weather">
+              <div class="card-title"><span>Weather</span><span class="icon-dot">☀</span></div>
+              <p class="weather-value">24℃</p>
+              <div class="mini-list">
+                <div class="mini-row"><span>Today</span><span>28℃ / 18℃</span></div>
+                <div class="mini-row"><span>Rain</span><span>20%</span></div>
+                <div class="mini-row"><span>Wind</span><span>2 m/s</span></div>
+              </div>
+            </article>
+
+            <article class="card calendar placeholder">Calendar</article>
+            <article class="card traffic placeholder">Traffic</article>
+            <article class="card news placeholder">News</article>
+
+            <article class="card pet">
+              <div class="card-title"><span>Pet Photo</span><span class="icon-dot">♡</span></div>
+              <div class="photo-frame">
+                <img src="https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=900&q=80" alt="" />
+                <div class="pet-caption">
+                  <div>
+                    <strong>Mugi</strong>
+                    <span>お気に入りからランダム</span>
+                  </div>
+                  <span class="random-chip">Tap detail</span>
+                </div>
+              </div>
+              <div class="pet-meta"><span>12 photos</span><span>07:30 selected</span></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="preview-shell">
+        <div class="label-row">
+          <h2>詳細画面に入った場合</h2>
+          <p class="note">写真を主役にし、操作は詳細側に集約。ホームへはヘッダーの Home ボタンで戻る想定。</p>
+        </div>
+        <div class="tablet">
+          <div class="detail-grid">
+            <header class="header">
+              <div>
+                <p class="clock">07:42</p>
+                <p class="date">Wed, May 20 · Tokyo</p>
+              </div>
+              <div class="status">
+                <button class="action" type="button">⌂</button>
+                <div class="pill"><span>Online</span><strong>Connected</strong></div>
+                <div class="pill"><span>Last Sync</span><strong>Just now</strong></div>
+              </div>
+            </header>
+
+            <article class="card detail-card">
+              <div class="hero-photo">
+                <img src="https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=1500&q=85" alt="" />
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

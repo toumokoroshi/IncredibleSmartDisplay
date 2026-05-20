@@ -4,6 +4,7 @@ export type DisplayMode =
   | "calendar"
   | "news"
   | "traffic"
+  | "petPhoto"
   | "stocks"
   | "smartHome"
   | "system";

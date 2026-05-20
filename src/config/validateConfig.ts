@@ -4,7 +4,7 @@ import { widgetRegistry } from "../registry/widgetRegistry";
 import type { WidgetConfig } from "../types/widget";
 import { dashboardConfig } from "./dashboard.config";
 
-const areaSchema = z.enum(["header", "main-left", "main-right", "sub-left", "sub-right", "quick-area", "detail"]);
+const areaSchema = z.enum(["header", "main-left", "main-right", "sub-left", "sub-right", "detail"]);
 
 const baseWidgetSchema = z.object({
   id: z.string().min(1),

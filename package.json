@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "prepare-pet-photos": "node scripts/prepare-pet-photos.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.2",

@@ -7,7 +7,7 @@ import { widgetRegistry } from "../registry/widgetRegistry";
 describe("config validation", () => {
   it("has enabled widgets resolvable in registry", () => {
     const enabledWidgets = dashboardConfig.widgets.filter((widget) => widget.enabled);
-    expect(enabledWidgets.every((widget) => widget.type in widgetRegistry || widget.type === "quickArea")).toBe(true);
+    expect(enabledWidgets.every((widget) => widget.type in widgetRegistry)).toBe(true);
   });
 
   it("falls back invalid refreshIntervalSec", () => {
