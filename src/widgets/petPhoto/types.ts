@@ -1,7 +1,7 @@
 export type PetPhotoSettings = {
   provider: "staticManifest";
   manifestPath: string;
-  selection: "daily";
+  selection: "twiceDaily";
 };
 
 export type PetPhoto = {
@@ -17,5 +17,5 @@ export type PetPhotoManifest = {
 export type PetPhotoData = {
   photo?: PetPhoto;
   totalPhotos: number;
-  selectedForDate: string;
+  selectedForPeriod: string;
 };

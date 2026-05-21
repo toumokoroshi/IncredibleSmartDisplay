@@ -45,7 +45,7 @@ function PetPhotoQuickLook({ src, totalPhotos }: { src: string; totalPhotos: num
       <div className="min-h-0 overflow-hidden rounded-2xl bg-slate-200">
         <img className="h-full w-full object-cover" src={src} alt="" />
       </div>
-      <p className="text-sm font-semibold text-slate-500">{totalPhotos} photos / daily pick</p>
+      <p className="text-sm font-semibold text-slate-500">{totalPhotos} photos / AM-PM pick</p>
     </div>
   );
 }

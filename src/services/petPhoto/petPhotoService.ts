@@ -15,8 +15,12 @@ const petPhotoManifestSchema = z.object({
     .default([]),
 });
 
-function getTodayKey() {
-  return new Date().toISOString().slice(0, 10);
+export function getHalfDaySelectionKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const period = date.getHours() < 12 ? "am" : "pm";
+  return `${year}-${month}-${day}-${period}`;
 }
 
 function hashString(value: string) {
@@ -38,17 +42,17 @@ export function resolvePublicAssetPath(path: string, basePath = import.meta.env.
   return `${normalizedBase}${normalizedPath}`;
 }
 
-function selectDailyPhoto(manifest: PetPhotoManifest) {
+function selectHalfDayPhoto(manifest: PetPhotoManifest) {
   const candidates = manifest.photos.filter((photo) => photo.favorite);
-  const selectedForDate = getTodayKey();
+  const selectedForPeriod = getHalfDaySelectionKey();
 
   if (candidates.length === 0) {
-    return { selectedForDate, photo: undefined };
+    return { selectedForPeriod, photo: undefined };
   }
 
   return {
-    selectedForDate,
-    photo: candidates[hashString(selectedForDate) % candidates.length],
+    selectedForPeriod,
+    photo: candidates[hashString(selectedForPeriod) % candidates.length],
   };
 }
 
@@ -70,11 +74,11 @@ export function createPetPhotoService(): WidgetService<PetPhotoSettings, PetPhot
   return {
     async fetch(settings) {
       const manifest = await fetchManifest(resolvePublicAssetPath(settings.manifestPath));
-      const { photo, selectedForDate } = selectDailyPhoto(manifest);
+      const { photo, selectedForPeriod } = selectHalfDayPhoto(manifest);
 
       return {
         photo: photo ? { ...photo, src: resolvePublicAssetPath(photo.src) } : undefined,
-        selectedForDate,
+        selectedForPeriod,
         totalPhotos: manifest.photos.length,
       };
     },

@@ -6,7 +6,7 @@ import { PetPhotoWidget } from "./PetPhotoWidget";
 export const petPhotoSettingsSchema = z.object({
   provider: z.literal("staticManifest"),
   manifestPath: z.string().min(1),
-  selection: z.literal("daily"),
+  selection: z.literal("twiceDaily"),
 });
 
 export const petPhotoDefinition = {
@@ -15,5 +15,5 @@ export const petPhotoDefinition = {
   settingsSchema: petPhotoSettingsSchema,
   createService: createPetPhotoService,
   fallbackArea: "sub-right",
-  defaultRefreshIntervalSec: 86400,
+  defaultRefreshIntervalSec: 43200,
 } as const;

@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createPetPhotoService, resolvePublicAssetPath } from "./petPhotoService";
+import { createPetPhotoService, getHalfDaySelectionKey, resolvePublicAssetPath } from "./petPhotoService";
 
 const settings = {
   provider: "staticManifest",
   manifestPath: "/pets/manifest.json",
-  selection: "daily",
+  selection: "twiceDaily",
 } as const;
 
 afterEach(() => {
@@ -21,7 +21,12 @@ describe("petPhotoService", () => {
     );
   });
 
-  it("loads the static manifest and selects one favorite photo for the day", async () => {
+  it("uses one selection key for morning and one for afternoon", () => {
+    expect(getHalfDaySelectionKey(new Date(2026, 4, 21, 11, 59))).toBe("2026-05-21-am");
+    expect(getHalfDaySelectionKey(new Date(2026, 4, 21, 12, 0))).toBe("2026-05-21-pm");
+  });
+
+  it("loads the static manifest and selects one favorite photo for the current half day", async () => {
     const fetchMock = vi.fn(async () => ({
       ok: true,
       json: async () => ({
@@ -37,7 +42,7 @@ describe("petPhotoService", () => {
 
     expect(fetchMock).toHaveBeenCalledWith("/pets/manifest.json", { cache: "no-store" });
     expect(data.totalPhotos).toBe(2);
-    expect(data.selectedForDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(data.selectedForPeriod).toMatch(/^\d{4}-\d{2}-\d{2}-(am|pm)$/);
     expect(data.photo?.src).toMatch(/^\/pets\/mugi-00[12]\.jpg$/);
   });
 
