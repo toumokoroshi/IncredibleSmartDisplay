@@ -404,16 +404,16 @@ export const dashboardConfig = {
     {
       id: "pet-photo-main",
       type: "petPhoto",
-      title: "Pet Photo",
+      title: "今日のぐり",
       enabled: true,
       size: "medium",
-      refreshIntervalSec: 86400,
+      refreshIntervalSec: 43200,
       order: 5,
       area: "sub-right",
       settings: {
         provider: "staticManifest",
         manifestPath: "/pets/manifest.json",
-        selection: "daily"
+        selection: "twiceDaily"
       }
     }
   ],

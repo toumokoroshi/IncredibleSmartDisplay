@@ -8,22 +8,22 @@ import type { PetPhotoData, PetPhotoSettings } from "./types";
 const config: WidgetConfig<PetPhotoSettings> = {
   id: "pet-photo-main",
   type: "petPhoto",
-  title: "Pet Photo",
+  title: "今日のぐり",
   enabled: true,
   size: "medium",
-  refreshIntervalSec: 86400,
+  refreshIntervalSec: 43200,
   order: 5,
   area: "sub-right",
   settings: {
     provider: "staticManifest",
     manifestPath: "/pets/manifest.json",
-    selection: "daily",
+    selection: "twiceDaily",
   },
 };
 
 const data: PetPhotoData = {
   photo: { favorite: true, id: "photo-1", src: "/pets/photo-1.jpg" },
-  selectedForDate: "2026-05-20",
+  selectedForPeriod: "2026-05-20-am",
   totalPhotos: 42,
 };
 
@@ -31,8 +31,8 @@ describe("PetPhotoWidget", () => {
   it("renders the quick look photo and total count", () => {
     const { container } = render(<PetPhotoWidget config={config} data={data} isEmpty={false} isHighlighted={false} status="success" />);
 
-    expect(screen.getByText("Pet Photo")).toBeInTheDocument();
-    expect(screen.getByText("42 photos / daily pick")).toBeInTheDocument();
+    expect(screen.getByText("今日のぐり")).toBeInTheDocument();
+    expect(screen.getByText("42 photos / AM-PM pick")).toBeInTheDocument();
     expect(container.querySelector("img")).toHaveAttribute("src", "/pets/photo-1.jpg");
   });
 
@@ -40,7 +40,7 @@ describe("PetPhotoWidget", () => {
     const { container } = render(<PetPhotoWidget config={config} data={data} isEmpty={false} isHighlighted status="success" />);
 
     expect(container.querySelector("img")).toHaveAttribute("src", "/pets/photo-1.jpg");
-    expect(screen.queryByText("Pet Photo")).not.toBeInTheDocument();
+    expect(screen.queryByText("今日のぐり")).not.toBeInTheDocument();
   });
 
   it("renders loading, error, empty, and stale states", () => {
@@ -52,7 +52,7 @@ describe("PetPhotoWidget", () => {
     rerender(<PetPhotoWidget config={config} error={error} isEmpty={false} isHighlighted={false} status="error" />);
     expect(screen.getByText("manifest invalid")).toBeInTheDocument();
 
-    rerender(<PetPhotoWidget config={config} data={{ selectedForDate: "2026-05-20", totalPhotos: 0 }} isEmpty isHighlighted={false} status="success" />);
+    rerender(<PetPhotoWidget config={config} data={{ selectedForPeriod: "2026-05-20-am", totalPhotos: 0 }} isEmpty isHighlighted={false} status="success" />);
     expect(screen.getByText("No data available.")).toBeInTheDocument();
 
     rerender(<PetPhotoWidget config={config} data={data} isEmpty={false} isHighlighted={false} status="stale" />);
