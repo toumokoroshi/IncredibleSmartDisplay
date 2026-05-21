@@ -4,6 +4,7 @@ import path from "node:path";
 const sourceDir = path.resolve(process.cwd(), "private-pet-photos");
 const outputDir = path.resolve(process.cwd(), "public", "pets");
 const supportedExtensions = new Set([".jpg", ".jpeg", ".png"]);
+const exifHeader = Buffer.from("Exif\0\0", "ascii");
 
 function normalizeId(filename) {
   const parsed = path.parse(filename);
@@ -17,12 +18,111 @@ function normalizeId(filename) {
   return normalized || `pet-photo-${Date.now()}`;
 }
 
+function readUInt16(buffer, offset, littleEndian) {
+  return littleEndian ? buffer.readUInt16LE(offset) : buffer.readUInt16BE(offset);
+}
+
+function readUInt32(buffer, offset, littleEndian) {
+  return littleEndian ? buffer.readUInt32LE(offset) : buffer.readUInt32BE(offset);
+}
+
+function readJpegOrientation(buffer) {
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) {
+    throw new Error("Invalid JPEG file");
+  }
+
+  let offset = 2;
+
+  while (offset + 4 <= buffer.length && buffer[offset] === 0xff) {
+    const marker = buffer[offset + 1];
+    if (marker === 0xda || marker === 0xd9) {
+      break;
+    }
+
+    const length = buffer.readUInt16BE(offset + 2);
+    const segmentStart = offset + 4;
+    const segmentEnd = offset + 2 + length;
+    if (segmentEnd > buffer.length) {
+      throw new Error("Invalid JPEG segment length");
+    }
+
+    if (marker === 0xe1 && buffer.subarray(segmentStart, segmentStart + exifHeader.length).equals(exifHeader)) {
+      const tiffStart = segmentStart + exifHeader.length;
+      if (tiffStart + 8 > segmentEnd) {
+        return undefined;
+      }
+
+      const byteOrder = buffer.toString("ascii", tiffStart, tiffStart + 2);
+      const littleEndian = byteOrder === "II";
+      if (!littleEndian && byteOrder !== "MM") {
+        return undefined;
+      }
+
+      if (readUInt16(buffer, tiffStart + 2, littleEndian) !== 42) {
+        return undefined;
+      }
+
+      const ifdOffset = readUInt32(buffer, tiffStart + 4, littleEndian);
+      const ifdStart = tiffStart + ifdOffset;
+      if (ifdStart + 2 > segmentEnd) {
+        return undefined;
+      }
+
+      const entryCount = readUInt16(buffer, ifdStart, littleEndian);
+      for (let index = 0; index < entryCount; index += 1) {
+        const entryStart = ifdStart + 2 + index * 12;
+        if (entryStart + 12 > segmentEnd) {
+          return undefined;
+        }
+
+        if (readUInt16(buffer, entryStart, littleEndian) === 0x0112) {
+          const orientation = readUInt16(buffer, entryStart + 8, littleEndian);
+          return orientation >= 1 && orientation <= 8 ? orientation : undefined;
+        }
+      }
+    }
+
+    offset = segmentEnd;
+  }
+
+  return undefined;
+}
+
+function createOrientationExifSegment(orientation) {
+  const payload = Buffer.alloc(exifHeader.length + 26);
+  exifHeader.copy(payload, 0);
+  const tiffStart = exifHeader.length;
+
+  payload.write("MM", tiffStart, "ascii");
+  payload.writeUInt16BE(42, tiffStart + 2);
+  payload.writeUInt32BE(8, tiffStart + 4);
+  payload.writeUInt16BE(1, tiffStart + 8);
+  payload.writeUInt16BE(0x0112, tiffStart + 10);
+  payload.writeUInt16BE(3, tiffStart + 12);
+  payload.writeUInt32BE(1, tiffStart + 14);
+  payload.writeUInt16BE(orientation, tiffStart + 18);
+  payload.writeUInt16BE(0, tiffStart + 20);
+  payload.writeUInt32BE(0, tiffStart + 22);
+
+  const segment = Buffer.alloc(payload.length + 4);
+  segment[0] = 0xff;
+  segment[1] = 0xe1;
+  segment.writeUInt16BE(payload.length + 2, 2);
+  payload.copy(segment, 4);
+  return segment;
+}
+
 function stripJpegMetadata(buffer) {
   if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) {
     throw new Error("Invalid JPEG file");
   }
 
   const chunks = [buffer.subarray(0, 2)];
+  const orientation = readJpegOrientation(buffer);
+  if (orientation && orientation !== 1) {
+    chunks.push(createOrientationExifSegment(orientation));
+  }
+
   let offset = 2;
 
   while (offset < buffer.length) {
