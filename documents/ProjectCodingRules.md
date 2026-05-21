@@ -90,6 +90,52 @@ These rules are project-level instructions for IncredibleSmartDisplay. Keep fixe
 - Commit messages should state the purpose of the change.
 - Good examples: `Add missing emnapi lock entries`, `Make quick area a compact command bar`, `Use Celsius symbol in weather widget`.
 
+### Large Asset Push Troubleshooting
+
+When `git push` fails with messages such as `RPC failed`, `curl 55 Recv failure: Connection was reset`,
+`HTTP 408`, `unexpected disconnect while reading sideband packet`, or a misleading trailing
+`Everything up-to-date`, first verify the real remote state:
+
+```powershell
+git status --short --branch
+git rev-parse HEAD
+git ls-remote origin refs/heads/development
+```
+
+If local `HEAD` and `git ls-remote` differ, the push did not fully update GitHub even if
+`Everything up-to-date` appeared.
+
+Large binary assets, especially many JPG files, can make Git spend a long time packing and sending
+objects over HTTPS. Slow or unstable LAN/WAN upload speed can trigger GitHub or intermediate network
+timeouts. In this repository, a pet photo asset push failed repeatedly when a single push had to send
+tens or hundreds of MiB of images.
+
+Preferred fixes:
+
+- Reduce, resize, or compress images before committing them.
+- Keep asset commits small. For large image sets, split assets into batches of roughly 4 MiB or less.
+- Push large asset batches one commit at a time so each remote update is a small fast-forward.
+- Use a backup branch before rewriting unpushed history, for example `git branch backup/before-asset-rewrite`.
+
+One-commit-at-a-time push pattern:
+
+```powershell
+$commits = @(git rev-list --reverse origin/development..HEAD)
+foreach ($commit in $commits) {
+  git -c http.lowSpeedLimit=0 -c http.lowSpeedTime=999999 push origin "${commit}:refs/heads/development"
+  if ($LASTEXITCODE -ne 0) { break }
+  git fetch origin development --quiet
+}
+```
+
+`http.lowSpeedLimit=0` and `http.lowSpeedTime=999999` are useful for this specific slow-upload
+failure mode because they prevent Git/libcurl from aborting only because transfer speed is low.
+Prefer setting them with `git -c` for the push command instead of changing global gitconfig.
+
+Increasing `http.postBuffer` may help only for the specific `unable to rewind rpc post data` case,
+especially when forcing HTTP/1.1. It is not the primary fix for slow or reset connections and should
+not be treated as a substitute for smaller commits or smaller assets.
+
 ## 9. Documentation Rules
 
 - When an implementation decision changes, update `ImplementationPlan.md` or `ImplementationPlan_Addendum.md` if the decision affects future work.
