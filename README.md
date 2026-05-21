@@ -160,14 +160,59 @@ npm.cmd run prepare-pet-photos
 
 ## Fully Kiosk Browser 推奨設定
 
-未確定のため、まずは以下を推奨値として扱う。
+初期運用は常時表示モードにする。画面焼け、発熱、電池劣化が気になったら motion / screen off 運用へ切り替える。
 
-- 横向き固定
-- 全画面表示
-- 画面スリープ抑止
-- ピンチズーム抑止
-- スクロールバー非表示
-- 起動URLは GitHub Pages の公開URL
-- 定期リロードは dashboard config の autoReload と重複しないようにする
+- Start URL: `https://toumokoroshi.github.io/IncredibleSmartDisplay/`
+- Fullscreen Mode: ON
+- Kiosk Mode: ON
+- Screen Orientation: Landscape
+- Keep Screen On: ON
+- Autostart on Boot: ON
+- JavaScript: ON
+- Text Zoom / Page Zoom: 100%
+- Pull to Refresh: OFF
+- Pinch to Zoom: OFF
+- Auto Reload on Internet Reconnect: ON
+- Auto Reload on Screen On: OFFから開始
+- Periodic / Idle Auto Reload: OFF
+- Remote Admin: OFFから開始。必要になったら強いパスワードを設定して有効化する
+- Motion Detection: OFFから開始
+
+リロード方針:
+
+- app側: `dashboard.config.ts` の `autoReload` を使う
+- Fully Kiosk側: network reconnect の再読み込みだけ使う
+- Periodic reload は app側と重複するため使わない
+
+実機確認:
+
+- GitHub Pages URL: `https://toumokoroshi.github.io/IncredibleSmartDisplay/`
+- 確認日: 2026-05-21
+- 確認端末: Xiaomi 12.4インチタブレット / 横置き
+- 確認結果: GitHub Actions 正常、GitHub Pages 表示正常、タブレット横置きレイアウト正常
+
+## YouTube を見る時
+
+Dashboard 常設表示を基本にしつつ、必要な時だけ YouTube を見る運用にする。
+
+推奨:
+
+- 通常時は Fully Kiosk Browser で Dashboard を表示する
+- YouTube 視聴時は Kiosk Mode を一時解除して YouTube app を使う
+- 視聴後は Fully Kiosk Browser に戻し、Start URL を再表示する
+
+避けること:
+
+- Dashboard の Start URL を YouTube に変えない
+- Fully Kiosk の許可URLに YouTube を広く混ぜない
+- Dashboard と YouTube を同じ kiosk session 内で頻繁に行き来する前提にしない
+
+理由:
+
+- YouTube はログイン、動画再生、画面回転、音量操作、広告、バックグラウンド復帰など、Dashboard 固定表示とは要求が違う
+- Dashboard 用の Kiosk 設定を強くしすぎると YouTube が使いにくくなる
+- YouTube に寄せると Dashboard の常時表示安定性が落ちる
+
+必要なら後で Fully Kiosk の App Launcher か Android ホーム画面に YouTube を置く。ただし初期運用では、手動で Kiosk Mode を抜けて YouTube app を開く方式にする。
 
 実機で文字切れ、カードのはみ出し、タップしづらさがあれば、まず `documents/*layout-preview.html` で比較してから app 側へ反映する。
