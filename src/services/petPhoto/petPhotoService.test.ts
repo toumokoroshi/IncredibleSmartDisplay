@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createPetPhotoService } from "./petPhotoService";
+import { createPetPhotoService, resolvePublicAssetPath } from "./petPhotoService";
 
 const settings = {
   provider: "staticManifest",
@@ -13,22 +13,29 @@ afterEach(() => {
 });
 
 describe("petPhotoService", () => {
-  it("loads the static manifest and selects one favorite photo for the day", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => ({
-        ok: true,
-        json: async () => ({
-          photos: [
-            { id: "mugi-001", src: "/pets/mugi-001.jpg", favorite: true },
-            { id: "mugi-002", src: "/pets/mugi-002.jpg", favorite: true },
-          ],
-        }),
-      })),
+  it("resolves public asset paths against the Vite base path", () => {
+    expect(resolvePublicAssetPath("/pets/manifest.json", "/IncredibleSmartDisplay/")).toBe("/IncredibleSmartDisplay/pets/manifest.json");
+    expect(resolvePublicAssetPath("pets/manifest.json", "/IncredibleSmartDisplay")).toBe("/IncredibleSmartDisplay/pets/manifest.json");
+    expect(resolvePublicAssetPath("https://example.com/pets/manifest.json", "/IncredibleSmartDisplay/")).toBe(
+      "https://example.com/pets/manifest.json",
     );
+  });
+
+  it("loads the static manifest and selects one favorite photo for the day", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        photos: [
+          { id: "mugi-001", src: "/pets/mugi-001.jpg", favorite: true },
+          { id: "mugi-002", src: "/pets/mugi-002.jpg", favorite: true },
+        ],
+      }),
+    }));
+    vi.stubGlobal("fetch", fetchMock);
 
     const data = await createPetPhotoService().fetch(settings);
 
+    expect(fetchMock).toHaveBeenCalledWith("/pets/manifest.json", { cache: "no-store" });
     expect(data.totalPhotos).toBe(2);
     expect(data.selectedForDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(data.photo?.src).toMatch(/^\/pets\/mugi-00[12]\.jpg$/);

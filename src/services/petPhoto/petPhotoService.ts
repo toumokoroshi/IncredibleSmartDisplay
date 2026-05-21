@@ -28,6 +28,16 @@ function hashString(value: string) {
   return hash >>> 0;
 }
 
+export function resolvePublicAssetPath(path: string, basePath = import.meta.env.BASE_URL) {
+  if (/^[a-z][a-z\d+\-.]*:/i.test(path) || path.startsWith("//")) {
+    return path;
+  }
+
+  const normalizedBase = basePath.endsWith("/") ? basePath : `${basePath}/`;
+  const normalizedPath = path.startsWith("/") ? path.slice(1) : path;
+  return `${normalizedBase}${normalizedPath}`;
+}
+
 function selectDailyPhoto(manifest: PetPhotoManifest) {
   const candidates = manifest.photos.filter((photo) => photo.favorite);
   const selectedForDate = getTodayKey();
@@ -59,11 +69,11 @@ async function fetchManifest(path: string): Promise<PetPhotoManifest> {
 export function createPetPhotoService(): WidgetService<PetPhotoSettings, PetPhotoData> {
   return {
     async fetch(settings) {
-      const manifest = await fetchManifest(settings.manifestPath);
+      const manifest = await fetchManifest(resolvePublicAssetPath(settings.manifestPath));
       const { photo, selectedForDate } = selectDailyPhoto(manifest);
 
       return {
-        photo,
+        photo: photo ? { ...photo, src: resolvePublicAssetPath(photo.src) } : undefined,
         selectedForDate,
         totalPhotos: manifest.photos.length,
       };
