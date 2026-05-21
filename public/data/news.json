@@ -1,0 +1,22 @@
+{
+  "items": [
+    {
+      "id": "static-1",
+      "title": "Static JSON news provider is available",
+      "summary": "This file proves the dashboard can read news data from a public JSON source without changing NewsWidget.",
+      "category": "System",
+      "priority": "top",
+      "source": "Local JSON",
+      "publishedAt": "2026-05-21T00:00:00.000Z"
+    },
+    {
+      "id": "static-2",
+      "title": "Mock data remains available as a fallback provider",
+      "summary": "Provider selection stays in the service layer so future RSS or worker-backed sources can be added safely.",
+      "category": "System",
+      "priority": "normal",
+      "source": "Local JSON",
+      "publishedAt": "2026-05-21T00:10:00.000Z"
+    }
+  ]
+}

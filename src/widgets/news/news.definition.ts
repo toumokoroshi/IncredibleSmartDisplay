@@ -3,13 +3,25 @@ import { z } from "zod";
 import { createNewsService } from "../../services/news/newsService";
 import { NewsWidget } from "./NewsWidget";
 
-export const newsSettingsSchema = z.object({
-  provider: z.literal("mock"),
-  feeds: z.array(z.object({ id: z.string(), name: z.string() })).min(1),
+const newsBaseSettingsSchema = {
   maxItems: z.number().int().positive(),
-  showSource: z.boolean(),
   showPublishedAt: z.boolean(),
-});
+  showSource: z.boolean(),
+};
+
+export const newsSettingsSchema = z.discriminatedUnion("provider", [
+  z.object({
+    ...newsBaseSettingsSchema,
+    feeds: z.array(z.object({ id: z.string(), name: z.string() })).min(1),
+    provider: z.literal("mock"),
+  }),
+  z.object({
+    ...newsBaseSettingsSchema,
+    cacheBusterIntervalSec: z.number().int().positive().optional(),
+    provider: z.literal("staticJson"),
+    url: z.string().min(1),
+  }),
+]);
 
 export const newsDefinition = {
   type: "news",
