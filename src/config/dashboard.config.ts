@@ -87,9 +87,9 @@ export const dashboardConfig: DashboardConfig = {
       order: 3,
       area: "sub-left",
       settings: {
-        provider: "mock",
-        // MVP keeps the registered route list in config. A future settings UI can override this per device via localStorage
-        // without requiring two-way server sync from GitHub Pages.
+        provider: "staticJson",
+        url: "/data/traffic.json",
+        cacheBusterIntervalSec: 300,
         lines: [
           { id: "jr-chuo-rapid", name: "中央線快速", operator: "JR東日本", priority: 1 },
           { id: "tokyo-metro-tozai", name: "東京メトロ東西線", operator: "東京メトロ", priority: 2 },

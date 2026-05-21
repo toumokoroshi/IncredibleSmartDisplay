@@ -3,27 +3,59 @@
   "lines": [
     {
       "id": "jr-chuo-rapid",
-      "name": "Chuo Line Rapid",
-      "operator": "JR East",
-      "status": "delayed",
-      "updatedAt": "2026-05-22T07:28:00+09:00",
-      "delayMinutes": 8,
-      "detail": "Delays on some inbound services",
-      "reason": "Congestion"
+      "name": "中央線快速",
+      "operator": "JR東日本",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:30:00+09:00"
     },
     {
       "id": "tokyo-metro-tozai",
-      "name": "Tokyo Metro Tozai Line",
-      "operator": "Tokyo Metro",
+      "name": "東京メトロ東西線",
+      "operator": "東京メトロ",
       "status": "normal",
-      "updatedAt": "2026-05-22T07:29:00+09:00"
+      "updatedAt": "2026-05-22T07:30:00+09:00"
     },
     {
       "id": "jr-yamanote",
-      "name": "Yamanote Line",
-      "operator": "JR East",
+      "name": "山手線",
+      "operator": "JR東日本",
       "status": "normal",
-      "updatedAt": "2026-05-22T07:29:00+09:00"
+      "updatedAt": "2026-05-22T07:30:00+09:00"
+    },
+    {
+      "id": "jr-sobu-local",
+      "name": "総武線各駅停車",
+      "operator": "JR東日本",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:30:00+09:00"
+    },
+    {
+      "id": "tokyo-metro-marunouchi",
+      "name": "丸ノ内線",
+      "operator": "東京メトロ",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:30:00+09:00"
+    },
+    {
+      "id": "tokyo-metro-ginza",
+      "name": "銀座線",
+      "operator": "東京メトロ",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:30:00+09:00"
+    },
+    {
+      "id": "keio-line",
+      "name": "京王線",
+      "operator": "京王電鉄",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:30:00+09:00"
+    },
+    {
+      "id": "keio-inokashira",
+      "name": "京王井の頭線",
+      "operator": "京王電鉄",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:30:00+09:00"
     }
   ]
 }

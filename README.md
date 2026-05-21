@@ -158,6 +158,58 @@ npm.cmd run prepare-pet-photos
 
 写真を追加・削除したら、manifest を作り直してから `build` / `test:run` / `lint` を確認する。
 
+## 交通情報 JSON の手動運用
+
+Traffic は `staticJson` provider で `public/data/traffic.json` を読む。初期運用では外部APIから自動取得せず、この JSON を手動更新する。
+
+更新手順:
+
+1. 公式サイトやアプリで対象路線の運行情報を確認する
+2. `public/data/traffic.json` を編集する
+3. `updatedAt` と対象 `lines[].updatedAt` を ISO 8601 文字列で更新する
+4. `npm.cmd run build`
+5. `npm.cmd run test:run`
+6. `npm.cmd run lint`
+7. commit して `develop` に push する
+8. 公開する場合は `develop` を `main` に fast-forward merge する
+
+JSON 契約:
+
+```json
+{
+  "updatedAt": "2026-05-22T07:30:00+09:00",
+  "lines": [
+    {
+      "id": "jr-chuo-rapid",
+      "name": "中央線快速",
+      "operator": "JR東日本",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:30:00+09:00"
+    }
+  ]
+}
+```
+
+必須項目:
+
+- `updatedAt`: JSON全体の更新時刻
+- `lines[].id`: `dashboard.config.ts` の `lines[].id` と一致させる
+- `lines[].name`: 表示名
+- `lines[].status`: `"normal" | "delayed" | "partiallyDelayed" | "suspended" | "unknown"`
+- `lines[].updatedAt`: 路線ごとの確認時刻
+
+任意項目:
+
+- `lines[].operator`
+- `lines[].delayMinutes`
+- `lines[].statusText`
+- `lines[].detail`
+- `lines[].reason`
+- `lines[].recoveryEstimate`
+- `lines[].alternateTransport`
+
+手動更新時は、対象8路線を原則すべて残す。未確認の路線は削除せず `status: "unknown"` にする。自動取得へ移行する場合も、この JSON 契約を維持する。
+
 ## Fully Kiosk Browser 推奨設定
 
 初期運用は常時表示モードにする。画面焼け、発熱、電池劣化が気になったら motion / screen off 運用へ切り替える。
