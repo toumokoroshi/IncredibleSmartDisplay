@@ -115,12 +115,9 @@ export const dashboardConfig: DashboardConfig = {
       order: 4,
       area: "sub-right",
       settings: {
-        provider: "mock",
-        feeds: [
-          { id: "nhk", name: "NHK" },
-          { id: "itmedia", name: "ITmedia" },
-          { id: "hackernews", name: "Hacker News" },
-        ],
+        provider: "staticJson",
+        url: "/data/news.json",
+        cacheBusterIntervalSec: 1800,
         maxItems: 5,
         showSource: true,
         showPublishedAt: true,

@@ -12,6 +12,7 @@ export type MockNewsSettings = NewsBaseSettings & {
 export type StaticJsonNewsSettings = NewsBaseSettings & {
   provider: "staticJson";
   url: string;
+  cacheBusterIntervalSec?: number;
 };
 
 export type NewsSettings = MockNewsSettings | StaticJsonNewsSettings;

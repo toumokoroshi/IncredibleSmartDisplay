@@ -1,4 +1,6 @@
 import type { WidgetService } from "../../types/widget";
+import { appendCacheBuster } from "../../utils/cacheBuster";
+import { resolvePublicAssetPath } from "../../utils/publicAssetPath";
 import { mockTrafficLines } from "./mockData";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "../../widgets/traffic";
 
@@ -10,7 +12,7 @@ const statusOrder: Record<TrafficLineData["status"], number> = {
   normal: 4,
 };
 
-function toTrafficLineData(settings: TrafficSettings) {
+function toTrafficLineData(settings: Extract<TrafficSettings, { provider: "mock" }>) {
   const configuredLineIds = new Set(settings.lines.map((line) => line.id));
   const configuredLinesById = new Map(settings.lines.map((line) => [line.id, line]));
 
@@ -35,9 +37,72 @@ function toTrafficLineData(settings: TrafficSettings) {
     });
 }
 
+function isTrafficData(value: unknown): value is TrafficData {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+
+  const payload = value as Partial<TrafficData>;
+  return typeof payload.updatedAt === "string" && Array.isArray(payload.lines) && payload.lines.every(isTrafficLineData);
+}
+
+function isTrafficLineData(value: unknown): value is TrafficLineData {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+
+  const line = value as Partial<Record<keyof TrafficLineData, unknown>>;
+  return (
+    typeof line.id === "string" &&
+    typeof line.name === "string" &&
+    optionalString(line.operator) &&
+    isTrafficStatus(line.status) &&
+    typeof line.updatedAt === "string" &&
+    (line.delayMinutes === undefined || typeof line.delayMinutes === "number") &&
+    optionalString(line.statusText) &&
+    optionalString(line.detail) &&
+    optionalString(line.reason) &&
+    optionalString(line.recoveryEstimate) &&
+    optionalString(line.alternateTransport)
+  );
+}
+
+function isTrafficStatus(value: unknown): value is TrafficLineData["status"] {
+  return value === "normal" || value === "delayed" || value === "partiallyDelayed" || value === "suspended" || value === "unknown";
+}
+
+function optionalString(value: unknown) {
+  return value === undefined || typeof value === "string";
+}
+
+async function fetchStaticJsonTraffic(settings: Extract<TrafficSettings, { provider: "staticJson" }>) {
+  const response = await fetch(appendCacheBuster(resolvePublicAssetPath(settings.url), settings.cacheBusterIntervalSec));
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch traffic JSON: ${response.status}`);
+  }
+
+  const payload: unknown = await response.json();
+  if (!isTrafficData(payload)) {
+    throw new Error("Invalid traffic JSON");
+  }
+
+  const lineIds = settings.lines ? new Set(settings.lines.map((line) => line.id)) : undefined;
+  const lines = lineIds ? payload.lines.filter((line) => lineIds.has(line.id)) : payload.lines;
+
+  return {
+    lines: lines.slice(0, settings.maxItems),
+    updatedAt: payload.updatedAt,
+  };
+}
+
 export function createTrafficService(): WidgetService<TrafficSettings, TrafficData> {
   return {
     async fetch(settings) {
+      if (settings.provider === "staticJson") {
+        return fetchStaticJsonTraffic(settings);
+      }
+
       // Operational path: keep the widget contract stable, then replace this mock source with public/static
       // traffic-status.json or a Worker/GitHub Actions generated JSON feed. Station departures should be a separate
       // data source because their freshness and API constraints differ from route operation status.

@@ -17,6 +17,7 @@ export const newsSettingsSchema = z.discriminatedUnion("provider", [
   }),
   z.object({
     ...newsBaseSettingsSchema,
+    cacheBusterIntervalSec: z.number().int().positive().optional(),
     provider: z.literal("staticJson"),
     url: z.string().min(1),
   }),

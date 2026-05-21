@@ -1,10 +1,16 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createNewsService } from "./newsService";
 
 describe("createNewsService", () => {
   beforeEach(() => {
     vi.mocked(fetch).mockReset();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("1970-01-01T00:10:30.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("returns sliced mock news data", async () => {
@@ -38,12 +44,13 @@ describe("createNewsService", () => {
     const result = await service.fetch({
       maxItems: 1,
       provider: "staticJson",
+      cacheBusterIntervalSec: 300,
       showPublishedAt: true,
       showSource: true,
       url: "/data/news.json",
     });
 
-    expect(fetch).toHaveBeenCalledWith("/data/news.json");
+    expect(fetch).toHaveBeenCalledWith("/data/news.json?v=2");
     expect(result).toEqual({
       items: [{ id: "a", title: "First", priority: "top", source: "Local" }],
     });

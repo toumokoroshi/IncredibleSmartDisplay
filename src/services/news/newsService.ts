@@ -1,4 +1,6 @@
 import type { WidgetService } from "../../types/widget";
+import { appendCacheBuster } from "../../utils/cacheBuster";
+import { resolvePublicAssetPath } from "../../utils/publicAssetPath";
 import { mockNewsData } from "./mockData";
 import type { NewsData, NewsItem, NewsSettings } from "../../widgets/news";
 
@@ -33,7 +35,7 @@ function optionalString(value: unknown) {
 }
 
 async function fetchStaticJsonNews(settings: Extract<NewsSettings, { provider: "staticJson" }>) {
-  const response = await fetch(settings.url);
+  const response = await fetch(appendCacheBuster(resolvePublicAssetPath(settings.url), settings.cacheBusterIntervalSec));
 
   if (!response.ok) {
     throw new Error(`Failed to fetch news JSON: ${response.status}`);

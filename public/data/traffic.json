@@ -1,0 +1,29 @@
+{
+  "updatedAt": "2026-05-22T07:30:00+09:00",
+  "lines": [
+    {
+      "id": "jr-chuo-rapid",
+      "name": "Chuo Line Rapid",
+      "operator": "JR East",
+      "status": "delayed",
+      "updatedAt": "2026-05-22T07:28:00+09:00",
+      "delayMinutes": 8,
+      "detail": "Delays on some inbound services",
+      "reason": "Congestion"
+    },
+    {
+      "id": "tokyo-metro-tozai",
+      "name": "Tokyo Metro Tozai Line",
+      "operator": "Tokyo Metro",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:29:00+09:00"
+    },
+    {
+      "id": "jr-yamanote",
+      "name": "Yamanote Line",
+      "operator": "JR East",
+      "status": "normal",
+      "updatedAt": "2026-05-22T07:29:00+09:00"
+    }
+  ]
+}
