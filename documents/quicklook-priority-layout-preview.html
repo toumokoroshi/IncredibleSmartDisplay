@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quick Look Priority Layout Preview</title>
+    <style>
+      :root {
+        --app-bg: #f6f8fb;
+        --panel-bg: rgba(255, 255, 255, 0.9);
+        --panel-stroke: rgba(15, 23, 42, 0.08);
+        --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+        --control-bg: #f1f5f9;
+        --radius-card: 24px;
+        --blue: #4285f4;
+        --green: #34a853;
+        --yellow: #fbbc05;
+        --red: #ea4335;
+        --pink: #d93068;
+        color: #0f172a;
+        font-family: "Google Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #fbfcfe, #eef2f7);
+      }
+
+      main {
+        display: grid;
+        gap: 22px;
+        padding: 24px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 26px;
+        line-height: 1.25;
+      }
+
+      .intro {
+        display: grid;
+        gap: 10px;
+        max-width: 1120px;
+      }
+
+      .intro p,
+      .note {
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .comparison {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .preview {
+        display: grid;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .preview h2 {
+        font-size: 18px;
+      }
+
+      .tablet {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        min-height: 0;
+        padding: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 28px;
+        background: var(--app-bg);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+      }
+
+      .grid {
+        display: grid;
+        height: 100%;
+        gap: 16px;
+      }
+
+      .current {
+        grid-template-columns: 1.45fr 0.95fr 0.82fr;
+        grid-template-rows: 14fr 43fr 43fr;
+        grid-template-areas:
+          "header header header"
+          "weather calendar traffic"
+          "weather news pet";
+      }
+
+      .proposed {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: 14fr 43fr 43fr;
+        grid-template-areas:
+          "header header header header header header header header header header header header"
+          "weather weather weather weather weather traffic traffic traffic traffic calendar calendar calendar"
+          "weather weather weather weather weather pet pet pet pet news news news";
+      }
+
+      .variant-a {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: 14fr 43fr 43fr;
+        grid-template-areas:
+          "header header header header header header header header header header header header"
+          "weather weather weather weather weather traffic traffic traffic traffic calendar calendar calendar"
+          "weather weather weather weather weather pet pet pet pet news news news";
+      }
+
+      .variant-b {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: 14fr 43fr 43fr;
+        grid-template-areas:
+          "header header header header header header header header header header header header"
+          "weather weather weather weather weather traffic traffic traffic traffic traffic calendar calendar"
+          "weather weather weather weather weather pet pet pet pet pet news news";
+      }
+
+      .variant-c {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: 14fr 43fr 43fr;
+        grid-template-areas:
+          "header header header header header header header header header header header header"
+          "weather weather weather weather traffic traffic traffic traffic traffic calendar calendar calendar"
+          "weather weather weather weather pet pet pet pet pet news news news";
+      }
+
+      .variant-d {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: 14fr 48fr 38fr;
+        grid-template-areas:
+          "header header header header header header header header header header header header"
+          "weather weather weather weather weather traffic traffic traffic traffic calendar calendar calendar"
+          "weather weather weather weather weather pet pet pet pet news news news";
+      }
+
+      .variant-e {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: 14fr 43fr 43fr;
+        grid-template-areas:
+          "header header header header header header header header header header header header"
+          "weather weather weather weather weather weather traffic traffic traffic calendar calendar calendar"
+          "weather weather weather weather weather weather pet pet pet pet news news";
+      }
+
+      .card {
+        position: relative;
+        display: grid;
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid var(--panel-stroke);
+        border-radius: var(--radius-card);
+        background: var(--panel-bg);
+        box-shadow: var(--panel-shadow);
+      }
+
+      .header {
+        grid-area: header;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 12px 22px;
+      }
+
+      .clock {
+        font-size: clamp(28px, 3.2vw, 46px);
+        font-weight: 520;
+        line-height: 1;
+      }
+
+      .date {
+        margin-top: 6px;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .status {
+        display: flex;
+        gap: 8px;
+      }
+
+      .pill {
+        min-width: 104px;
+        padding: 8px 10px;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 14px;
+        background: var(--control-bg);
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .widget {
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        gap: 12px;
+        padding: 18px;
+        border-top: 5px solid var(--accent);
+      }
+
+      .weather {
+        --accent: var(--blue);
+        grid-area: weather;
+      }
+
+      .calendar {
+        --accent: var(--green);
+        grid-area: calendar;
+      }
+
+      .traffic {
+        --accent: var(--red);
+        grid-area: traffic;
+      }
+
+      .news {
+        --accent: var(--yellow);
+        grid-area: news;
+      }
+
+      .pet {
+        --accent: var(--pink);
+        grid-area: pet;
+      }
+
+      .title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 750;
+      }
+
+      .icon {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--accent) 14%, white);
+        color: var(--accent);
+        font-weight: 900;
+      }
+
+      .weather-value {
+        align-self: center;
+        font-size: clamp(56px, 5vw, 88px);
+        font-weight: 430;
+        line-height: 1;
+      }
+
+      .content {
+        display: grid;
+        align-content: start;
+        gap: 8px;
+        min-height: 0;
+      }
+
+      .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        min-height: 32px;
+        padding: 7px 9px;
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .photo {
+        min-height: 0;
+        border-radius: 16px;
+        background:
+          linear-gradient(135deg, rgba(217, 48, 104, 0.28), transparent 48%),
+          linear-gradient(180deg, #dde7f3, #f8fafc);
+      }
+
+      .priority {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 750;
+      }
+
+      .legend {
+        display: grid;
+        gap: 8px;
+        max-width: 980px;
+        padding: 16px 18px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .patterns {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      @media (max-width: 1100px) {
+        .comparison,
+        .patterns {
+          grid-template-columns: 1fr;
+        }
+
+        .tablet {
+          aspect-ratio: auto;
+          height: 720px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="intro">
+        <h1>Quick Look Priority Layout Preview</h1>
+        <p>
+          クイックルックの情報優先度を「天気 &gt; traffic &gt; 今日のぐり &gt;= 予定 &gt;= news」に寄せるための比較案です。
+          左は現状の列幅、右は提案です。提案ではtrafficを予定より広くし、今日のぐりを予定/news以上にしています。
+        </p>
+      </section>
+
+      <section class="comparison">
+        <section class="preview">
+          <h2>現状: 天気 &gt; 予定 = news &gt; traffic = 今日のぐり</h2>
+          <p class="note">中央列が右列より広いため、予定とnewsがtraffic/今日のぐりより目立つ。</p>
+          <div class="tablet">
+            <div class="grid current">
+              <header class="card header">
+                <div>
+                  <p class="clock">07:42</p>
+                  <p class="date">Thu, May 21 / Tokyo</p>
+                </div>
+                <div class="status">
+                  <div class="pill">Online</div>
+                  <div class="pill">Last Sync</div>
+                </div>
+              </header>
+
+              <article class="card widget weather">
+                <div class="title"><span>Weather</span><span class="icon">W</span></div>
+                <div class="weather-value">24℃</div>
+                <div class="content">
+                  <div class="row"><span>Rain</span><span>20%</span></div>
+                  <div class="row"><span>Wind</span><span>2 m/s</span></div>
+                </div>
+                <div class="priority">Priority 1</div>
+              </article>
+
+              <article class="card widget calendar">
+                <div class="title"><span>予定</span><span class="icon">C</span></div>
+                <div class="content">
+                  <div class="row"><span>09:00</span><span>朝会</span></div>
+                  <div class="row"><span>13:00</span><span>外出</span></div>
+                  <div class="row"><span>18:30</span><span>夕食</span></div>
+                </div>
+                <div class="priority">Priority 2</div>
+              </article>
+
+              <article class="card widget traffic">
+                <div class="title"><span>Traffic</span><span class="icon">T</span></div>
+                <div class="content">
+                  <div class="row"><span>中央線</span><span>+12</span></div>
+                  <div class="row"><span>東西線</span><span>一部</span></div>
+                </div>
+                <div class="priority">Priority 3</div>
+              </article>
+
+              <article class="card widget news">
+                <div class="title"><span>News</span><span class="icon">N</span></div>
+                <div class="content">
+                  <div class="row"><span>NHK</span><span>主要ニュース</span></div>
+                  <div class="row"><span>IT</span><span>技術トピック</span></div>
+                  <div class="row"><span>HN</span><span>話題</span></div>
+                </div>
+                <div class="priority">Priority 2</div>
+              </article>
+
+              <article class="card widget pet">
+                <div class="title"><span>今日のぐり</span><span class="icon">P</span></div>
+                <div class="photo"></div>
+                <div class="priority">Priority 3</div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="preview">
+          <h2>提案: 天気 &gt; traffic &gt; 今日のぐり &gt;= 予定 &gt;= news</h2>
+          <p class="note">12列グリッドにして、trafficを予定より広くする。今日のぐりはnewsより広く、予定と同程度以上。</p>
+          <div class="tablet">
+            <div class="grid proposed">
+              <header class="card header">
+                <div>
+                  <p class="clock">07:42</p>
+                  <p class="date">Thu, May 21 / Tokyo</p>
+                </div>
+                <div class="status">
+                  <div class="pill">Online</div>
+                  <div class="pill">Last Sync</div>
+                </div>
+              </header>
+
+              <article class="card widget weather">
+                <div class="title"><span>Weather</span><span class="icon">W</span></div>
+                <div class="weather-value">24℃</div>
+                <div class="content">
+                  <div class="row"><span>Rain</span><span>20%</span></div>
+                  <div class="row"><span>Wind</span><span>2 m/s</span></div>
+                </div>
+                <div class="priority">Priority 1</div>
+              </article>
+
+              <article class="card widget calendar">
+                <div class="title"><span>予定</span><span class="icon">C</span></div>
+                <div class="content">
+                  <div class="row"><span>09:00</span><span>朝会</span></div>
+                  <div class="row"><span>13:00</span><span>外出</span></div>
+                </div>
+                <div class="priority">Priority 4</div>
+              </article>
+
+              <article class="card widget traffic">
+                <div class="title"><span>Traffic</span><span class="icon">T</span></div>
+                <div class="content">
+                  <div class="row"><span>中央線</span><span>+12</span></div>
+                  <div class="row"><span>東西線</span><span>一部</span></div>
+                  <div class="row"><span>山手線</span><span>OK</span></div>
+                </div>
+                <div class="priority">Priority 2</div>
+              </article>
+
+              <article class="card widget news">
+                <div class="title"><span>News</span><span class="icon">N</span></div>
+                <div class="content">
+                  <div class="row"><span>NHK</span><span>主要ニュース</span></div>
+                  <div class="row"><span>IT</span><span>技術トピック</span></div>
+                </div>
+                <div class="priority">Priority 5</div>
+              </article>
+
+              <article class="card widget pet">
+                <div class="title"><span>今日のぐり</span><span class="icon">P</span></div>
+                <div class="photo"></div>
+                <div class="priority">Priority 3</div>
+              </article>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section class="legend">
+        <p>
+          実装に進む場合は、ホームグリッドを現在の3列指定から12列指定へ変更する想定です。
+          ウィジェットの順序やサービス層には触れず、`src/index.css` のホーム配置だけを変更できます。
+        </p>
+      </section>
+
+      <section class="intro">
+        <h1>Trafficを大きくする追加パターン</h1>
+        <p>
+          下の案はtrafficを大きくしたい場合の比較です。Aは優先度どおりの穏当案、B/Cはtrafficを強める案、
+          Dは上段の視認性重視、Eは天気を最大維持しつつtrafficを予定より上げる案です。
+        </p>
+      </section>
+
+      <section class="patterns">
+        <section class="preview">
+          <h2>A: trafficを予定より広くする標準案</h2>
+          <p class="note">traffic 4列、予定 3列。今日のぐり 4列、news 3列。新しい優先度の表現は一番素直。</p>
+          <div class="tablet">
+            <div class="grid variant-a">
+              <header class="card header"><div><p class="clock">07:42</p><p class="date">Thu, May 21 / Tokyo</p></div><div class="status"><div class="pill">Online</div><div class="pill">Last Sync</div></div></header>
+              <article class="card widget weather"><div class="title"><span>Weather</span><span class="icon">W</span></div><div class="weather-value">24℃</div><div class="content"><div class="row"><span>Rain</span><span>20%</span></div><div class="row"><span>Wind</span><span>2 m/s</span></div></div><div class="priority">5列 x 2段</div></article>
+              <article class="card widget calendar"><div class="title"><span>予定</span><span class="icon">C</span></div><div class="content"><div class="row"><span>09:00</span><span>朝会</span></div><div class="row"><span>13:00</span><span>外出</span></div></div><div class="priority">3列</div></article>
+              <article class="card widget traffic"><div class="title"><span>Traffic</span><span class="icon">T</span></div><div class="content"><div class="row"><span>中央線</span><span>+12</span></div><div class="row"><span>東西線</span><span>一部</span></div><div class="row"><span>山手線</span><span>OK</span></div></div><div class="priority">4列</div></article>
+              <article class="card widget news"><div class="title"><span>News</span><span class="icon">N</span></div><div class="content"><div class="row"><span>NHK</span><span>主要</span></div><div class="row"><span>IT</span><span>技術</span></div></div><div class="priority">3列</div></article>
+              <article class="card widget pet"><div class="title"><span>今日のぐり</span><span class="icon">P</span></div><div class="photo"></div><div class="priority">4列</div></article>
+            </div>
+          </div>
+        </section>
+
+        <section class="preview">
+          <h2>B: traffic最優先寄せ</h2>
+          <p class="note">traffic 5列、予定 2列。天気の次にtrafficを明確に見せる。予定は要約表示前提。</p>
+          <div class="tablet">
+            <div class="grid variant-b">
+              <header class="card header"><div><p class="clock">07:42</p><p class="date">Thu, May 21 / Tokyo</p></div><div class="status"><div class="pill">Online</div><div class="pill">Last Sync</div></div></header>
+              <article class="card widget weather"><div class="title"><span>Weather</span><span class="icon">W</span></div><div class="weather-value">24℃</div><div class="content"><div class="row"><span>Rain</span><span>20%</span></div><div class="row"><span>Wind</span><span>2 m/s</span></div></div><div class="priority">5列 x 2段</div></article>
+              <article class="card widget calendar"><div class="title"><span>予定</span><span class="icon">C</span></div><div class="content"><div class="row"><span>09:00</span><span>朝会</span></div><div class="row"><span>13:00</span><span>外出</span></div></div><div class="priority">2列</div></article>
+              <article class="card widget traffic"><div class="title"><span>Traffic</span><span class="icon">T</span></div><div class="content"><div class="row"><span>中央線</span><span>+12</span></div><div class="row"><span>東西線</span><span>一部</span></div><div class="row"><span>山手線</span><span>OK</span></div><div class="row"><span>総武線</span><span>OK</span></div></div><div class="priority">5列</div></article>
+              <article class="card widget news"><div class="title"><span>News</span><span class="icon">N</span></div><div class="content"><div class="row"><span>NHK</span><span>主要</span></div></div><div class="priority">2列</div></article>
+              <article class="card widget pet"><div class="title"><span>今日のぐり</span><span class="icon">P</span></div><div class="photo"></div><div class="priority">5列</div></article>
+            </div>
+          </div>
+        </section>
+
+        <section class="preview">
+          <h2>C: traffic強め / 今日のぐりも大きめ</h2>
+          <p class="note">天気を4列にして、traffic 5列、今日のぐり 5列。trafficと写真の存在感を上げる案。</p>
+          <div class="tablet">
+            <div class="grid variant-c">
+              <header class="card header"><div><p class="clock">07:42</p><p class="date">Thu, May 21 / Tokyo</p></div><div class="status"><div class="pill">Online</div><div class="pill">Last Sync</div></div></header>
+              <article class="card widget weather"><div class="title"><span>Weather</span><span class="icon">W</span></div><div class="weather-value">24℃</div><div class="content"><div class="row"><span>Rain</span><span>20%</span></div><div class="row"><span>Wind</span><span>2 m/s</span></div></div><div class="priority">4列 x 2段</div></article>
+              <article class="card widget calendar"><div class="title"><span>予定</span><span class="icon">C</span></div><div class="content"><div class="row"><span>09:00</span><span>朝会</span></div><div class="row"><span>13:00</span><span>外出</span></div></div><div class="priority">3列</div></article>
+              <article class="card widget traffic"><div class="title"><span>Traffic</span><span class="icon">T</span></div><div class="content"><div class="row"><span>中央線</span><span>+12</span></div><div class="row"><span>東西線</span><span>一部</span></div><div class="row"><span>山手線</span><span>OK</span></div><div class="row"><span>総武線</span><span>OK</span></div></div><div class="priority">5列</div></article>
+              <article class="card widget news"><div class="title"><span>News</span><span class="icon">N</span></div><div class="content"><div class="row"><span>NHK</span><span>主要</span></div><div class="row"><span>IT</span><span>技術</span></div></div><div class="priority">3列</div></article>
+              <article class="card widget pet"><div class="title"><span>今日のぐり</span><span class="icon">P</span></div><div class="photo"></div><div class="priority">5列</div></article>
+            </div>
+          </div>
+        </section>
+
+        <section class="preview">
+          <h2>D: 上段をtraffic寄りに高くする</h2>
+          <p class="note">traffic 4列、予定 3列。上段を高くして運行情報を読みやすくする。newsは控えめ。</p>
+          <div class="tablet">
+            <div class="grid variant-d">
+              <header class="card header"><div><p class="clock">07:42</p><p class="date">Thu, May 21 / Tokyo</p></div><div class="status"><div class="pill">Online</div><div class="pill">Last Sync</div></div></header>
+              <article class="card widget weather"><div class="title"><span>Weather</span><span class="icon">W</span></div><div class="weather-value">24℃</div><div class="content"><div class="row"><span>Rain</span><span>20%</span></div><div class="row"><span>Wind</span><span>2 m/s</span></div></div><div class="priority">5列 x 2段</div></article>
+              <article class="card widget calendar"><div class="title"><span>予定</span><span class="icon">C</span></div><div class="content"><div class="row"><span>09:00</span><span>朝会</span></div><div class="row"><span>13:00</span><span>外出</span></div></div><div class="priority">3列 / 高め</div></article>
+              <article class="card widget traffic"><div class="title"><span>Traffic</span><span class="icon">T</span></div><div class="content"><div class="row"><span>中央線</span><span>+12</span></div><div class="row"><span>東西線</span><span>一部</span></div><div class="row"><span>山手線</span><span>OK</span></div><div class="row"><span>総武線</span><span>OK</span></div></div><div class="priority">4列 / 高め</div></article>
+              <article class="card widget news"><div class="title"><span>News</span><span class="icon">N</span></div><div class="content"><div class="row"><span>NHK</span><span>主要</span></div></div><div class="priority">2列</div></article>
+              <article class="card widget pet"><div class="title"><span>今日のぐり</span><span class="icon">P</span></div><div class="photo"></div><div class="priority">5列</div></article>
+            </div>
+          </div>
+        </section>
+
+        <section class="preview">
+          <h2>E: 天気最大維持 / trafficを予定より上に</h2>
+          <p class="note">天気を6列のまま広く保つ。traffic 3列、予定 3列で、今日のぐりは4列、newsは2列。</p>
+          <div class="tablet">
+            <div class="grid variant-e">
+              <header class="card header"><div><p class="clock">07:42</p><p class="date">Thu, May 21 / Tokyo</p></div><div class="status"><div class="pill">Online</div><div class="pill">Last Sync</div></div></header>
+              <article class="card widget weather"><div class="title"><span>Weather</span><span class="icon">W</span></div><div class="weather-value">24℃</div><div class="content"><div class="row"><span>Rain</span><span>20%</span></div><div class="row"><span>Wind</span><span>2 m/s</span></div></div><div class="priority">6列 x 2段</div></article>
+              <article class="card widget calendar"><div class="title"><span>予定</span><span class="icon">C</span></div><div class="content"><div class="row"><span>09:00</span><span>朝会</span></div><div class="row"><span>13:00</span><span>外出</span></div></div><div class="priority">3列</div></article>
+              <article class="card widget traffic"><div class="title"><span>Traffic</span><span class="icon">T</span></div><div class="content"><div class="row"><span>中央線</span><span>+12</span></div><div class="row"><span>東西線</span><span>一部</span></div><div class="row"><span>山手線</span><span>OK</span></div></div><div class="priority">3列</div></article>
+              <article class="card widget news"><div class="title"><span>News</span><span class="icon">N</span></div><div class="content"><div class="row"><span>NHK</span><span>主要</span></div></div><div class="priority">2列</div></article>
+              <article class="card widget pet"><div class="title"><span>今日のぐり</span><span class="icon">P</span></div><div class="photo"></div><div class="priority">4列</div></article>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
