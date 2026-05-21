@@ -37,6 +37,9 @@ export function HeaderBar({
           ) : null}
           <StatusPill label={status.online ? "Online" : "Offline"} value={status.online ? "Connected" : "Disconnected"} />
           <StatusPill label="Last Sync" value={syncLabel} />
+          <StatusPill label="Syncing" value={String(status.refreshingCount)} />
+          <StatusPill label="Issues" value={String(status.errorCount)} />
+          <StatusPill label="Stale" value={String(status.staleCount)} />
         </div>
       </div>
     </header>
