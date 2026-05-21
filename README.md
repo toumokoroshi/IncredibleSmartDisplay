@@ -10,7 +10,7 @@
 - `develop`: 次の公開候補。通常の作業結果を集約して検証する
 - `feature/*`: 個別作業用。README、UI、CI、依存更新など目的ごとに分ける
 
-反映順:
+反映順。PRは使わず、ローカルで検証してから fast-forward merge する。
 
 ```text
 feature/* -> develop -> main -> GitHub Pages
@@ -19,32 +19,50 @@ feature/* -> develop -> main -> GitHub Pages
 運用ルール:
 
 - `main` へ入ると GitHub Pages deploy が走る
-- `develop` と `feature/*` では CI のみ走らせ、deploy しない
+- `develop` と `feature/*` を push すると CI のみ走り、deploy はしない
 - `main` へ入れる前に `build` / `test:run` / `lint` を通す
+- `main` への反映は `git merge --ff-only develop` を基本にする
+- `main` では直接作業しない。修正が必要なら `develop` に戻って直す
 - UI変更、CI変更、依存更新、リファクタは別コミットにする
 - `develop` と `main` の差分を大きくしすぎない
 
-現状メモ:
-
-- 旧作業ブランチ名は `development`
-- 今後は `develop` に寄せる
-- `development` に残っている変更は `develop` へ引き継いだ後、リモート整理を検討する
-
-ローカル移行コマンド例:
+普段の作業開始:
 
 ```powershell
-git fetch origin
-git switch development
-git switch -c develop
+git switch develop
 ```
 
-リモートへ反映する場合:
+作業後に `develop` へ保存:
 
 ```powershell
-git push -u origin develop
+git status
+npm.cmd run build
+npm.cmd run test:run
+npm.cmd run lint
+git add <changed-files>
+git commit -m "<purpose>"
+git push origin develop
 ```
 
-`main` は公開用なので、`develop` で検証した後に merge する。
+公開する時:
+
+```powershell
+git switch develop
+git status
+npm.cmd run build
+npm.cmd run test:run
+npm.cmd run lint
+
+git switch main
+git pull --ff-only origin main
+git merge --ff-only develop
+git push origin main
+git switch develop
+```
+
+`git merge --ff-only develop` が失敗した場合は、`main` と `develop` が分岐している。無理に merge commit を作らず、先に状況を確認する。
+
+旧 `development` branch は使わない。`develop` 運用が安定した後で、必要なら GitHub 上とローカルから削除する。
 
 ## 検証コマンド
 
