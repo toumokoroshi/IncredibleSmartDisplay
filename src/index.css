@@ -57,12 +57,12 @@ body {
 }
 
 .dashboard-grid {
-  grid-template-columns: 1.45fr 0.95fr 0.82fr;
-  grid-template-rows: 14fr 43fr 43fr;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: 14fr 48fr 38fr;
   grid-template-areas:
-    "header header header"
-    "weather calendar traffic"
-    "weather news pet";
+    "header header header header header header header header header header header header"
+    "weather weather weather weather weather traffic traffic traffic traffic calendar calendar calendar"
+    "weather weather weather weather weather pet pet pet pet news news news";
   gap: 1rem;
   max-width: 1520px;
 }
