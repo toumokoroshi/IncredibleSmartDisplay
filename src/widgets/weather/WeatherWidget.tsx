@@ -98,7 +98,7 @@ function NowWeatherSummary({
   const condition = getDisplayCondition(data);
 
   return (
-    <div className={`${compact ? "flex justify-between" : "grid grid-cols-[minmax(0,1fr)_240px]"} min-h-0 items-center gap-6 overflow-hidden`}>
+    <div className={`${compact ? "flex justify-between" : "grid grid-cols-[minmax(0,1fr)_240px]"} h-full min-h-0 items-center gap-6 overflow-hidden`}>
       <div className="min-w-0">
         <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Now</p>
         <p className={`${compact ? "mt-0 text-lg" : "mt-1 text-xl"} text-slate-300`}>{data.locationName}</p>
@@ -142,7 +142,7 @@ function DailyWeatherSummary({
   const summaryText = showSummary ? getDailyJudgementSummary(summary, judgementHourly) : "";
 
   return (
-    <div className={`${compact ? "px-3 py-2" : "px-5 py-4"} weather-metric overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]`}>
+    <div className={`${compact ? "px-3 py-2" : "px-5 py-4"} weather-metric h-full min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]`}>
       <div className={`grid items-center ${compact ? "grid-cols-[auto_1fr] gap-2" : "grid-cols-[138px_minmax(0,1fr)] gap-4"}`}>
         <div className="-ml-2">
           <WeatherConditionIcon condition={condition} size={compact ? 82 : 138} />
@@ -213,7 +213,7 @@ function NextHoursStrip({ hourly, iconSize = 34 }: { hourly: WeatherHourlyPoint[
   }
 
   return (
-    <div className="weather-metric rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
+    <div className="weather-metric h-full min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Next hours</p>
         <p className="text-xs font-medium text-slate-500">Rain / Temp</p>
