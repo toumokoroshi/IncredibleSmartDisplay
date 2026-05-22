@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Viewport Debug</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: #f4f7fb;
+        color: #0f172a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+      }
+
+      main {
+        max-width: 1120px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 32px;
+        line-height: 1.1;
+      }
+
+      p {
+        margin: 0;
+        color: #475569;
+        font-size: 16px;
+        line-height: 1.55;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin: 24px 0;
+      }
+
+      .panel {
+        border: 1px solid #dbe3ef;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: 0 16px 40px rgb(15 23 42 / 0.08);
+      }
+
+      .metric {
+        padding: 18px;
+      }
+
+      .metric-label {
+        display: block;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .metric-value {
+        display: block;
+        margin-top: 8px;
+        font-size: 34px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .section {
+        padding: 18px;
+        margin-top: 16px;
+      }
+
+      .section h2 {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 10px 8px;
+        border-top: 1px solid #e2e8f0;
+        text-align: left;
+        vertical-align: top;
+        font-size: 15px;
+      }
+
+      th {
+        width: 34%;
+        color: #334155;
+        font-weight: 700;
+      }
+
+      td {
+        color: #0f172a;
+        font-family:
+          ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          "Liberation Mono",
+          monospace;
+        overflow-wrap: anywhere;
+      }
+
+      .note {
+        margin-top: 10px;
+        color: #64748b;
+        font-size: 14px;
+      }
+
+      .viewport-box {
+        position: relative;
+        height: 240px;
+        margin-top: 12px;
+        overflow: hidden;
+        border: 1px dashed #94a3b8;
+        border-radius: 12px;
+        background:
+          linear-gradient(90deg, rgb(37 99 235 / 0.08) 1px, transparent 1px),
+          linear-gradient(rgb(37 99 235 / 0.08) 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+
+      .target-box {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        width: min(60%, 360px);
+        aspect-ratio: 3 / 2;
+        border: 3px solid #2563eb;
+        border-radius: 10px;
+        background: rgb(37 99 235 / 0.08);
+      }
+
+      .current-box {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        width: min(55%, 330px);
+        border: 3px solid #f97316;
+        border-radius: 10px;
+        background: rgb(249 115 22 / 0.08);
+      }
+
+      .box-label {
+        position: absolute;
+        left: 10px;
+        top: 8px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      button {
+        min-height: 44px;
+        margin-top: 14px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 999px;
+        background: #0f172a;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          padding: 16px;
+        }
+
+        .summary {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Viewport Debug</h1>
+      <p>
+        Use this page in Fully Kiosk Browser with and without "Set initial scale for older websites".
+        The dashboard layout is driven by CSS pixels, especially window.innerWidth and window.innerHeight.
+      </p>
+
+      <section class="summary" aria-label="Key metrics">
+        <div class="panel metric">
+          <span class="metric-label">CSS viewport</span>
+          <span class="metric-value" id="cssViewport">-</span>
+        </div>
+        <div class="panel metric">
+          <span class="metric-label">Aspect ratio</span>
+          <span class="metric-value" id="aspectRatio">-</span>
+        </div>
+        <div class="panel metric">
+          <span class="metric-label">Device pixel ratio</span>
+          <span class="metric-value" id="devicePixelRatio">-</span>
+        </div>
+      </section>
+
+      <section class="panel section">
+        <h2>What to compare</h2>
+        <p>
+          Xiaomi Pad 6S Pro screenshot size is 3048 x 2032 physical pixels. At DPR 2, the expected
+          CSS viewport is about 1524 x 1016. If Fully Kiosk reports a much taller CSS viewport or a
+          different scale, the app can lay out as if the screen had a different size.
+        </p>
+        <button type="button" id="copyButton">Copy metrics</button>
+        <p class="note" id="copyStatus"></p>
+      </section>
+
+      <section class="panel section">
+        <h2>Live values</h2>
+        <table>
+          <tbody id="metricsTable"></tbody>
+        </table>
+      </section>
+
+      <section class="panel section">
+        <h2>3:2 reference</h2>
+        <p>
+          Blue is the target 3:2 frame. Orange uses the current CSS viewport aspect ratio.
+        </p>
+        <div class="viewport-box" aria-hidden="true">
+          <div class="target-box"><span class="box-label">3:2 target</span></div>
+          <div class="current-box" id="currentBox"><span class="box-label" id="currentBoxLabel">current</span></div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const formatNumber = (value) => {
+        if (typeof value !== "number" || Number.isNaN(value)) {
+          return "-";
+        }
+
+        return Number.isInteger(value) ? String(value) : value.toFixed(3);
+      };
+
+      const getMetrics = () => {
+        const doc = document.documentElement;
+        const visualViewport = window.visualViewport;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        return {
+          timestamp: new Date().toISOString(),
+          innerWidth: width,
+          innerHeight: height,
+          aspectRatio: width / height,
+          devicePixelRatio: window.devicePixelRatio,
+          visualViewportWidth: visualViewport ? visualViewport.width : null,
+          visualViewportHeight: visualViewport ? visualViewport.height : null,
+          visualViewportScale: visualViewport ? visualViewport.scale : null,
+          documentClientWidth: doc.clientWidth,
+          documentClientHeight: doc.clientHeight,
+          screenWidth: window.screen.width,
+          screenHeight: window.screen.height,
+          screenAvailWidth: window.screen.availWidth,
+          screenAvailHeight: window.screen.availHeight,
+          orientationType: window.screen.orientation ? window.screen.orientation.type : "unknown",
+          orientationAngle: window.screen.orientation ? window.screen.orientation.angle : "unknown",
+          pageZoomEstimate: window.outerWidth ? width / window.outerWidth : null,
+          userAgent: navigator.userAgent,
+        };
+      };
+
+      const render = () => {
+        const metrics = getMetrics();
+        const rows = Object.entries(metrics)
+          .map(([key, value]) => {
+            const output = typeof value === "number" ? formatNumber(value) : value ?? "-";
+            return `<tr><th>${key}</th><td>${output}</td></tr>`;
+          })
+          .join("");
+
+        document.getElementById("cssViewport").textContent = `${metrics.innerWidth} x ${metrics.innerHeight}`;
+        document.getElementById("aspectRatio").textContent = formatNumber(metrics.aspectRatio);
+        document.getElementById("devicePixelRatio").textContent = formatNumber(metrics.devicePixelRatio);
+        document.getElementById("metricsTable").innerHTML = rows;
+
+        const currentBox = document.getElementById("currentBox");
+        const currentBoxLabel = document.getElementById("currentBoxLabel");
+        currentBox.style.aspectRatio = `${metrics.innerWidth} / ${metrics.innerHeight}`;
+        currentBoxLabel.textContent = `current ${formatNumber(metrics.aspectRatio)}`;
+      };
+
+      document.getElementById("copyButton").addEventListener("click", async () => {
+        const metrics = getMetrics();
+        const text = JSON.stringify(metrics, null, 2);
+
+        try {
+          await navigator.clipboard.writeText(text);
+          document.getElementById("copyStatus").textContent = "Copied. Paste this into a memo for comparison.";
+        } catch {
+          document.getElementById("copyStatus").textContent = text;
+        }
+      });
+
+      window.addEventListener("resize", render);
+      window.visualViewport?.addEventListener("resize", render);
+      window.screen.orientation?.addEventListener("change", render);
+      render();
+      window.setInterval(render, 1000);
+    </script>
+  </body>
+</html>
