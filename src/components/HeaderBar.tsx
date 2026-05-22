@@ -1,6 +1,7 @@
 import { House } from "lucide-react";
+import type { ReactNode } from "react";
 
-import { formatDistanceToNowLabel, formatHeaderDateLabel, formatTimeLabel } from "../utils/date";
+import { formatHeaderDateLabel, formatTimeLabel } from "../utils/date";
 import type { HeaderStatus } from "../types/dashboard";
 
 export function HeaderBar({
@@ -15,7 +16,7 @@ export function HeaderBar({
   status: HeaderStatus;
 }) {
   const now = new Date();
-  const syncLabel = status.lastSyncedAt ? formatDistanceToNowLabel(status.lastSyncedAt) : "Waiting";
+  const syncLabel = status.lastSyncedAt ? `Updated ${formatTimeLabel(new Date(status.lastSyncedAt))}` : "Waiting";
 
   return (
     <header className="dashboard-header col-span-2 rounded-[var(--radius-card)] border border-[color:var(--panel-stroke)] bg-[var(--header-bg)] px-6 py-3 shadow-[var(--panel-shadow)]">
@@ -24,7 +25,7 @@ export function HeaderBar({
           <p className="app-clock text-[48px] font-semibold leading-none text-white">{formatTimeLabel(now)}</p>
           <p className="mt-2 text-sm font-semibold tracking-[0.04em] text-slate-500">{formatHeaderDateLabel(now)} · {locationName ?? "Tokyo"}</p>
         </div>
-        <div className="status-grid flex flex-wrap justify-end gap-2 text-right text-sm text-slate-300">
+        <div className="status-grid flex flex-wrap items-start justify-end gap-2 text-right text-sm text-slate-300">
           {isDetailMode ? (
             <button
               type="button"
@@ -35,22 +36,23 @@ export function HeaderBar({
               <House aria-hidden="true" className="inline-block align-[-0.2em]" size={20} strokeWidth={1.8} />
             </button>
           ) : null}
-          <StatusPill label={status.online ? "Online" : "Offline"} value={status.online ? "Connected" : "Disconnected"} />
-          <StatusPill label="Last Sync" value={syncLabel} />
-          <StatusPill label="Syncing" value={String(status.refreshingCount)} />
-          <StatusPill label="Issues" value={String(status.errorCount)} />
-          <StatusPill label="Stale" value={String(status.staleCount)} />
+          <QuietStatusPill>{syncLabel}</QuietStatusPill>
+          <QuietStatusPill tone={status.online ? "ok" : "warn"}>{status.online ? "Online" : "Offline"}</QuietStatusPill>
+          {status.refreshingCount > 0 ? <QuietStatusPill>Syncing {status.refreshingCount}</QuietStatusPill> : null}
+          {status.errorCount > 0 ? <QuietStatusPill tone="warn">Issues {status.errorCount}</QuietStatusPill> : null}
+          {status.staleCount > 0 ? <QuietStatusPill tone="warn">Stale {status.staleCount}</QuietStatusPill> : null}
         </div>
       </div>
     </header>
   );
 }
 
-function StatusPill({ label, value }: { label: string; value: string }) {
+function QuietStatusPill({ children, tone = "default" }: { children: ReactNode; tone?: "default" | "ok" | "warn" }) {
+  const toneClass = tone === "ok" ? "text-emerald-700" : tone === "warn" ? "text-amber-700" : "text-slate-600";
+
   return (
-    <div className="status-pill min-w-28 rounded-[calc(var(--radius-card)-10px)] border border-[color:var(--panel-stroke)] bg-[var(--control-bg)] px-3 py-2">
-      <p className="status-label text-[11px] uppercase tracking-[0.2em] text-slate-400">{label}</p>
-      <p className="status-value mt-1 text-base font-semibold text-white">{value}</p>
+    <div className={`status-pill inline-flex min-h-9 items-center rounded-full border border-[color:var(--panel-stroke)] bg-[rgba(241,245,249,0.62)] px-3 py-1 text-base font-semibold ${toneClass}`}>
+      {children}
     </div>
   );
 }
