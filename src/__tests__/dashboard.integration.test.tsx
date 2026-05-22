@@ -60,7 +60,8 @@ describe("dashboard integration", () => {
     render(<App />);
 
     expect(await screen.findByText(/Tokyo/)).toBeInTheDocument();
-    expect(screen.getByText("Last Sync")).toBeInTheDocument();
+    expect(screen.getByText("Online")).toBeInTheDocument();
+    expect(screen.queryByText("Last Sync")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Weather detail" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Traffic detail" })).toBeInTheDocument();
 

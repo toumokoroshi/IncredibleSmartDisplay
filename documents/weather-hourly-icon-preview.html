@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather hourly icon preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family:
+          Inter, "Segoe UI", "Noto Sans JP", system-ui, -apple-system,
+          sans-serif;
+        background: #07111f;
+        color: #e5eefb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 20% 10%, rgb(14 165 233 / 16%), transparent 28rem),
+          #07111f;
+      }
+
+      main {
+        display: grid;
+        gap: 20px;
+        max-width: 1500px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      .preview-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .panel {
+        min-width: 0;
+        border: 1px solid rgb(255 255 255 / 12%);
+        border-radius: 8px;
+        background: rgb(255 255 255 / 4%);
+        padding: 16px;
+      }
+
+      .panel h2 {
+        margin: 0 0 12px;
+        font-size: 18px;
+        letter-spacing: 0;
+      }
+
+      .weather-card {
+        height: 720px;
+        overflow: hidden;
+        border: 1px solid rgb(255 255 255 / 12%);
+        border-radius: 8px;
+        background: rgb(15 23 42 / 94%);
+        padding: 20px;
+      }
+
+      .detail-grid {
+        display: grid;
+        height: 100%;
+        min-height: 0;
+        grid-template-rows: 9.2rem 7.5rem minmax(0, 1fr);
+        gap: 8px;
+      }
+
+      .top,
+      .daily {
+        display: grid;
+        gap: 8px;
+      }
+
+      .top {
+        grid-template-columns: 1.1fr 0.9fr;
+      }
+
+      .daily {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .block {
+        border: 1px solid rgb(255 255 255 / 10%);
+        border-radius: 8px;
+        background: rgb(255 255 255 / 4%);
+        padding: 14px;
+      }
+
+      .hero {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .hero strong {
+        display: block;
+        font-size: 56px;
+        line-height: 1;
+      }
+
+      .muted {
+        color: #94a3b8;
+      }
+
+      .hourly-wrap {
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid rgb(255 255 255 / 10%);
+        border-radius: 8px;
+        background: rgb(255 255 255 / 3%);
+        padding: 8px;
+      }
+
+      .scroll {
+        min-height: 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 32px;
+      }
+
+      .timeline {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 4.5rem;
+        align-items: stretch;
+        min-width: max-content;
+      }
+
+      .label,
+      .col {
+        display: grid;
+        justify-items: center;
+        text-align: center;
+        font-size: 13px;
+        color: #475569;
+      }
+
+      .label {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        width: 3.5rem;
+        justify-items: start;
+        background: rgb(255 255 255 / 95%);
+        font-weight: 700;
+        color: #64748b;
+      }
+
+      .current .time {
+        border-bottom-color: #3b82f6;
+        color: #f8fafc;
+        font-weight: 700;
+      }
+
+      .time {
+        display: grid;
+        width: 100%;
+        place-items: center;
+        border-bottom: 2px solid #cbd5e1;
+      }
+
+      .cell {
+        display: grid;
+        place-items: center;
+      }
+
+      .weather-icon {
+        filter: drop-shadow(0 2px 3px rgb(15 23 42 / 18%));
+      }
+
+      .wind {
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        line-height: 1;
+      }
+
+      .current-layout .label,
+      .current-layout .col {
+        grid-template-rows: 1.45rem 1.55rem 1.55rem 1.55rem 1.55rem 3.6rem;
+      }
+
+      .proposed-layout .label,
+      .proposed-layout .col {
+        grid-template-rows: 1.45rem 2.35rem 1.35rem 1.35rem 1.35rem 3.25rem;
+      }
+
+      .proposed-layout .timeline {
+        grid-auto-columns: 4.75rem;
+      }
+
+      .note {
+        margin: 10px 0 0;
+        color: #94a3b8;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 900px) {
+        .preview-grid {
+          grid-template-columns: 1fr;
+        }
+
+        body {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Weather detail hourly icon preview</h1>
+      <div class="preview-grid">
+        <section class="panel current-layout">
+          <h2>Current: icon 18px / weather row 1.55rem</h2>
+          <div class="weather-card">
+            <div class="detail-grid">
+              <div class="top">
+                <div class="block hero">
+                  <div>
+                    <span class="muted">Now</span>
+                    <strong>23℃</strong>
+                    <div class="muted">Tokyo / 晴れ時々くもり</div>
+                  </div>
+                  <img alt="晴れ時々くもり" height="88" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" width="88" />
+                </div>
+                <div class="block">
+                  <div class="muted">Alerts</div>
+                  <p>昼過ぎに弱い雨の可能性</p>
+                  <p>南西の風 4m/s</p>
+                </div>
+              </div>
+              <div class="daily">
+                <div class="block">Today / 晴れ時々くもり</div>
+                <div class="block">Tomorrow / くもり</div>
+              </div>
+              <div class="hourly-wrap">
+                <div class="scroll">
+                  <div class="timeline" data-icon-size="18"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="note">現状はアイコンが 18px で、タブレットを離れて見ると天気差分が読み取りづらい。</p>
+        </section>
+
+        <section class="panel proposed-layout">
+          <h2>Proposed: icon 30px / weather row 2.35rem</h2>
+          <div class="weather-card">
+            <div class="detail-grid">
+              <div class="top">
+                <div class="block hero">
+                  <div>
+                    <span class="muted">Now</span>
+                    <strong>23℃</strong>
+                    <div class="muted">Tokyo / 晴れ時々くもり</div>
+                  </div>
+                  <img alt="晴れ時々くもり" height="88" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" width="88" />
+                </div>
+                <div class="block">
+                  <div class="muted">Alerts</div>
+                  <p>昼過ぎに弱い雨の可能性</p>
+                  <p>南西の風 4m/s</p>
+                </div>
+              </div>
+              <div class="daily">
+                <div class="block">Today / 晴れ時々くもり</div>
+                <div class="block">Tomorrow / くもり</div>
+              </div>
+              <div class="hourly-wrap">
+                <div class="scroll">
+                  <div class="timeline" data-icon-size="30"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="note">案は行全体の高さはほぼ維持しつつ、天気行へ高さを寄せる。気温・降水・雨量は少し詰める。</p>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const icons = [
+        ["06", "clear-day", "23℃", "10%", "0mm", "南西", "4m"],
+        ["07", "partly-cloudy-day", "24℃", "15%", "0mm", "南西", "4m"],
+        ["08", "overcast-day", "25℃", "20%", "0mm", "南西", "5m"],
+        ["09", "drizzle", "24℃", "45%", "0.1mm", "南", "5m"],
+        ["10", "rain", "23℃", "70%", "1.2mm", "南", "6m"],
+        ["11", "partly-cloudy-day-rain", "24℃", "50%", "0.5mm", "南東", "4m"],
+        ["12", "clear-day", "26℃", "20%", "0mm", "南東", "4m"],
+        ["13", "clear-day", "27℃", "10%", "0mm", "南東", "3m"]
+      ];
+
+      function renderTimeline(root) {
+        const size = Number(root.dataset.iconSize);
+        root.innerHTML = `
+          <div class="label">
+            <div class="cell">時刻</div>
+            <div class="cell">天気</div>
+            <div class="cell">気温</div>
+            <div class="cell">降水</div>
+            <div class="cell">雨量</div>
+            <div class="cell">風</div>
+          </div>
+          ${icons
+            .map(([time, icon, temp, rain, amount, wind, speed], index) => `
+              <div class="col ${index === 2 ? "current" : ""}">
+                <div class="time">${time}</div>
+                <div class="cell">
+                  <img class="weather-icon" alt="${icon}" height="${size}" width="${size}" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/${icon}.svg" style="height:${size}px;width:${size}px" />
+                </div>
+                <div class="cell">${temp}</div>
+                <div class="cell" style="color:#0284c7">${rain}</div>
+                <div class="cell" style="font-size:12px">${amount}</div>
+                <div class="wind">
+                  <div>▲</div>
+                  <div>${wind}</div>
+                  <div>${speed}</div>
+                </div>
+              </div>
+            `)
+            .join("")}
+        `;
+      }
+
+      document.querySelectorAll(".timeline").forEach(renderTimeline);
+    </script>
+  </body>
+</html>

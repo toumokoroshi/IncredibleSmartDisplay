@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather quick look 3:2 full dashboard preview</title>
+    <style>
+      :root {
+        --app-bg: #f6f8fb;
+        --header-bg: rgba(255, 255, 255, 0.78);
+        --panel-bg: #ffffff;
+        --control-bg: #f1f5f9;
+        --panel-stroke: rgba(15, 23, 42, 0.08);
+        --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+        --radius-card: 1.7rem;
+        --item-bg: #f8fafc;
+        color: #0f172a;
+        background: #e8ecf2;
+        font-family:
+          "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans",
+          "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+        font-weight: 400;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #e8ecf2;
+        overflow-x: auto;
+      }
+
+      main {
+        display: grid;
+        gap: 24px;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        font-size: 20px;
+        letter-spacing: 0;
+      }
+
+      .intro {
+        display: grid;
+        gap: 8px;
+      }
+
+      .intro p,
+      .note {
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .comparison {
+        display: grid;
+        gap: 28px;
+      }
+
+      .preview {
+        display: grid;
+        gap: 10px;
+      }
+
+      .device {
+        width: 1520px;
+        height: 1013px;
+        overflow: hidden;
+        border: 1px solid #cfd7e3;
+        border-radius: 8px;
+        background: var(--app-bg);
+        padding: 16px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+      }
+
+      .dashboard-grid {
+        display: grid;
+        width: 100%;
+        height: 100%;
+        max-width: 1520px;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: 14fr 48fr 38fr;
+        grid-template-areas:
+          "header header header header header header header header header header header header"
+          "weather weather weather weather weather traffic traffic traffic traffic calendar calendar calendar"
+          "weather weather weather weather weather pet pet pet pet news news news";
+        gap: 16px;
+      }
+
+      .header {
+        position: relative;
+        grid-area: header;
+        overflow: hidden;
+        border: 1px solid var(--panel-stroke);
+        border-radius: var(--radius-card);
+        background: var(--header-bg);
+        box-shadow: var(--panel-shadow);
+        backdrop-filter: blur(18px);
+        padding: 18px 28px;
+      }
+
+      .header::before {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        content: "";
+        background:
+          linear-gradient(90deg, rgba(66, 133, 244, 0.1), transparent 26%),
+          radial-gradient(circle at 92% 16%, rgba(251, 188, 5, 0.16), transparent 20%);
+      }
+
+      .header-content {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .clock {
+        font-size: 60px;
+        font-weight: 430;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .date {
+        margin-top: 10px;
+        color: #64748b;
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .status-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .status {
+        min-width: 138px;
+        border: 1px solid var(--panel-stroke);
+        border-radius: 22px;
+        background: var(--control-bg);
+        padding: 12px 16px;
+        text-align: right;
+      }
+
+      .status-label {
+        color: #64748b;
+        font-size: 15px;
+      }
+
+      .status-value {
+        margin-top: 6px;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .quiet-status {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 14px;
+        color: #475569;
+        font-size: 18px;
+        font-weight: 650;
+      }
+
+      .quiet-status-item {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        border-radius: 999px;
+        background: rgba(241, 245, 249, 0.62);
+        padding: 6px 12px;
+      }
+
+      .quiet-status-online {
+        color: #15803d;
+      }
+
+      .slot-weather {
+        grid-area: weather;
+      }
+
+      .slot-traffic {
+        grid-area: traffic;
+      }
+
+      .slot-calendar {
+        grid-area: calendar;
+      }
+
+      .slot-pet {
+        grid-area: pet;
+      }
+
+      .slot-news {
+        grid-area: news;
+      }
+
+      .card {
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+        border: 1px solid var(--panel-stroke);
+        border-radius: var(--radius-card);
+        background: var(--panel-bg);
+        box-shadow: var(--panel-shadow);
+        padding: 20px;
+      }
+
+      .card::before {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        content: "";
+        background: linear-gradient(180deg, rgba(66, 133, 244, 0.035), transparent 28%);
+      }
+
+      .card > * {
+        position: relative;
+      }
+
+      .weather-card {
+        display: flex;
+        flex-direction: column;
+        border-top: 5px solid #5b8def;
+        padding: 32px;
+      }
+
+      .traffic-card {
+        border-top: 5px solid #e57368;
+        padding: 16px;
+      }
+
+      .calendar-card {
+        border-top: 5px solid #5bb974;
+      }
+
+      .news-card {
+        border-top: 5px solid #e6a700;
+      }
+
+      .pet-card {
+        border-top: 5px solid #e6a700;
+      }
+
+      .widget-title {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-height: 42px;
+        color: #334155;
+        font-size: 16px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .heading-icon {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border: 1px solid #d2e3fc;
+        border-radius: 999px;
+        background: #e8f0fe;
+        color: #1a73e8;
+        font-size: 21px;
+        box-shadow: 0 10px 22px rgba(66, 133, 244, 0.16);
+      }
+
+      .weather-body {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        gap: 16px;
+        margin-top: 16px;
+        overflow: hidden;
+      }
+
+      .weather-body-current {
+        grid-template-rows: minmax(0, 1fr) auto auto;
+      }
+
+      .weather-body-proposed {
+        grid-template-rows: 270px 214px minmax(0, 1fr);
+      }
+
+      .now-row-current {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 110px 170px;
+        align-items: center;
+        gap: 18px;
+        min-height: 0;
+      }
+
+      .now-row-proposed {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 240px;
+        align-items: center;
+        gap: 18px;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .now-main {
+        min-width: 0;
+      }
+
+      .eyebrow {
+        color: #64748b;
+        font-size: 13px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .location {
+        margin-top: 8px;
+        font-size: 24px;
+      }
+
+      .temp {
+        margin-top: 46px;
+        color: #0f172a;
+        font-size: 76px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      .proposed-temp {
+        margin-top: 18px;
+        font-size: 68px;
+      }
+
+      .proposed-condition {
+        margin-top: 12px;
+      }
+
+      .condition {
+        margin-top: 18px;
+        font-size: 24px;
+        font-weight: 500;
+      }
+
+      .hero-icon {
+        width: 160px;
+        height: 160px;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 10px rgba(15, 23, 42, 0.12));
+      }
+
+      .hero-icon-proposed {
+        width: 240px;
+        height: 240px;
+      }
+
+      .round-icon {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border-radius: 999px;
+        background: #eef5ff;
+        color: #2563eb;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.1);
+      }
+
+      .stat-label {
+        display: block;
+        color: #64748b;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .stat-value {
+        display: block;
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 720;
+        line-height: 1.25;
+        white-space: nowrap;
+      }
+
+      .now-stat-stack {
+        display: grid;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .now-stat-current {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr);
+        gap: 8px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .now-stat-current .stat-value {
+        overflow-wrap: anywhere;
+        white-space: normal;
+      }
+
+      .now-stats-proposed {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(116px, 1fr));
+        gap: 8px;
+        max-width: 292px;
+        margin-top: 14px;
+      }
+
+      .wide-chip,
+      .metric-panel {
+        display: grid;
+        grid-template-columns: 30px minmax(0, 1fr);
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        background: #eef2f8;
+      }
+
+      .wide-chip {
+        border-radius: 999px;
+        padding: 8px 12px;
+      }
+
+      .today-current {
+        display: grid;
+        grid-template-columns: 150px minmax(0, 1fr);
+        align-items: center;
+        gap: 14px;
+        min-height: 190px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 20px;
+      }
+
+      .today-proposed {
+        display: grid;
+        grid-template-columns: 154px minmax(0, 1fr);
+        align-items: center;
+        gap: 18px;
+        min-height: 214px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 16px 20px;
+      }
+
+      .today-icon-current {
+        width: 114px;
+        height: 114px;
+        object-fit: contain;
+      }
+
+      .today-icon-proposed {
+        width: 138px;
+        height: 138px;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 10px rgba(15, 23, 42, 0.12));
+      }
+
+      .today-main-current {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) repeat(3, 82px);
+        align-items: end;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .today-content-proposed {
+        display: grid;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .today-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: 12px;
+      }
+
+      .today-title {
+        margin-top: 4px;
+        overflow: hidden;
+        font-size: 20px;
+        font-weight: 720;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .temps {
+        margin-top: 6px;
+        color: #f97316;
+        font-size: 20px;
+        font-weight: 720;
+        white-space: nowrap;
+      }
+
+      .temps span {
+        color: #0284c7;
+      }
+
+      .summary {
+        margin-top: 8px;
+        color: #64748b;
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .compact-chip {
+        min-width: 0;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #eef2f8;
+        padding: 8px 10px;
+      }
+
+      .compact-chip .stat-value {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .today-summary-proposed {
+        color: #64748b;
+        font-size: 15px;
+        font-weight: 650;
+        line-height: 1.2;
+      }
+
+      .metric-panel {
+        border-radius: 8px;
+        padding: 9px 12px;
+      }
+
+      .next-hours {
+        min-height: 150px;
+        overflow: hidden;
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 14px 20px;
+      }
+
+      .next-title {
+        display: flex;
+        justify-content: space-between;
+        color: #64748b;
+        font-size: 15px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .next-title span:last-child {
+        letter-spacing: 0;
+        text-transform: none;
+      }
+
+      .hours-row {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .hour {
+        display: grid;
+        justify-items: center;
+        gap: 5px;
+        color: #334155;
+        font-size: 15px;
+      }
+
+      .hour img {
+        width: 34px;
+        height: 34px;
+      }
+
+      .proposed-next-hours .hour img {
+        width: 66px;
+        height: 66px;
+        filter: drop-shadow(0 6px 8px rgba(15, 23, 42, 0.14));
+      }
+
+      .proposed-next-hours .hour {
+        gap: 2px;
+        font-size: 14px;
+        line-height: 1.15;
+      }
+
+      .traffic-summary {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-top: 18px;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 10px;
+      }
+
+      .traffic-summary strong {
+        color: #15803d;
+        font-size: 30px;
+      }
+
+      .traffic-list {
+        display: grid;
+        margin-top: 8px;
+      }
+
+      .traffic-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 52px 64px;
+        align-items: center;
+        min-height: 31px;
+        gap: 10px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 17px;
+        font-weight: 650;
+      }
+
+      .pill-ok {
+        border-radius: 999px;
+        background: #dcfce7;
+        color: #047857;
+        padding: 2px 8px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .mini-item {
+        margin-top: 18px;
+        border: 1px solid rgba(15, 23, 42, 0.07);
+        border-radius: 8px;
+        background: #f8fafc;
+        padding: 20px;
+      }
+
+      .mini-item strong {
+        display: block;
+        font-size: 22px;
+      }
+
+      .pet-photo {
+        margin-top: 22px;
+        height: 206px;
+        border-radius: 8px;
+        background: #dfe7f1;
+      }
+
+      .clip-fade {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 48px;
+        background: linear-gradient(transparent, #ffffff);
+      }
+
+      @media (max-width: 1600px) {
+        main {
+          max-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="intro">
+        <h1>Weather Quick Look full dashboard preview</h1>
+        <p>Target: Xiaomi Pad 6S Pro landscape, 3:2. The preview stage is 1520 x 1013 CSS px, matching the app max-width and 3:2 aspect ratio.</p>
+      </div>
+
+      <div class="comparison">
+        <section class="preview">
+          <h2>Current risk: Quick Look values collapse in the real dashboard slot</h2>
+          <div class="device">
+            <div class="dashboard-grid">
+              <header class="header">
+                <div class="header-content">
+                  <div>
+                    <div class="clock">19:06</div>
+                    <div class="date">Fri, May 22 · Tokyo</div>
+                  </div>
+                  <div class="status-grid">
+                    <div class="status"><div class="status-label">Online</div><div class="status-value">Connected</div></div>
+                    <div class="status"><div class="status-label">Last Sync</div><div class="status-value">Just now</div></div>
+                    <div class="status"><div class="status-label">Syncing</div><div class="status-value">0</div></div>
+                    <div class="status"><div class="status-label">Issues</div><div class="status-value">0</div></div>
+                    <div class="status"><div class="status-label">Stale</div><div class="status-value">0</div></div>
+                  </div>
+                </div>
+              </header>
+
+              <section class="slot-weather card weather-card">
+                <div class="widget-title"><span class="heading-icon">☼</span>Weather</div>
+                <div class="weather-body weather-body-current">
+                  <section class="now-row-current">
+                    <div class="now-main">
+                      <p class="eyebrow">Now</p>
+                      <p class="location">Tokyo</p>
+                      <p class="temp">23℃</p>
+                      <p class="condition">晴れ時々くもり</p>
+                    </div>
+                    <div class="now-stat-stack">
+                      <div class="now-stat-current">
+                        <span class="round-icon">💧</span>
+                        <span><span class="stat-label">Hum</span><span class="stat-value">68%</span></span>
+                      </div>
+                      <div class="now-stat-current">
+                        <span class="round-icon">◢</span>
+                        <span><span class="stat-label">Wind</span><span class="stat-value">3 m/s</span></span>
+                      </div>
+                    </div>
+                    <img class="hero-icon" alt="晴れ時々くもり" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" />
+                  </section>
+
+                  <section class="today-current">
+                    <img class="today-icon-current" alt="くもり" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" />
+                    <div class="today-main-current">
+                      <div>
+                        <p class="eyebrow">Today</p>
+                        <p class="today-title">くもり</p>
+                        <p class="temps">27℃ / <span>19℃</span></p>
+                        <p class="summary">昼は暖かく感じる</p>
+                      </div>
+                      <div class="compact-chip"><span class="stat-label">Rain</span><span class="stat-value">30%</span></div>
+                      <div class="compact-chip"><span class="stat-label">Wind</span><span class="stat-value">4 m/s</span></div>
+                      <div class="compact-chip"><span class="stat-label">Hum</span><span class="stat-value">68%</span></div>
+                    </div>
+                  </section>
+
+                  <section class="next-hours">
+                    <div class="next-title"><span>Next hours</span><span>Rain / Temp</span></div>
+                    <div class="hours-row">
+                      <div class="hour"><span>00時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>19℃</strong><span>10%</span></div>
+                      <div class="hour"><span>01時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>20℃</strong><span>10%</span></div>
+                      <div class="hour"><span>02時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>21℃</strong><span>15%</span></div>
+                      <div class="hour"><span>03時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>22℃</strong><span>15%</span></div>
+                      <div class="hour"><span>04時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>24℃</strong><span>20%</span></div>
+                      <div class="hour"><span>05時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>25℃</strong><span>20%</span></div>
+                    </div>
+                  </section>
+                </div>
+              </section>
+
+              <section class="slot-traffic card traffic-card">
+                <div class="widget-title"><span class="heading-icon" style="color:#c5221f;background:#fce8e6;border-color:#fad2cf">○</span>Traffic</div>
+                <div class="traffic-summary"><strong>通常 8/8</strong><span>異常 0/8</span></div>
+                <div class="traffic-list">
+                  <div class="traffic-row"><span>ぶりりりぶり</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>東京メトロ東西線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>山手線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>総武線各駅停車</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>丸ノ内線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>銀座線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>京王線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>京王井の頭線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                </div>
+              </section>
+
+              <section class="slot-calendar card calendar-card">
+                <div class="widget-title"><span class="heading-icon" style="color:#188038;background:#e6f4ea;border-color:#ceead6">○</span>Calendar</div>
+                <div class="mini-item"><strong>Standup</strong><p class="summary">5/22 08:26</p></div>
+                <div class="mini-item"><strong>Dinner</strong><p class="summary">5/22 15:26</p></div>
+              </section>
+
+              <section class="slot-pet card pet-card">
+                <div class="widget-title"><span class="heading-icon">♡</span>今日のぐり</div>
+                <div class="pet-photo"></div>
+                <p class="summary">59 photos / AM-PM pick</p>
+              </section>
+
+              <section class="slot-news card news-card">
+                <div class="widget-title"><span class="heading-icon" style="color:#b06000;background:#fef7e0;border-color:#feefc3">○</span>News</div>
+                <div class="mini-item"><strong>Static JSON news provider is available</strong><p class="summary">Local JSON / 34 hr ago</p></div>
+                <div class="mini-item"><strong>Mock data remains available as a fallback...</strong><p class="summary">Local JSON / 33 hr ago</p></div>
+                <div class="clip-fade"></div>
+              </section>
+            </div>
+          </div>
+          <p class="note">This stage uses the real 3:2 dashboard grid. Weather occupies the same 5-column x 2-row slot as the app.</p>
+        </section>
+
+        <section class="preview">
+          <h2>Proposed: Weather Quick Look uses the 3:2 vertical room</h2>
+          <div class="device">
+            <div class="dashboard-grid">
+              <header class="header">
+                <div class="header-content">
+                  <div>
+                    <div class="clock">19:06</div>
+                    <div class="date">Fri, May 22 · Tokyo</div>
+                  </div>
+                  <div class="quiet-status">
+                    <span class="quiet-status-item">Updated 19:06</span>
+                    <span class="quiet-status-item quiet-status-online">Online</span>
+                  </div>
+                </div>
+              </header>
+
+              <section class="slot-weather card weather-card proposed-card">
+                <div class="widget-title"><span class="heading-icon">☼</span>Weather</div>
+                <div class="weather-body weather-body-proposed">
+                  <section class="now-row-proposed">
+                    <div class="now-main">
+                      <p class="eyebrow">Now</p>
+                      <p class="location">Tokyo</p>
+                      <p class="temp proposed-temp">23℃</p>
+                      <p class="condition proposed-condition">晴れ時々くもり</p>
+                      <div class="now-stats-proposed">
+                        <div class="wide-chip">
+                          <span class="round-icon">💧</span>
+                          <span><span class="stat-label">Hum</span><span class="stat-value">68%</span></span>
+                        </div>
+                        <div class="wide-chip">
+                          <span class="round-icon">◢</span>
+                          <span><span class="stat-label">Wind</span><span class="stat-value">3 m/s</span></span>
+                        </div>
+                      </div>
+                    </div>
+                    <img class="hero-icon hero-icon-proposed" alt="晴れ時々くもり" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" />
+                  </section>
+
+                  <section class="today-proposed">
+                    <img class="today-icon-proposed" alt="くもり" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" />
+                    <div class="today-content-proposed">
+                      <div class="today-head">
+                        <div>
+                          <p class="eyebrow">Today</p>
+                          <p class="today-title">くもり</p>
+                        </div>
+                        <p class="temps">27℃ / <span>19℃</span></p>
+                      </div>
+                      <p class="today-summary-proposed">昼は暖かく感じる</p>
+                      <div class="metric-grid">
+                        <div class="metric-panel">
+                          <span class="round-icon">☂</span>
+                          <span><span class="stat-label">Rain</span><span class="stat-value">30%</span></span>
+                        </div>
+                        <div class="metric-panel">
+                          <span class="round-icon">◢</span>
+                          <span><span class="stat-label">Wind</span><span class="stat-value">4 m/s</span></span>
+                        </div>
+                        <div class="metric-panel">
+                          <span class="round-icon">💧</span>
+                          <span><span class="stat-label">Hum</span><span class="stat-value">68%</span></span>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section class="next-hours proposed-next-hours">
+                    <div class="next-title"><span>Next hours</span><span>Rain / Temp</span></div>
+                    <div class="hours-row">
+                      <div class="hour"><span>00時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>19℃</strong><span>10%</span></div>
+                      <div class="hour"><span>01時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>20℃</strong><span>10%</span></div>
+                      <div class="hour"><span>02時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>21℃</strong><span>15%</span></div>
+                      <div class="hour"><span>03時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>22℃</strong><span>15%</span></div>
+                      <div class="hour"><span>04時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>24℃</strong><span>20%</span></div>
+                      <div class="hour"><span>05時</span><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /><strong>25℃</strong><span>20%</span></div>
+                    </div>
+                  </section>
+                </div>
+              </section>
+
+              <section class="slot-traffic card traffic-card">
+                <div class="widget-title"><span class="heading-icon" style="color:#c5221f;background:#fce8e6;border-color:#fad2cf">○</span>Traffic</div>
+                <div class="traffic-summary"><strong>通常 8/8</strong><span>異常 0/8</span></div>
+                <div class="traffic-list">
+                  <div class="traffic-row"><span>ぶりりりぶり</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>東京メトロ東西線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>山手線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>総武線各駅停車</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>丸ノ内線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>銀座線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>京王線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                  <div class="traffic-row"><span>京王井の頭線</span><span>07:30</span><span class="pill-ok">OK</span></div>
+                </div>
+              </section>
+
+              <section class="slot-calendar card calendar-card">
+                <div class="widget-title"><span class="heading-icon" style="color:#188038;background:#e6f4ea;border-color:#ceead6">○</span>Calendar</div>
+                <div class="mini-item"><strong>Standup</strong><p class="summary">5/22 08:26</p></div>
+                <div class="mini-item"><strong>Dinner</strong><p class="summary">5/22 15:26</p></div>
+              </section>
+
+              <section class="slot-pet card pet-card">
+                <div class="widget-title"><span class="heading-icon">♡</span>今日のぐり</div>
+                <div class="pet-photo"></div>
+                <p class="summary">59 photos / AM-PM pick</p>
+              </section>
+
+              <section class="slot-news card news-card">
+                <div class="widget-title"><span class="heading-icon" style="color:#b06000;background:#fef7e0;border-color:#feefc3">○</span>News</div>
+                <div class="mini-item"><strong>Static JSON news provider is available</strong><p class="summary">Local JSON / 34 hr ago</p></div>
+                <div class="mini-item"><strong>Mock data remains available as a fallback...</strong><p class="summary">Local JSON / 33 hr ago</p></div>
+                <div class="clip-fade"></div>
+              </section>
+            </div>
+          </div>
+          <p class="note">The proposed Weather card keeps all quick look values visible in the same dashboard slot, using vertical room from the 3:2 tablet layout.</p>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

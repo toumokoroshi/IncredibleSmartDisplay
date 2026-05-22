@@ -51,7 +51,8 @@ These rules are project-level instructions for IncredibleSmartDisplay. Keep fixe
 
 ## 5. React And UI Rules
 
-- Optimize for a 12.4 inch tablet in landscape orientation with no required scrolling.
+- Optimize for a Xiaomi Pad 6S Pro 12.4 inch tablet in landscape orientation. Its target aspect ratio is 3:2, not 16:9.
+- Use the extra vertical room of the 3:2 tablet layout instead of compressing dense weather or status information into narrow horizontal chips.
 - Main information should be readable within roughly three seconds.
 - Keep Quick Area as a future command surface, but keep it compact so it does not crowd core widgets.
 - Touch targets should stay at least 44px high or wide where practical.

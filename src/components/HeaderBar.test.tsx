@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { HeaderBar } from "./HeaderBar";
 
 describe("HeaderBar", () => {
-  it("renders connectivity, sync, and widget state counts", () => {
+  it("renders quiet status and only non-zero widget state counts", () => {
     render(
       <HeaderBar
         isDetailMode={false}
@@ -22,14 +22,12 @@ describe("HeaderBar", () => {
     );
 
     expect(screen.getByText("Online")).toBeInTheDocument();
-    expect(screen.getByText("Connected")).toBeInTheDocument();
-    expect(screen.getByText("Last Sync")).toBeInTheDocument();
-    expect(screen.getByText("Syncing")).toBeInTheDocument();
-    expect(screen.getByText("Issues")).toBeInTheDocument();
-    expect(screen.getByText("Stale")).toBeInTheDocument();
-    expect(screen.getByText("1")).toBeInTheDocument();
-    expect(screen.getByText("2")).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
+    expect(screen.getByText(/Updated/)).toBeInTheDocument();
+    expect(screen.getByText("Syncing 1")).toBeInTheDocument();
+    expect(screen.getByText("Issues 2")).toBeInTheDocument();
+    expect(screen.getByText("Stale 3")).toBeInTheDocument();
+    expect(screen.queryByText("Connected")).not.toBeInTheDocument();
+    expect(screen.queryByText("Last Sync")).not.toBeInTheDocument();
   });
 
   it("renders offline state and home command in detail mode", async () => {
@@ -49,8 +47,8 @@ describe("HeaderBar", () => {
     );
 
     expect(screen.getByText("Offline")).toBeInTheDocument();
-    expect(screen.getByText("Disconnected")).toBeInTheDocument();
     expect(screen.getByText("Waiting")).toBeInTheDocument();
+    expect(screen.queryByText("Disconnected")).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Home" }));
     expect(onHomeClick).toHaveBeenCalledTimes(1);

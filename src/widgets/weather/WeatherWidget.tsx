@@ -45,10 +45,10 @@ export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, sta
 
 function WeatherQuickLook({ data }: { data: WeatherData }) {
   return (
-    <div className="mt-4 grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto_auto] gap-4 overflow-hidden">
-      <NowWeatherSummary data={data} iconSize={163} iconClassName="-translate-x-6 translate-y-5" tempClassName="text-6xl" />
+    <div className="mt-4 grid min-h-0 flex-1 grid-rows-[270px_214px_minmax(0,1fr)] gap-4 overflow-hidden">
+      <NowWeatherSummary data={data} iconSize={244} iconClassName="-translate-x-2" tempClassName="text-[4.25rem]" />
       <DailyWeatherSummary judgementHourly={data.hourlyForecast} showSummary summary={getDailySummaries(data)[0]} />
-      <NextHoursStrip hourly={data.hourlyForecast ?? []} />
+      <NextHoursStrip hourly={data.hourlyForecast ?? []} iconSize={66} />
     </div>
   );
 }
@@ -98,28 +98,27 @@ function NowWeatherSummary({
   const condition = getDisplayCondition(data);
 
   return (
-    <div className="flex min-h-0 items-center justify-between gap-6">
+    <div className={`${compact ? "flex justify-between" : "grid grid-cols-[minmax(0,1fr)_240px]"} min-h-0 items-center gap-6 overflow-hidden`}>
       <div className="min-w-0">
         <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Now</p>
         <p className={`${compact ? "mt-0 text-lg" : "mt-1 text-xl"} text-slate-300`}>{data.locationName}</p>
-        <div className="mt-2 flex items-end gap-5">
+        <div className={`${compact ? "mt-2 flex items-end gap-5" : "mt-4"}`}>
           <p className={`font-semibold leading-none text-white ${tempClassName}`}>{formatTemp(data.currentTempC)}</p>
           {!compact ? (
-            <div className="mb-2 grid gap-2">
-              <InlineWeatherStat icon={<Droplets size={15} />} label="Hum" value={formatPercent(data.humidityPercent)} />
-              <InlineWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} />
-            </div>
+            null
           ) : null}
         </div>
-        <p className={`${compact ? "mt-1 text-lg" : "mt-3 text-xl"} text-slate-300`}>{formatConditionLabel(condition)}</p>
-        <div className={`${compact ? "mt-2" : "hidden"} flex flex-wrap gap-x-4 gap-y-1`}>
+        <p className={`${compact ? "mt-1 text-lg" : "mt-3 text-2xl"} text-slate-300`}>{formatConditionLabel(condition)}</p>
+        <div className={`${compact ? "mt-2 flex flex-wrap gap-x-4 gap-y-1" : "mt-4 grid max-w-[18rem] grid-cols-2 gap-2"}`}>
+          {!compact ? <InlineWeatherStat chip icon={<Droplets size={15} />} label="Hum" value={formatPercent(data.humidityPercent)} /> : null}
+          {!compact ? <InlineWeatherStat chip icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} /> : null}
           {compact ? <InlineWeatherStat icon={<Droplets size={15} />} label="Hum" value={formatPercent(data.humidityPercent)} /> : null}
           {compact ? <InlineWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} /> : null}
           {showApparent ? <InlineWeatherStat icon={<span className="text-sm leading-none">{"\u2197"}</span>} label="Feel" value={formatTemp(data.apparentTempC)} /> : null}
         </div>
         <WeatherModifierBadges modifiers={condition.modifiers} />
       </div>
-      <div className={`weather-hero-icon shrink-0 p-1 ${iconClassName}`}>
+      <div className={`weather-hero-icon grid shrink-0 place-items-center p-1 ${iconClassName}`}>
         <WeatherConditionIcon condition={condition} size={iconSize} />
       </div>
     </div>
@@ -144,22 +143,31 @@ function DailyWeatherSummary({
 
   return (
     <div className={`${compact ? "px-3 py-2" : "px-5 py-4"} weather-metric overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]`}>
-      <div className={`grid grid-cols-[auto_1fr] items-center ${compact ? "gap-2" : "gap-3"}`}>
+      <div className={`grid items-center ${compact ? "grid-cols-[auto_1fr] gap-2" : "grid-cols-[138px_minmax(0,1fr)] gap-4"}`}>
         <div className="-ml-2">
-          <WeatherConditionIcon condition={condition} size={compact ? 82 : 104} />
+          <WeatherConditionIcon condition={condition} size={compact ? 82 : 138} />
         </div>
         <div className="min-w-0">
-          <div className="flex min-w-0 items-baseline gap-3">
-            <p className="shrink-0 text-xs uppercase tracking-[0.18em] text-slate-500">{summary?.label ?? "Today"}</p>
-            <p className="truncate text-base font-semibold text-slate-100">{formatConditionLabel(condition)}</p>
+          <div className={`${compact ? "flex min-w-0 items-baseline gap-3" : "grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3"}`}>
+            <div className="min-w-0">
+              <p className="shrink-0 text-xs uppercase tracking-[0.18em] text-slate-500">{summary?.label ?? "Today"}</p>
+              <p className={`${compact ? "text-base" : "text-xl"} truncate font-semibold text-slate-100`}>{formatConditionLabel(condition)}</p>
+            </div>
+            {!compact ? (
+              <p className="whitespace-nowrap text-xl font-semibold text-slate-500">
+                <span className="text-orange-500">{formatTemp(summary?.highTempC)}</span>
+                <span className="mx-1 text-slate-400">/</span>
+                <span className="text-sky-500">{formatTemp(summary?.lowTempC)}</span>
+              </p>
+            ) : null}
           </div>
-          <p className="mt-1 text-base font-semibold text-slate-500">
+          {compact ? <p className="mt-1 text-base font-semibold text-slate-500">
             <span className="text-orange-500">{formatTemp(summary?.highTempC)}</span>
             <span className="mx-1 text-slate-400">/</span>
             <span className="text-sky-500">{formatTemp(summary?.lowTempC)}</span>
-          </p>
-          {summaryText ? <p className="mt-1 truncate text-sm font-semibold text-slate-500">{summaryText}</p> : null}
-          <div className={`${compact ? "mt-2 flex flex-wrap gap-1.5" : "mt-2 grid max-w-[28rem] grid-cols-3 gap-2.5"}`}>
+          </p> : null}
+          {summaryText ? <p className={`${compact ? "mt-1 truncate text-sm" : "mt-2 text-base"} font-semibold text-slate-500`}>{summaryText}</p> : null}
+          <div className={`${compact ? "mt-2 flex flex-wrap gap-1.5" : "mt-3 grid grid-cols-3 gap-2.5"}`}>
             <QuickStatChip compact={compact} icon={<Umbrella size={15} />} label="Rain" value={formatPercent(summary?.precipitationProbabilityPercent)} />
             <QuickStatChip compact={compact} icon={<WindDirectionIcon degrees={summary?.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(summary?.maxWindSpeedKph)} />
             <QuickStatChip compact={compact} icon={<Droplets size={15} />} label="Hum" value={formatPercent(summary?.humidityPercent)} />
@@ -171,13 +179,13 @@ function DailyWeatherSummary({
   );
 }
 
-function InlineWeatherStat({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+function InlineWeatherStat({ chip = false, icon, label, value }: { chip?: boolean; icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="inline-flex items-center gap-1.5 text-base font-semibold text-slate-100">
+    <div className={`${chip ? "min-w-0 rounded-full bg-slate-100 px-3 py-2" : ""} inline-flex items-center gap-1.5 text-base font-semibold text-slate-100`}>
       <span className="grid h-6 w-6 place-items-center rounded-full bg-slate-100 text-blue-600 shadow-sm">{icon}</span>
-      <span>
+      <span className="min-w-0">
         <span className="mr-1 text-[0.62rem] uppercase tracking-[0.1em] text-slate-500">{label}</span>
-        {value}
+        <span className="whitespace-nowrap">{value}</span>
       </span>
     </div>
   );
@@ -185,19 +193,19 @@ function InlineWeatherStat({ icon, label, value }: { icon: ReactNode; label: str
 
 function QuickStatChip({ compact = false, icon, label, value }: { compact?: boolean; icon: ReactNode; label: string; value: string }) {
   return (
-    <div className={`${compact ? "min-w-[6.2rem] px-2.5 py-1.5" : "min-w-0 px-3 py-2"} rounded-full bg-slate-100`}>
+    <div className={`${compact ? "min-w-[6.2rem] rounded-full px-2.5 py-1.5" : "min-w-0 rounded-lg px-3 py-2.5"} bg-slate-100`}>
       <div className="flex items-center gap-2">
         <span className={`${compact ? "h-5 w-5" : "h-6 w-6"} grid place-items-center rounded-full bg-white text-blue-600 shadow-sm`}>{icon}</span>
         <span className="min-w-0">
           <span className={`${compact ? "text-[0.62rem]" : "text-[0.68rem]"} block uppercase tracking-[0.1em] text-slate-500`}>{label}</span>
-          <span className={`${compact ? "text-sm" : "text-base"} block truncate font-semibold leading-tight text-slate-100`}>{value}</span>
+          <span className={`${compact ? "text-sm" : "text-base"} block whitespace-nowrap font-semibold leading-tight text-slate-100`}>{value}</span>
         </span>
       </div>
     </div>
   );
 }
 
-function NextHoursStrip({ hourly }: { hourly: WeatherHourlyPoint[] }) {
+function NextHoursStrip({ hourly, iconSize = 34 }: { hourly: WeatherHourlyPoint[]; iconSize?: number }) {
   const points = hourly.slice(0, 6);
 
   if (points.length === 0) {
@@ -215,12 +223,12 @@ function NextHoursStrip({ hourly }: { hourly: WeatherHourlyPoint[] }) {
           const pointCondition = point.condition ?? unavailableCondition;
 
           return (
-            <div key={point.time} className="min-w-0 rounded-md bg-white/50 px-2 py-2 text-center">
+            <div key={point.time} className="grid min-w-0 justify-items-center rounded-md bg-white/50 px-2 py-1 text-center text-sm leading-tight">
               <p className="text-xs font-medium text-slate-500">{formatHour(point.time)}</p>
-              <div className="mt-1 flex justify-center">
-                <WeatherConditionIcon condition={pointCondition} size={34} />
+              <div className="mt-0.5 flex justify-center">
+                <WeatherConditionIcon condition={pointCondition} size={iconSize} />
               </div>
-              <p className="mt-1 text-sm font-semibold text-slate-100">{formatTemp(point.tempC)}</p>
+              <p className="mt-0.5 text-sm font-semibold text-slate-100">{formatTemp(point.tempC)}</p>
               <p className="text-xs text-sky-600">{formatPercent(point.precipitationProbabilityPercent)}</p>
             </div>
           );
@@ -369,7 +377,7 @@ function WeatherConditionIcon({ condition, size }: { condition: WeatherDisplayCo
 }
 
 function WeatherIconImage({ iconName, label, size }: { iconName: string; label: string; size: number }) {
-  return <img alt={label} className="drop-shadow-[0_2px_3px_rgba(15,23,42,0.18)]" height={size} src={`${meteoconsBaseUrl}/${iconName}.svg`} style={{ height: size, width: size }} width={size} />;
+  return <img alt={label} className="drop-shadow-[0_8px_10px_rgba(15,23,42,0.14)]" height={size} src={`${meteoconsBaseUrl}/${iconName}.svg`} style={{ height: size, width: size }} width={size} />;
 }
 
 function WeatherModifierBadges({ modifiers }: { modifiers: WeatherModifier[] }) {
