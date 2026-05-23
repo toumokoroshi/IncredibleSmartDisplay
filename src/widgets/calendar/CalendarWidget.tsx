@@ -16,7 +16,7 @@ export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, st
           <span className="widget-heading-icon">
             <MaterialSymbolIcon name="calendar_month" />
           </span>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
+          <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>
         {status === "stale" ? <StaleBadge /> : null}
       </div>
@@ -27,8 +27,8 @@ export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, st
         <ul className="mt-4 space-y-3">
           {data.items.slice(0, 4).map((item) => (
             <li key={item.id} className="widget-list-item rounded-lg border border-white/10 bg-white/5 px-4 py-3">
-              <p className="line-clamp-2 text-xl font-semibold text-white">{item.title}</p>
-              <p className="mt-1 text-sm text-slate-400">{formatScheduleLabel(item.startsAt)}</p>
+              <p className="line-clamp-2 text-[25px] font-semibold leading-tight text-white">{item.title}</p>
+              <p className="mt-1 text-base text-slate-400">{formatScheduleLabel(item.startsAt)}</p>
             </li>
           ))}
         </ul>

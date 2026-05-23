@@ -16,7 +16,7 @@ export function NewsWidget({ config, data, error, isEmpty, isHighlighted, status
           <span className="widget-heading-icon">
             <MaterialSymbolIcon name="newspaper" />
           </span>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
+          <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>
         {status === "stale" ? <StaleBadge /> : null}
       </div>
@@ -39,7 +39,7 @@ function NewsQuickLook({ data, maxItems }: { data: NewsData; maxItems: number })
     <ul className="mt-4 space-y-3">
       {data.items.slice(0, maxItems).map((item) => (
         <li key={item.id} className="widget-list-item rounded-lg border border-white/10 bg-white/5 px-4 py-3">
-          <p className="line-clamp-2 text-lg font-semibold text-white">{item.title}</p>
+          <p className="line-clamp-2 text-[25px] font-semibold leading-tight text-white">{item.title}</p>
           <NewsMetaLine publishedAt={item.publishedAt} source={item.source} />
         </li>
       ))}
@@ -111,5 +111,5 @@ function NewsMetaLine({ publishedAt, source }: { publishedAt?: string; source?: 
     return null;
   }
 
-  return <p className="mt-2 text-sm font-semibold text-slate-400">{parts.join(" / ")}</p>;
+  return <p className="mt-2 text-base font-semibold text-slate-400">{parts.join(" / ")}</p>;
 }

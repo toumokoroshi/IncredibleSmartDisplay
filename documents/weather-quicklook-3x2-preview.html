@@ -270,7 +270,7 @@
         gap: 14px;
         min-height: 42px;
         color: #334155;
-        font-size: 16px;
+        font-size: 18px;
         letter-spacing: 0.2em;
         text-transform: uppercase;
       }
@@ -302,7 +302,8 @@
       }
 
       .weather-body-proposed {
-        grid-template-rows: 270px 214px minmax(0, 1fr);
+        align-content: space-between;
+        grid-template-rows: 258px 202px 206px;
       }
 
       .now-row-current {
@@ -315,7 +316,7 @@
 
       .now-row-proposed {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 240px;
+        grid-template-columns: minmax(0, 1fr) 264px;
         align-items: center;
         gap: 18px;
         min-height: 0;
@@ -328,14 +329,14 @@
 
       .eyebrow {
         color: #64748b;
-        font-size: 13px;
+        font-size: 14px;
         letter-spacing: 0.2em;
         text-transform: uppercase;
       }
 
       .location {
         margin-top: 8px;
-        font-size: 24px;
+        font-size: 26px;
       }
 
       .temp {
@@ -348,12 +349,13 @@
       }
 
       .proposed-temp {
-        margin-top: 18px;
-        font-size: 68px;
+        margin-top: 6px;
+        font-size: 60px;
       }
 
       .proposed-condition {
-        margin-top: 12px;
+        margin-top: 6px;
+        font-size: 22px;
       }
 
       .condition {
@@ -370,8 +372,8 @@
       }
 
       .hero-icon-proposed {
-        width: 240px;
-        height: 240px;
+        width: 264px;
+        height: 264px;
       }
 
       .round-icon {
@@ -388,7 +390,7 @@
       .stat-label {
         display: block;
         color: #64748b;
-        font-size: 12px;
+        font-size: 13px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
       }
@@ -396,7 +398,7 @@
       .stat-value {
         display: block;
         color: #0f172a;
-        font-size: 17px;
+        font-size: 18px;
         font-weight: 720;
         line-height: 1.25;
         white-space: nowrap;
@@ -423,10 +425,30 @@
 
       .now-stats-proposed {
         display: grid;
-        grid-template-columns: repeat(2, minmax(116px, 1fr));
+        grid-template-columns: repeat(2, minmax(132px, 1fr));
         gap: 8px;
-        max-width: 292px;
-        margin-top: 14px;
+        max-width: 340px;
+        margin-top: 8px;
+      }
+
+      .now-stats-proposed .wide-chip {
+        min-height: 48px;
+        padding: 7px 12px;
+      }
+
+      .now-stats-proposed .round-icon {
+        width: 26px;
+        height: 26px;
+      }
+
+      .now-stats-proposed .stat-label {
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .now-stats-proposed .stat-value {
+        font-size: 17px;
+        line-height: 1.05;
       }
 
       .wide-chip,
@@ -440,7 +462,7 @@
       }
 
       .wide-chip {
-        border-radius: 999px;
+        border-radius: 8px;
         padding: 8px 12px;
       }
 
@@ -459,15 +481,15 @@
 
       .today-proposed {
         display: grid;
-        grid-template-columns: 154px minmax(0, 1fr);
+        grid-template-columns: 132px minmax(0, 1fr);
         align-items: center;
-        gap: 18px;
-        min-height: 214px;
+        gap: 14px;
+        min-height: 202px;
         overflow: hidden;
         border: 1px solid rgba(15, 23, 42, 0.07);
         border-radius: 8px;
         background: #f8fafc;
-        padding: 16px 20px;
+        padding: 10px 16px;
       }
 
       .today-icon-current {
@@ -477,8 +499,8 @@
       }
 
       .today-icon-proposed {
-        width: 138px;
-        height: 138px;
+        width: 177px;
+        height: 177px;
         object-fit: contain;
         filter: drop-shadow(0 8px 10px rgba(15, 23, 42, 0.12));
       }
@@ -507,7 +529,7 @@
       .today-title {
         margin-top: 4px;
         overflow: hidden;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 720;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -516,7 +538,7 @@
       .temps {
         margin-top: 6px;
         color: #f97316;
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 720;
         white-space: nowrap;
       }
@@ -554,14 +576,14 @@
 
       .today-summary-proposed {
         color: #64748b;
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 650;
         line-height: 1.2;
       }
 
       .metric-panel {
         border-radius: 8px;
-        padding: 9px 12px;
+        padding: 6px 10px;
       }
 
       .next-hours {
@@ -577,7 +599,7 @@
         display: flex;
         justify-content: space-between;
         color: #64748b;
-        font-size: 15px;
+        font-size: 16px;
         letter-spacing: 0.18em;
         text-transform: uppercase;
       }
@@ -608,15 +630,24 @@
       }
 
       .proposed-next-hours .hour img {
-        width: 66px;
-        height: 66px;
+        width: 99px;
+        height: 99px;
         filter: drop-shadow(0 6px 8px rgba(15, 23, 42, 0.14));
       }
 
       .proposed-next-hours .hour {
         gap: 2px;
-        font-size: 14px;
+        font-size: 15px;
         line-height: 1.15;
+      }
+
+      .proposed-next-hours {
+        min-height: 206px;
+        padding: 8px 16px;
+      }
+
+      .proposed-next-hours .hours-row {
+        margin-top: 6px;
       }
 
       .traffic-summary {
@@ -630,7 +661,7 @@
 
       .traffic-summary strong {
         color: #15803d;
-        font-size: 30px;
+        font-size: 34px;
       }
 
       .traffic-list {
@@ -645,7 +676,7 @@
         min-height: 31px;
         gap: 10px;
         border-bottom: 1px solid #e2e8f0;
-        font-size: 17px;
+        font-size: 19px;
         font-weight: 650;
       }
 
@@ -655,7 +686,7 @@
         color: #047857;
         padding: 2px 8px;
         text-align: center;
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 800;
       }
 
@@ -669,7 +700,7 @@
 
       .mini-item strong {
         display: block;
-        font-size: 22px;
+        font-size: 25px;
       }
 
       .pet-photo {
