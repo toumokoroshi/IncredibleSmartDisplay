@@ -466,3 +466,28 @@ Traffic は初期運用で `staticJson` provider を使い、`public/data/traffi
 - `lines[].alternateTransport`
 
 手動更新では対象8路線を原則すべて残し、未確認の路線は削除せず `status: "unknown"` にする。
+
+## Addendum 18. Detail layout measurement probes
+
+Detail layout work should expose stable measurement probes so one layout fix does not silently break another widget or another region of the same widget.
+
+Shared probe classes:
+
+- `widget-detail-root`: root of a widget detail layout or highlighted fallback layout.
+- `widget-detail-primary`: primary detail region.
+- `widget-detail-secondary`: secondary detail region when present.
+- `widget-detail-list`: list/table region that can overflow if rows grow.
+- `widget-scroll-region`: region where horizontal or vertical scrolling is intentionally allowed.
+
+Widget-specific probe classes should be added beside the shared classes, for example:
+
+- `weather-detail-root`, `weather-detail-top`, `weather-detail-now`, `weather-detail-daily`, `weather-detail-alerts`, `weather-detail-hourly`
+- `calendar-detail-root`, `calendar-detail-events`
+- `traffic-detail-root`, `traffic-detail-impact`, `traffic-detail-lines`
+- `news-detail-root`, `news-detail-featured`, `news-detail-list`
+- `petPhoto-detail-root`, `petPhoto-detail-media`
+- `stocks-detail-root`, `stocks-detail-list`
+
+Quantitative checks should use the `1524 x 1016` CSS px target viewport first. A detail layout passes when important non-scroll regions have `scrollHeight <= clientHeight + 1`, important child bounds remain inside the parent card, and horizontal overflow exists only in regions intentionally marked as scroll regions. Smaller fallback viewport checks such as `1366 x 912` and `1219 x 812` should be added when browser automation is available.
+
+Use `collectLayoutProbeResults` from `src/utils/layoutProbe.ts` as the shared overflow checker when browser-based layout automation is available. Unit tests should keep the probe class contract and overflow decision rules stable even before full browser automation is introduced.

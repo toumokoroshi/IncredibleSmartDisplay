@@ -24,7 +24,7 @@ export function StocksWidget({ config, data, error, isEmpty, isHighlighted, stat
       {status === "error" ? <ErrorState error={error} /> : null}
       {isEmpty ? <EmptyState /> : null}
       {data && status !== "error" && status !== "loading" && !isEmpty ? (
-        <ul className="mt-4 space-y-3">
+        <ul className={`${isHighlighted ? "widget-detail-root widget-detail-list stocks-detail-root stocks-detail-list " : ""}mt-4 space-y-3`}>
           {data.items.slice(0, 5).map((item) => (
             <li key={item.symbol} className="widget-list-item flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
               <div>
