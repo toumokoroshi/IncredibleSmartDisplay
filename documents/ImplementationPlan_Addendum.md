@@ -245,6 +245,8 @@ MVP重視なら 1 を推奨する。
 - ルーティングを増やさない前提で、404 fallback不要の構成を維持する
 - Headerに `last successful fetch` を常時表示できるようにする
 - Fully Kiosk Browser前提で `orientation lock`, `zoom抑止`, `auto reload` を考慮する
+- Xiaomi Pad 6S Pro の実機確認では Fully Kiosk Browser の default viewport が `1219 x 812` CSS px になり、想定より狭い。`Set initial scale for older websites: 200%` を採用し、`1524 x 1015` CSS px 前後をレイアウト基準にする
+- viewport確認用に `public/debug-viewport.html` を用意し、実機では GitHub Pages の `/debug-viewport.html` で `innerWidth`, `innerHeight`, `visualViewportScale` を確認する
 - 長時間運用を想定し、定期的な `window.location.reload()` を使う場合は `dashboard.config.ts` で制御する
 
 ## 追記 11. テスト戦略

@@ -27,7 +27,7 @@ export function PetPhotoWidget({ config, data, error, isEmpty, isHighlighted, st
           <span className="widget-heading-icon">
             <Heart aria-hidden="true" size={22} strokeWidth={1.9} />
           </span>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
+          <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>
         {status === "stale" ? <StaleBadge /> : null}
       </div>
@@ -45,7 +45,7 @@ function PetPhotoQuickLook({ src, totalPhotos }: { src: string; totalPhotos: num
       <div className="min-h-0 overflow-hidden rounded-2xl bg-slate-200">
         <img className="h-full w-full object-cover" src={src} alt="" />
       </div>
-      <p className="text-sm font-semibold text-slate-500">{totalPhotos} photos / AM-PM pick</p>
+      <p className="text-base font-semibold text-slate-500">{totalPhotos} photos / AM-PM pick</p>
     </div>
   );
 }

@@ -103,7 +103,7 @@ export function TrafficWidget({ config, data, error, isEmpty, isHighlighted, sta
           <span className="widget-heading-icon">
             <MaterialSymbolIcon name="train" />
           </span>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
+          <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
           {status === "stale" ? <StaleBadge /> : null}
@@ -125,10 +125,10 @@ export function TrafficWidget({ config, data, error, isEmpty, isHighlighted, sta
       {data && status !== "error" && status !== "loading" && !isEmpty && !isHighlighted ? (
         <>
           <div className="mt-2 flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
-            <strong className={`text-[21px] font-semibold leading-none ${summary.className}`}>{summary.primaryLabel}</strong>
-            <span className="text-[13px] font-bold text-slate-500">{summary.secondaryLabel}</span>
+            <strong className={`text-[34px] font-semibold leading-none ${summary.className}`}>{summary.primaryLabel}</strong>
+            <span className="text-[15px] font-bold text-slate-500">{summary.secondaryLabel}</span>
           </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 pt-1 text-[10px] font-bold tracking-[0.08em] text-slate-500">
+          <div className="grid grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 pt-1 text-[11px] font-bold tracking-[0.08em] text-slate-500">
             <span>路線</span>
             <span className="text-center">更新</span>
             <span className="text-center">状態</span>
@@ -137,11 +137,11 @@ export function TrafficWidget({ config, data, error, isEmpty, isHighlighted, sta
             {lines.map((line) => (
               <li
                 key={line.id}
-                className="grid min-h-[22px] grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 border-b border-slate-200 py-0.5"
+                className="grid min-h-[28px] grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 border-b border-slate-200 py-0.5"
               >
-                <p className="truncate text-sm font-medium text-slate-950">{line.name}</p>
-                <span className="text-center text-[11px] font-bold text-slate-500">{formatTime(line.updatedAt)}</span>
-                <span className={`rounded-full px-2 py-0.5 text-center text-[11px] font-extrabold ${getStatusClass(line)}`}>
+                <p className="truncate text-[19px] font-medium leading-tight text-slate-950">{line.name}</p>
+                <span className="text-center text-[13px] font-bold text-slate-500">{formatTime(line.updatedAt)}</span>
+                <span className={`rounded-full px-2 py-0.5 text-center text-[15px] font-extrabold leading-tight ${getStatusClass(line)}`}>
                   {getStatusLabel(line)}
                 </span>
               </li>
