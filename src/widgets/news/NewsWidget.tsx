@@ -56,7 +56,7 @@ function NewsDetail({ data, maxItems }: { data: NewsData; maxItems: number }) {
   }
 
   return (
-    <div className="mt-4 grid min-h-0 flex-1 grid-cols-[1.05fr_0.95fr] grid-rows-[auto_minmax(0,1fr)] gap-4 overflow-hidden">
+    <div className="widget-detail-root news-detail-root mt-4 grid min-h-0 flex-1 grid-cols-[1.05fr_0.95fr] grid-rows-[auto_minmax(0,1fr)] gap-4 overflow-hidden">
       <div className="col-span-2 flex items-end justify-between gap-4 border-b border-slate-200 pb-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-600">主要ニュース</p>
@@ -65,7 +65,7 @@ function NewsDetail({ data, maxItems }: { data: NewsData; maxItems: number }) {
         <p className="shrink-0 text-sm font-semibold text-slate-500">{items.length}件</p>
       </div>
 
-      <section className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-lg border border-slate-200 bg-white p-5">
+      <section className="widget-detail-primary news-detail-featured grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-lg border border-slate-200 bg-white p-5">
         <div className="flex items-center gap-2">
           <NewsCategoryLabel category={topItem.category ?? "主要"} />
           <NewsMetaLine publishedAt={topItem.publishedAt} source={topItem.source} />
@@ -79,7 +79,7 @@ function NewsDetail({ data, maxItems }: { data: NewsData; maxItems: number }) {
         </p>
       </section>
 
-      <section className="min-h-0 overflow-hidden">
+      <section className="widget-detail-list news-detail-list min-h-0 overflow-hidden">
         <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)]">
           <h3 className="pb-2 text-lg font-semibold text-slate-700">最新ヘッドライン</h3>
           <ul className="grid min-h-0 gap-3 overflow-hidden">

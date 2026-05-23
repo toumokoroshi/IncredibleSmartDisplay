@@ -61,6 +61,9 @@ These rules are project-level instructions for IncredibleSmartDisplay. Keep fixe
 - Empty state is not an error state.
 - Stale state should preserve displayable previous data with a warning-style indication.
 - UI changes must be checked against the target viewport for clipping.
+- Layout-sensitive widget changes should expose stable measurement classes so clipping can be checked quantitatively. Use shared classes such as `widget-detail-root`, `widget-detail-primary`, `widget-detail-secondary`, `widget-detail-list`, and `widget-scroll-region`, plus widget-specific classes such as `weather-detail-hourly` or `traffic-detail-lines`.
+- For detail layouts, check the `1524 x 1016` target viewport for `scrollHeight <= clientHeight + 1`, allowed horizontal scroll only on explicitly scrollable regions, and important child bounds staying within their parent card.
+- Use `collectLayoutProbeResults` from `src/utils/layoutProbe.ts` for shared overflow checks when browser-based layout automation is available.
 - Temperature must use the Celsius symbol, Unicode `U+2103`, not the text `deg`.
 - When touching display text, search for `deg` and common mojibake marker strings before committing.
 

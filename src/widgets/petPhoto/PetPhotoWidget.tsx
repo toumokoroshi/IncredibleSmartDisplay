@@ -52,7 +52,7 @@ function PetPhotoQuickLook({ src, totalPhotos }: { src: string; totalPhotos: num
 
 function PetPhotoDetail({ src }: { src: string }) {
   return (
-    <div className="h-full w-full overflow-hidden rounded-[var(--radius-card)] bg-slate-200">
+    <div className="widget-detail-root widget-detail-primary petPhoto-detail-root petPhoto-detail-media h-full w-full overflow-hidden rounded-[var(--radius-card)] bg-slate-200">
       <img className="h-full w-full object-cover" src={src} alt="" />
     </div>
   );

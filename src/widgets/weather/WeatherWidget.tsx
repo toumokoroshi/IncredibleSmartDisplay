@@ -59,22 +59,43 @@ function WeatherDetail({ data }: { data: WeatherData }) {
   const insights = getWeatherInsights(daily, hourly);
 
   return (
-    <div className="mt-3 grid min-h-0 flex-1 grid-rows-[9.2rem_7.5rem_minmax(0,1fr)] gap-2 overflow-hidden">
-      <div className="grid min-h-0 grid-cols-[1.1fr_0.9fr] gap-2 overflow-hidden">
-        <div className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] px-5 py-2">
-          <NowWeatherSummary compact data={data} iconSize={88} showApparent tempClassName="text-[3.5rem]" />
+    <div className="widget-detail-root weather-detail-root mt-3 grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(18rem,0.82fr)] gap-3 overflow-hidden">
+      <div className="widget-detail-primary weather-detail-top grid min-h-0 grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] gap-3 overflow-hidden">
+        <WeatherDetailNow data={data} />
+        <div className="widget-detail-secondary weather-detail-daily-stack grid min-h-0 grid-rows-[1fr_1fr_4.625rem] gap-3 overflow-hidden">
+          {daily.map((summary) => (
+            <DailyWeatherSummary detail judgementHourly={hourly} key={summary.label} showSummary summary={summary} />
+          ))}
+          <WeatherAlertPanel compact insights={insights.slice(0, 3)} />
         </div>
-        <WeatherAlertPanel insights={insights.slice(0, 4)} />
       </div>
 
-      <div className="grid min-h-0 grid-cols-2 gap-3">
-        {daily.map((summary) => (
-          <DailyWeatherSummary compact key={summary.label} showApparent summary={summary} />
-        ))}
+      <div className="widget-scroll-region weather-detail-hourly min-h-0 overflow-hidden">
+        <HourlyForecastTable daily={daily} hourly={hourly} large />
       </div>
+    </div>
+  );
+}
 
-      <div className="min-h-0 overflow-hidden">
-        <HourlyForecastTable daily={daily} hourly={hourly} />
+function WeatherDetailNow({ data }: { data: WeatherData }) {
+  const condition = getDisplayCondition(data);
+
+  return (
+    <div className="weather-detail-now grid h-full min-h-0 grid-cols-[minmax(0,1fr)_16rem] grid-rows-[minmax(0,1fr)_auto] items-center gap-x-5 gap-y-3 overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] px-7 py-5">
+      <div className="min-w-0">
+        <p className="text-[1.0625rem] uppercase tracking-[0.18em] text-slate-500">Now</p>
+        <p className="mt-2 text-[1.75rem] font-semibold text-slate-300">{data.locationName}</p>
+        <p className="mt-3 text-[5.75rem] font-semibold leading-none text-white">{formatTemp(data.currentTempC)}</p>
+        <p className="mt-2.5 text-[2rem] font-semibold leading-tight text-slate-300">{formatConditionLabel(condition)}</p>
+      </div>
+      <div className="weather-hero-icon grid shrink-0 place-items-center">
+        <WeatherConditionIcon condition={condition} size={256} />
+      </div>
+      <div className="col-span-2 grid min-w-0 grid-cols-4 gap-3">
+        <DetailWeatherStat icon={<Droplets size={16} />} label="Hum" value={formatPercent(data.humidityPercent)} />
+        <DetailWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={16} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} />
+        <DetailWeatherStat icon={<span className="text-base leading-none">{"\u2197"}</span>} label="Feel" value={formatTemp(data.apparentTempC)} />
+        <DetailWeatherStat icon={<Umbrella size={16} />} label="Rain" value={formatPercent(data.precipitationProbabilityPercent)} />
       </div>
     </div>
   );
@@ -127,12 +148,14 @@ function NowWeatherSummary({
 
 function DailyWeatherSummary({
   compact = false,
+  detail = false,
   judgementHourly = [],
   showApparent = false,
   showSummary = false,
   summary,
 }: {
   compact?: boolean;
+  detail?: boolean;
   judgementHourly?: WeatherHourlyPoint[];
   showApparent?: boolean;
   showSummary?: boolean;
@@ -142,19 +165,19 @@ function DailyWeatherSummary({
   const summaryText = showSummary ? getDailyJudgementSummary(summary, judgementHourly) : "";
 
   return (
-    <div className={`${compact ? "px-3 py-2" : "px-4 py-2.5"} weather-metric h-full min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]`}>
-      <div className={`grid h-full min-h-0 items-center ${compact ? "grid-cols-[auto_1fr] gap-2" : "grid-cols-[132px_minmax(0,1fr)] gap-3.5"}`}>
+    <div className={`${detail ? "widget-detail-card weather-detail-daily px-4 py-4" : compact ? "px-3 py-2" : "px-4 py-2.5"} weather-metric h-full min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]`}>
+      <div className={`grid h-full min-h-0 items-center ${compact ? "grid-cols-[auto_1fr] gap-2" : detail ? "grid-cols-[132px_minmax(0,1fr)] gap-4" : "grid-cols-[132px_minmax(0,1fr)] gap-3.5"}`}>
         <div className="-ml-2">
-          <WeatherConditionIcon condition={condition} size={compact ? 82 : 177} />
+          <WeatherConditionIcon condition={condition} size={compact ? 82 : detail ? 126 : 177} />
         </div>
         <div className="min-w-0">
           <div className={`${compact ? "flex min-w-0 items-baseline gap-3" : "grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3"}`}>
             <div className="min-w-0">
-              <p className={`${compact ? "text-xs" : "text-sm"} shrink-0 uppercase tracking-[0.18em] text-slate-500`}>{summary?.label ?? "Today"}</p>
-              <p className={`${compact ? "text-base" : "text-[1.375rem]"} truncate font-semibold text-slate-100`}>{formatConditionLabel(condition)}</p>
+              <p className={`${compact ? "text-xs" : detail ? "text-[1.0625rem]" : "text-sm"} shrink-0 uppercase tracking-[0.18em] text-slate-500`}>{summary?.label ?? "Today"}</p>
+              <p className={`${compact ? "text-base" : detail ? "text-[1.625rem]" : "text-[1.375rem]"} truncate font-semibold leading-tight text-slate-100`}>{formatConditionLabel(condition)}</p>
             </div>
             {!compact ? (
-              <p className="whitespace-nowrap text-[1.375rem] font-semibold text-slate-500">
+              <p className={`${detail ? "text-[1.5625rem]" : "text-[1.375rem]"} whitespace-nowrap font-semibold text-slate-500`}>
                 <span className="text-orange-500">{formatTemp(summary?.highTempC)}</span>
                 <span className="mx-1 text-slate-400">/</span>
                 <span className="text-sky-500">{formatTemp(summary?.lowTempC)}</span>
@@ -166,8 +189,8 @@ function DailyWeatherSummary({
             <span className="mx-1 text-slate-400">/</span>
             <span className="text-sky-500">{formatTemp(summary?.lowTempC)}</span>
           </p> : null}
-          {summaryText ? <p className={`${compact ? "mt-1 truncate text-sm" : "mt-1 text-base"} font-semibold leading-tight text-slate-500`}>{summaryText}</p> : null}
-          <div className={`${compact ? "mt-2 flex flex-wrap gap-1.5" : "mt-2 grid grid-cols-3 gap-2.5"}`}>
+          {summaryText ? <p className={`${compact ? "mt-1 truncate text-sm" : detail ? "mt-1.5 truncate text-lg" : "mt-1 text-base"} font-semibold leading-tight text-slate-500`}>{summaryText}</p> : null}
+          <div className={`${compact ? "mt-2 flex flex-wrap gap-1.5" : detail ? "mt-3.5 grid grid-cols-3 gap-2" : "mt-2 grid grid-cols-3 gap-2.5"}`}>
             <QuickStatChip compact={compact} icon={<Umbrella size={15} />} label="Rain" value={formatPercent(summary?.precipitationProbabilityPercent)} />
             <QuickStatChip compact={compact} icon={<WindDirectionIcon degrees={summary?.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(summary?.maxWindSpeedKph)} />
             <QuickStatChip compact={compact} icon={<Droplets size={15} />} label="Hum" value={formatPercent(summary?.humidityPercent)} />
@@ -186,6 +209,18 @@ function InlineWeatherStat({ chip = false, icon, label, value }: { chip?: boolea
       <span className="min-w-0">
         <span className="mr-1 text-xs uppercase leading-none tracking-[0.1em] text-slate-500">{label}</span>
         <span className="whitespace-nowrap text-[17px] leading-none">{value}</span>
+      </span>
+    </div>
+  );
+}
+
+function DetailWeatherStat({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className="grid min-h-[4.125rem] min-w-0 grid-cols-[34px_minmax(0,1fr)] items-center gap-2.5 rounded-lg bg-slate-100 px-3.5 py-2.5">
+      <span className="grid h-[34px] w-[34px] place-items-center rounded-full bg-white text-blue-600 shadow-sm">{icon}</span>
+      <span className="min-w-0">
+        <span className="block text-[11px] uppercase leading-none tracking-[0.1em] text-slate-500">{label}</span>
+        <span className="mt-1 block truncate text-[23px] font-semibold leading-none text-slate-100">{value}</span>
       </span>
     </div>
   );
@@ -238,7 +273,18 @@ function NextHoursStrip({ hourly, iconSize = 34 }: { hourly: WeatherHourlyPoint[
   );
 }
 
-function WeatherAlertPanel({ insights }: { insights: WeatherInsight[] }) {
+function WeatherAlertPanel({ compact = false, insights }: { compact?: boolean; insights: WeatherInsight[] }) {
+  if (compact) {
+    return (
+      <div className="widget-detail-card weather-detail-alerts grid min-h-0 grid-cols-[auto_repeat(3,minmax(0,1fr))] items-center gap-2 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] px-3.5 py-2">
+        <p className="text-[0.95rem] uppercase tracking-[0.1em] text-slate-500">Alerts</p>
+        {insights.map((insight) => (
+          <InsightLine compact insight={insight} key={insight.label} />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1.5">
       <p className="mb-1 text-xs uppercase tracking-[0.18em] text-slate-500">Alerts</p>
@@ -249,7 +295,16 @@ function WeatherAlertPanel({ insights }: { insights: WeatherInsight[] }) {
   );
 }
 
-function InsightLine({ insight }: { insight: WeatherInsight }) {
+function InsightLine({ compact = false, insight }: { compact?: boolean; insight: WeatherInsight }) {
+  if (compact) {
+    return (
+      <div className="grid min-h-12 min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-l border-white/10 pl-2.5 first:border-l-0 first:pl-0">
+        <span className="min-w-0 text-sm font-semibold leading-tight text-slate-100">{insight.label}</span>
+        <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[0.8125rem] font-semibold text-blue-600">{insight.badge}</span>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-between gap-2 border-t border-white/10 py-0.5 first:border-t-0">
       <span className="min-w-0 truncate text-[0.82rem] font-medium text-slate-100">{insight.label}</span>
@@ -258,7 +313,7 @@ function InsightLine({ insight }: { insight: WeatherInsight }) {
   );
 }
 
-function HourlyForecastTable({ daily, hourly }: { daily: WeatherDailySummary[]; hourly: WeatherHourlyPoint[] }) {
+function HourlyForecastTable({ daily, hourly, large = false }: { daily: WeatherDailySummary[]; hourly: WeatherHourlyPoint[]; large?: boolean }) {
   const points = buildWeatherTimeline(hourly.slice(0, 48), daily);
   const currentIndex = getCurrentHourlyIndex(points);
   const dayMarkers = getDayMarkerIndexes(points);
@@ -278,9 +333,9 @@ function HourlyForecastTable({ daily, hourly }: { daily: WeatherDailySummary[]; 
   return (
     <div className="grid h-full min-h-0 grid-rows-[minmax(0,1fr)] overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-2">
       {points.length > 0 ? (
-        <div ref={scrollRef} className="weather-hourly-scroll min-h-0 overflow-x-auto overflow-y-hidden pb-8">
-          <div className="grid min-w-max grid-flow-col auto-cols-[4.5rem] items-stretch">
-            <div className="sticky left-0 z-10 grid w-[3.5rem] grid-rows-[1.45rem_1.55rem_1.55rem_1.55rem_1.55rem_3.6rem] bg-white/95 text-sm font-semibold text-slate-500">
+        <div ref={scrollRef} className={`weather-hourly-scroll min-h-0 overflow-x-auto overflow-y-hidden ${large ? "pb-2" : "pb-8"}`}>
+          <div className={`${large ? "auto-cols-[5.8rem]" : "auto-cols-[4.5rem]"} grid min-w-max grid-flow-col items-stretch`}>
+            <div className={`${large ? "w-[4.5rem] grid-rows-[2rem_3.55rem_1.9rem_1.9rem_1.9rem_2.45rem] text-[0.95rem]" : "w-[3.5rem] grid-rows-[1.45rem_1.55rem_1.55rem_1.55rem_1.55rem_3.6rem] text-sm"} sticky left-0 z-10 grid bg-white/95 font-semibold text-slate-500`}>
               <HourlyLabel>{"\u6642\u523b"}</HourlyLabel>
               <HourlyLabel>{"\u5929\u6c17"}</HourlyLabel>
               <HourlyLabel>{"\u6c17\u6e29"}</HourlyLabel>
@@ -293,7 +348,7 @@ function HourlyForecastTable({ daily, hourly }: { daily: WeatherDailySummary[]; 
               const isNow = index === currentIndex;
               const isDayMarker = dayMarkers.has(index);
 
-              return <HourlyColumn isDayMarker={isDayMarker} isNow={isNow} isPast={isPast} key={getTimelineKey(timelinePoint)} timelinePoint={timelinePoint} />;
+              return <HourlyColumn isDayMarker={isDayMarker} isNow={isNow} isPast={isPast} key={getTimelineKey(timelinePoint)} large={large} timelinePoint={timelinePoint} />;
             })}
           </div>
         </div>
@@ -308,7 +363,7 @@ function HourlyLabel({ children }: { children: ReactNode }) {
   return <div className="flex items-center">{children}</div>;
 }
 
-function HourlyColumn({ isDayMarker, isNow, isPast, timelinePoint }: { isDayMarker: boolean; isNow: boolean; isPast: boolean; timelinePoint: WeatherTimelinePoint }) {
+function HourlyColumn({ isDayMarker, isNow, isPast, large = false, timelinePoint }: { isDayMarker: boolean; isNow: boolean; isPast: boolean; large?: boolean; timelinePoint: WeatherTimelinePoint }) {
   const isSunEvent = timelinePoint.kind === "sunEvent";
   const point = timelinePoint.kind === "hourly" ? timelinePoint.point : timelinePoint.reference;
   const condition = point?.condition ?? unavailableCondition;
@@ -316,21 +371,23 @@ function HourlyColumn({ isDayMarker, isNow, isPast, timelinePoint }: { isDayMark
   return (
     <div
       className={[
-        "grid grid-rows-[1.45rem_1.55rem_1.55rem_1.55rem_1.55rem_3.6rem] justify-items-center text-center text-[0.82rem] font-normal text-slate-600",
+        large
+          ? "grid grid-rows-[2rem_3.55rem_1.9rem_1.9rem_1.9rem_2.45rem] justify-items-center text-center text-[1rem] font-semibold text-slate-600"
+          : "grid grid-rows-[1.45rem_1.55rem_1.55rem_1.55rem_1.55rem_3.6rem] justify-items-center text-center text-[0.82rem] font-normal text-slate-600",
         isPast ? "opacity-40 grayscale" : "",
         isDayMarker ? "bg-slate-950/[0.04]" : "",
       ].join(" ")}
     >
       <div className={`grid w-full place-items-center border-b-2 ${isNow ? "weather-hourly-now border-blue-500 font-semibold text-slate-100" : "border-slate-300"}`}>{isDayMarker ? "\u660e\u65e5" : formatTimelineTime(timelinePoint)}</div>
       <div className="grid place-items-center">
-        {isDayMarker ? <span className="text-xs text-slate-500">{"\u660e\u65e5"}</span> : isSunEvent ? <SunEventIcon event={timelinePoint.event.event} size={18} /> : <WeatherConditionIcon condition={condition} size={18} />}
+        {isDayMarker ? <span className={`${large ? "text-[0.95rem]" : "text-xs"} text-slate-500`}>{"\u660e\u65e5"}</span> : isSunEvent ? <SunEventIcon event={timelinePoint.event.event} size={large ? 46 : 18} /> : <WeatherConditionIcon condition={condition} size={large ? 46 : 18} />}
       </div>
       <div className="grid place-items-center">{isDayMarker ? "--" : isSunEvent ? getSunEventLabel(timelinePoint.event.event) : formatTemp(point?.tempC)}</div>
       <div className="grid place-items-center text-sky-600">{formatPercent(point?.precipitationProbabilityPercent)}</div>
-      <div className="grid place-items-center text-[0.72rem]">{formatPrecipitation(point?.precipitationMm)}</div>
-      <div className="grid place-items-center text-[0.7rem] leading-none">
+      <div className={`${large ? "text-[0.95rem]" : "text-[0.72rem]"} grid place-items-center`}>{formatPrecipitation(point?.precipitationMm)}</div>
+      <div className={`${large ? "text-[0.82rem] font-semibold" : "text-[0.7rem]"} grid place-items-center leading-none`}>
         <div className="text-sky-500">
-          <WindDirectionIcon degrees={point?.windDirectionDeg} size={12} />
+          <WindDirectionIcon degrees={point?.windDirectionDeg} size={large ? 17 : 12} />
         </div>
         <div>{formatWindDirection(point?.windDirectionDeg)}</div>
         <div>{formatMeters(point?.windSpeedKph)}</div>

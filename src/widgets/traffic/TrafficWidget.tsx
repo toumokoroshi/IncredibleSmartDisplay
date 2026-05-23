@@ -167,7 +167,7 @@ function TrafficDetail({
   const affectedLines = lines.filter((line) => line.status !== "normal");
 
   return (
-    <div className="mt-4 grid min-h-0 flex-1 grid-cols-[1.2fr_0.8fr] grid-rows-[auto_minmax(0,1fr)] gap-4">
+    <div className="widget-detail-root traffic-detail-root mt-4 grid min-h-0 flex-1 grid-cols-[1.2fr_0.8fr] grid-rows-[auto_minmax(0,1fr)] gap-4">
       <div className="col-span-2 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
         <div>
           <p className={`text-3xl font-semibold leading-none ${summary.className}`}>
@@ -183,7 +183,7 @@ function TrafficDetail({
         </div>
       </div>
 
-      <section className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3">
+      <section className="widget-detail-primary traffic-detail-impact grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3">
         <h2 className="text-lg font-semibold text-slate-700">重要な影響</h2>
         <div className="grid min-h-0 grid-cols-2 gap-3">
           {affectedLines.length > 0 ? (
@@ -220,7 +220,7 @@ function TrafficDetail({
         </div>
       </section>
 
-      <section className="min-h-0 rounded-2xl border border-slate-200 bg-white p-4">
+      <section className="widget-detail-list traffic-detail-lines min-h-0 rounded-2xl border border-slate-200 bg-white p-4">
         <h2 className="text-lg font-semibold text-slate-700">登録路線一覧</h2>
         <div className="mt-3 grid">
           <div className="grid min-h-7 grid-cols-[minmax(0,1fr)_58px_54px_96px] items-center gap-2 text-[11px] font-extrabold tracking-[0.08em] text-slate-500">

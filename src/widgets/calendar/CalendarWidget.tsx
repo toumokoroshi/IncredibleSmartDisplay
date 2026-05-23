@@ -24,7 +24,7 @@ export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, st
       {status === "error" ? <ErrorState error={error} /> : null}
       {isEmpty ? <EmptyState /> : null}
       {data && status !== "error" && status !== "loading" && !isEmpty ? (
-        <ul className="mt-4 space-y-3">
+        <ul className={`${isHighlighted ? "widget-detail-root widget-detail-list calendar-detail-root calendar-detail-events " : ""}mt-4 space-y-3`}>
           {data.items.slice(0, 4).map((item) => (
             <li key={item.id} className="widget-list-item rounded-lg border border-white/10 bg-white/5 px-4 py-3">
               <p className="line-clamp-2 text-[25px] font-semibold leading-tight text-white">{item.title}</p>
