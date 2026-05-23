@@ -222,6 +222,7 @@ JSON 契約:
 - Autostart on Boot: ON
 - JavaScript: ON
 - Text Zoom / Page Zoom: 100%
+- Set initial scale for older websites: 200%
 - Pull to Refresh: OFF
 - Pinch to Zoom: OFF
 - Auto Reload on Internet Reconnect: ON
@@ -236,12 +237,20 @@ JSON 契約:
 - Fully Kiosk側: network reconnect の再読み込みだけ使う
 - Periodic reload は app側と重複するため使わない
 
+Viewport 方針:
+
+- この端末では Fully Kiosk Browser の default viewport は `1219 x 812` CSS px になる
+- `Set initial scale for older websites: 200%` を設定すると `1524 x 1015` CSS px になり、想定する 3:2 レイアウト基準に合う
+- 採用する確認基準は `1524 x 1016` CSS px 前後とする
+- PCで確認する場合は Chrome DevTools の Responsive mode で `1524 x 1016` を指定する。DPR は完全一致しなくてよい
+- 実機 viewport の確認には `https://toumokoroshi.github.io/IncredibleSmartDisplay/debug-viewport.html` を使う
+
 実機確認:
 
 - GitHub Pages URL: `https://toumokoroshi.github.io/IncredibleSmartDisplay/`
-- 確認日: 2026-05-21
+- 確認日: 2026-05-22
 - 確認端末: Xiaomi 12.4インチタブレット / 横置き
-- 確認結果: GitHub Actions 正常、GitHub Pages 表示正常、タブレット横置きレイアウト正常
+- 確認結果: GitHub Actions 正常、GitHub Pages 表示正常、`Set initial scale for older websites: 200%` でタブレット横置きレイアウト正常
 
 ## YouTube を見る時
 
