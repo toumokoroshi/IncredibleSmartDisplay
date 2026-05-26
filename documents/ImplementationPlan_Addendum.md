@@ -481,7 +481,7 @@ Shared probe classes:
 
 Widget-specific probe classes should be added beside the shared classes, for example:
 
-- `weather-detail-root`, `weather-detail-top`, `weather-detail-now`, `weather-detail-daily`, `weather-detail-alerts`, `weather-detail-hourly`
+- `weather-detail-root`, `weather-detail-top`, `weather-detail-now`, `weather-detail-daily`, `weather-detail-note`, `weather-detail-hourly`
 - `calendar-detail-root`, `calendar-detail-events`
 - `traffic-detail-root`, `traffic-detail-impact`, `traffic-detail-lines`
 - `news-detail-root`, `news-detail-featured`, `news-detail-list`

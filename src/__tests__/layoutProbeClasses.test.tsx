@@ -147,7 +147,7 @@ describe("layout measurement probes", () => {
     expectProbe(container, ".widget-detail-secondary.weather-detail-daily-stack");
     expectProbe(container, ".weather-detail-now");
     expectProbe(container, ".weather-detail-daily");
-    expectProbe(container, ".weather-detail-alerts");
+    expectProbe(container, ".weather-detail-note");
     expectProbe(container, ".widget-scroll-region.weather-detail-hourly");
   });
 

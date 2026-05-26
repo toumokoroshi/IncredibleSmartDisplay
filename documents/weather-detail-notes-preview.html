@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weather Detail Notes Preview</title>
+    <style>
+      :root {
+        --app-bg: #f6f8fb;
+        --panel: #ffffff;
+        --item: #f8fafc;
+        --chip: #f1f5f9;
+        --note: #eef6ff;
+        --stroke: rgba(15, 23, 42, 0.08);
+        --text: #0f172a;
+        --muted: #64748b;
+        --blue: #2563eb;
+        --sky: #0284c7;
+        --orange: #f97316;
+        --shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+        font-family:
+          "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans",
+          "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: auto;
+        background: #e8ecf2;
+        color: var(--text);
+      }
+
+      main {
+        display: grid;
+        width: max-content;
+        max-width: 100%;
+        gap: 18px;
+        padding: 24px;
+      }
+
+      h1,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      .intro {
+        display: grid;
+        gap: 8px;
+      }
+
+      .intro p {
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .device {
+        width: 1524px;
+        height: 1016px;
+        overflow: hidden;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: var(--app-bg);
+        padding: 16px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+      }
+
+      .dashboard {
+        display: grid;
+        height: 100%;
+        grid-template-rows: 14fr 86fr;
+        gap: 16px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 26px;
+        background: rgba(255, 255, 255, 0.78);
+        padding: 22px 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .clock {
+        font-size: 60px;
+        font-weight: 430;
+        line-height: 1;
+      }
+
+      .date {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .status-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .status-pill {
+        min-height: 44px;
+        border: 1px solid var(--stroke);
+        border-radius: 999px;
+        background: var(--chip);
+        padding: 11px 16px;
+        color: #334155;
+        font-size: 16px;
+        font-weight: 750;
+      }
+
+      .weather-card {
+        display: flex;
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-top: 5px solid #5b8def;
+        border-radius: 26px;
+        background: var(--panel);
+        padding: 32px;
+        box-shadow: var(--shadow);
+      }
+
+      .weather-heading {
+        display: flex;
+        min-height: 42px;
+        align-items: center;
+        gap: 14px;
+        color: #334155;
+        font-size: 18px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+
+      .heading-icon,
+      .round-icon {
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: #e8f0fe;
+        color: #1a73e8;
+      }
+
+      .heading-icon {
+        width: 36px;
+        height: 36px;
+        border: 1px solid #d2e3fc;
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .detail {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-rows: minmax(0, 1fr) minmax(18rem, 0.82fr);
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .top-grid {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+        gap: 12px;
+      }
+
+      .panel {
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: var(--item);
+      }
+
+      .now {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 256px;
+        grid-template-rows: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 12px 20px;
+        padding: 20px 28px;
+      }
+
+      .eyebrow {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 760;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .location {
+        margin-top: 10px;
+        font-size: 28px;
+        font-weight: 650;
+      }
+
+      .temp-now {
+        margin-top: 12px;
+        font-size: 92px;
+        font-weight: 760;
+        line-height: 0.92;
+      }
+
+      .condition {
+        margin-top: 10px;
+        font-size: 32px;
+        font-weight: 720;
+      }
+
+      .now-icon {
+        width: 256px;
+        height: 256px;
+        object-fit: contain;
+        filter: drop-shadow(0 12px 16px rgba(15, 23, 42, 0.14));
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stat,
+      .mini-stat {
+        display: grid;
+        min-width: 0;
+        align-items: center;
+        border-radius: 8px;
+        background: var(--chip);
+      }
+
+      .stat {
+        min-height: 56px;
+        grid-template-columns: 28px minmax(0, 1fr);
+        gap: 8px;
+        padding: 8px 12px;
+      }
+
+      .mini-stat {
+        min-height: 34px;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 6px;
+        padding: 4px 8px;
+      }
+
+      .round-icon {
+        width: 28px;
+        height: 28px;
+        background: #ffffff;
+        font-size: 14px;
+        font-weight: 800;
+      }
+
+      .mini-stat .round-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+      }
+
+      .stat-label {
+        display: block;
+        color: var(--muted);
+        font-size: 10px;
+        font-weight: 760;
+        letter-spacing: 0.1em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .stat-value {
+        display: block;
+        margin-top: 3px;
+        overflow: hidden;
+        color: var(--text);
+        font-size: 20px;
+        font-weight: 760;
+        line-height: 1.05;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .mini-stat .stat-value {
+        margin-top: 1px;
+        font-size: 15px;
+      }
+
+      .right-stack {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .daily {
+        display: grid;
+        grid-template-columns: 92px minmax(0, 1fr);
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+      }
+
+      .daily-icon {
+        width: 92px;
+        height: 92px;
+        object-fit: contain;
+        filter: drop-shadow(0 8px 12px rgba(15, 23, 42, 0.12));
+      }
+
+      .daily-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .daily-title {
+        margin-top: 4px;
+        overflow: hidden;
+        font-size: 22px;
+        font-weight: 760;
+        line-height: 1.05;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .temps {
+        color: var(--orange);
+        font-size: 22px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .temps span {
+        color: var(--sky);
+      }
+
+      .summary {
+        margin-top: 3px;
+        overflow: hidden;
+        color: #475569;
+        font-size: 14px;
+        font-weight: 650;
+        line-height: 1.22;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 7px;
+      }
+
+      .day-note {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        border-left: 4px solid #93c5fd;
+        border-radius: 8px;
+        background: var(--note);
+        padding: 7px 9px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 750;
+        line-height: 1.18;
+      }
+
+      .badge {
+        border-radius: 999px;
+        background: #dbeafe;
+        color: var(--blue);
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 850;
+        white-space: nowrap;
+      }
+
+      .hourly {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: 54px minmax(0, 1fr);
+        padding: 8px;
+      }
+
+      .hourly-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .hourly-title {
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 760;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .hourly-note {
+        display: flex;
+        min-height: 40px;
+        max-width: 58%;
+        align-items: center;
+        gap: 8px;
+        overflow: hidden;
+        border: 1px solid rgba(37, 99, 235, 0.18);
+        border-left: 4px solid #60a5fa;
+        border-radius: 10px;
+        background: #eff6ff;
+        padding: 8px 12px;
+        color: #334155;
+        font-size: 17px;
+        font-weight: 820;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .hourly-scroll {
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .hourly-table {
+        display: grid;
+        min-width: 1420px;
+        height: 100%;
+        grid-template-columns: 78px repeat(14, 96px);
+        align-items: stretch;
+      }
+
+      .label-stack,
+      .hour-card {
+        display: grid;
+        grid-template-rows: 30px 58px 34px 34px 34px 48px;
+      }
+
+      .label-cell,
+      .time-cell,
+      .value-cell,
+      .weather-cell,
+      .wind-cell {
+        display: grid;
+        place-items: center;
+        min-width: 0;
+        border-right: 1px solid rgba(15, 23, 42, 0.06);
+        color: #334155;
+        font-weight: 760;
+      }
+
+      .label-cell {
+        justify-content: start;
+        padding-left: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: left;
+      }
+
+      .time-cell {
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        font-size: 14px;
+      }
+
+      .now-time {
+        border-bottom: 2px solid var(--blue);
+        color: var(--text);
+      }
+
+      .weather-cell img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+      }
+
+      .value-cell {
+        font-size: 15px;
+      }
+
+      .rain {
+        color: var(--blue);
+      }
+
+      .wind-cell {
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.05;
+      }
+
+      .next-day {
+        background: rgba(15, 23, 42, 0.04);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="intro">
+        <h1>Weather Detail Notes layout preview</h1>
+        <p>Target: 1524 x 1016 CSS px. Alerts are separated by meaning: hourly note in the hourly header, and day notes inside Today and Tomorrow.</p>
+      </section>
+
+      <div class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">21:21</div>
+              <div class="date">Sat, May 23 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 21:21</span>
+              <span class="status-pill">Online</span>
+            </div>
+          </header>
+
+          <section class="weather-card">
+            <div class="weather-heading"><span class="heading-icon">☼</span>Weather</div>
+            <div class="detail">
+              <div class="top-grid">
+                <article class="panel now">
+                  <div>
+                    <p class="eyebrow">Now</p>
+                    <p class="location">Tokyo</p>
+                    <p class="temp-now">22℃</p>
+                    <p class="condition">晴れ</p>
+                  </div>
+                  <img class="now-icon" alt="晴れ時々くもり" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-night.svg" />
+                  <div class="stat-grid">
+                    <div class="stat"><span class="round-icon">H</span><span><span class="stat-label">Hum</span><span class="stat-value">73%</span></span></div>
+                    <div class="stat"><span class="round-icon">W</span><span><span class="stat-label">Wind</span><span class="stat-value">1 m/s</span></span></div>
+                    <div class="stat"><span class="round-icon">F</span><span><span class="stat-label">Feel</span><span class="stat-value">23℃</span></span></div>
+                    <div class="stat"><span class="round-icon">R</span><span><span class="stat-label">Rain</span><span class="stat-value">0%</span></span></div>
+                  </div>
+                </article>
+
+                <div class="right-stack">
+                  <article class="panel daily">
+                    <img class="daily-icon" alt="晴れ時々くもり" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" />
+                    <div>
+                      <div class="daily-head">
+                        <div>
+                          <p class="eyebrow">Today</p>
+                          <p class="daily-title">晴れ時々くもり</p>
+                        </div>
+                        <p class="temps">27℃ <span>/ 16℃</span></p>
+                      </div>
+                      <p class="summary">風は穏やかに感じる</p>
+                      <div class="mini-grid">
+                        <div class="mini-stat"><span class="round-icon">R</span><span><span class="stat-label">Rain</span><span class="stat-value">14%</span></span></div>
+                        <div class="mini-stat"><span class="round-icon">W</span><span><span class="stat-label">Wind</span><span class="stat-value">2 m/s</span></span></div>
+                        <div class="mini-stat"><span class="round-icon">H</span><span><span class="stat-label">Hum</span><span class="stat-value">77%</span></span></div>
+                      </div>
+                      <div class="day-note"><span class="badge">Note</span><span>UVやや強め。外出時は日差し対策を。</span></div>
+                    </div>
+                  </article>
+
+                  <article class="panel daily">
+                    <img class="daily-icon" alt="くもり" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-day.svg" />
+                    <div>
+                      <div class="daily-head">
+                        <div>
+                          <p class="eyebrow">Tomorrow</p>
+                          <p class="daily-title">くもり</p>
+                        </div>
+                        <p class="temps">26℃ <span>/ 17℃</span></p>
+                      </div>
+                      <p class="summary">風は穏やかに感じる</p>
+                      <div class="mini-grid">
+                        <div class="mini-stat"><span class="round-icon">R</span><span><span class="stat-label">Rain</span><span class="stat-value">20%</span></span></div>
+                        <div class="mini-stat"><span class="round-icon">W</span><span><span class="stat-label">Wind</span><span class="stat-value">1 m/s</span></span></div>
+                        <div class="mini-stat"><span class="round-icon">H</span><span><span class="stat-label">Hum</span><span class="stat-value">76%</span></span></div>
+                      </div>
+                      <div class="day-note"><span class="badge">Note</span><span>大きな天気崩れなし。朝夕の気温差は小さめ。</span></div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+
+              <section class="panel hourly">
+                <div class="hourly-head">
+                  <p class="hourly-title">Hourly Detail</p>
+                  <p class="hourly-note"><span class="badge">Note</span>20時以降 雨の可能性</p>
+                </div>
+                <div class="hourly-scroll">
+                  <div class="hourly-table">
+                    <div class="label-stack">
+                      <div class="label-cell">時刻</div>
+                      <div class="label-cell">天気</div>
+                      <div class="label-cell">気温</div>
+                      <div class="label-cell">降水</div>
+                      <div class="label-cell">雨量</div>
+                      <div class="label-cell">風</div>
+                    </div>
+                    <div class="hour-card"><div class="time-cell">18時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /></div><div class="value-cell">23℃</div><div class="value-cell rain">0%</div><div class="value-cell">0 mm</div><div class="wind-cell">南<br />1m</div></div>
+                    <div class="hour-card"><div class="time-cell">19時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-night.svg" /></div><div class="value-cell">22℃</div><div class="value-cell rain">0%</div><div class="value-cell">0 mm</div><div class="wind-cell">南<br />1m</div></div>
+                    <div class="hour-card"><div class="time-cell now-time">20時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/rain.svg" /></div><div class="value-cell">21℃</div><div class="value-cell rain">50%</div><div class="value-cell">0.1 mm</div><div class="wind-cell">東<br />1m</div></div>
+                    <div class="hour-card"><div class="time-cell">21時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/rain.svg" /></div><div class="value-cell">21℃</div><div class="value-cell rain">40%</div><div class="value-cell">0.1 mm</div><div class="wind-cell">東<br />1m</div></div>
+                    <div class="hour-card"><div class="time-cell">22時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-night.svg" /></div><div class="value-cell">20℃</div><div class="value-cell rain">20%</div><div class="value-cell">0 mm</div><div class="wind-cell">東<br />1m</div></div>
+                    <div class="hour-card"><div class="time-cell">23時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-night.svg" /></div><div class="value-cell">20℃</div><div class="value-cell rain">10%</div><div class="value-cell">0 mm</div><div class="wind-cell">東<br />1m</div></div>
+                    <div class="hour-card next-day"><div class="time-cell">明日</div><div class="weather-cell">明日</div><div class="value-cell">--</div><div class="value-cell rain">--</div><div class="value-cell">--</div><div class="wind-cell">--</div></div>
+                    <div class="hour-card next-day"><div class="time-cell">1時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" /></div><div class="value-cell">19℃</div><div class="value-cell rain">0%</div><div class="value-cell">0 mm</div><div class="wind-cell">東<br />1m</div></div>
+                    <div class="hour-card next-day"><div class="time-cell">2時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" /></div><div class="value-cell">18℃</div><div class="value-cell rain">0%</div><div class="value-cell">0 mm</div><div class="wind-cell">東<br />1m</div></div>
+                    <div class="hour-card next-day"><div class="time-cell">3時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" /></div><div class="value-cell">18℃</div><div class="value-cell rain">0%</div><div class="value-cell">0 mm</div><div class="wind-cell">東<br />1m</div></div>
+                    <div class="hour-card next-day"><div class="time-cell">4時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/clear-night.svg" /></div><div class="value-cell">18℃</div><div class="value-cell rain">0%</div><div class="value-cell">0 mm</div><div class="wind-cell">北東<br />1m</div></div>
+                    <div class="hour-card next-day"><div class="time-cell">5時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /></div><div class="value-cell">19℃</div><div class="value-cell rain">0%</div><div class="value-cell">0 mm</div><div class="wind-cell">北東<br />1m</div></div>
+                    <div class="hour-card next-day"><div class="time-cell">6時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/partly-cloudy-day.svg" /></div><div class="value-cell">20℃</div><div class="value-cell rain">0%</div><div class="value-cell">0 mm</div><div class="wind-cell">北東<br />1m</div></div>
+                    <div class="hour-card next-day"><div class="time-cell">7時</div><div class="weather-cell"><img alt="" src="https://unpkg.com/@meteocons/svg@0.1.0/flat/overcast-day.svg" /></div><div class="value-cell">22℃</div><div class="value-cell rain">10%</div><div class="value-cell">0 mm</div><div class="wind-cell">北東<br />2m</div></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
