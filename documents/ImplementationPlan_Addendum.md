@@ -483,7 +483,7 @@ Widget-specific probe classes should be added beside the shared classes, for exa
 
 - `weather-detail-root`, `weather-detail-top`, `weather-detail-now`, `weather-detail-daily`, `weather-detail-note`, `weather-detail-hourly`
 - `calendar-detail-root`, `calendar-detail-events`
-- `traffic-detail-root`, `traffic-detail-impact`, `traffic-detail-lines`
+- `traffic-detail-root`, `traffic-detail-summary`, `traffic-detail-impact`, `traffic-detail-lines`
 - `news-detail-root`, `news-detail-featured`, `news-detail-list`
 - `petPhoto-detail-root`, `petPhoto-detail-media`
 - `stocks-detail-root`, `stocks-detail-list`

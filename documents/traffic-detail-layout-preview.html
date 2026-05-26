@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
@@ -6,17 +6,21 @@
     <title>Traffic Detail Layout Preview</title>
     <style>
       :root {
-        --app-bg: #edf1f7;
-        --panel-bg: rgba(255, 255, 255, 0.88);
-        --panel-stroke: #d8e0ea;
-        --panel-shadow: 0 18px 36px rgba(15, 23, 42, 0.09);
-        --control-bg: #eef3f9;
-        --red: #ea4335;
-        --green: #34a853;
-        --amber: #fbbc05;
-        color: #0f172a;
+        --app-bg: #f6f8fb;
+        --panel: #ffffff;
+        --item: #f8fafc;
+        --chip: #f1f5f9;
+        --stroke: rgba(15, 23, 42, 0.08);
+        --text: #0f172a;
+        --muted: #64748b;
+        --red: #dc2626;
+        --amber: #b45309;
+        --green: #15803d;
+        --blue: #2563eb;
+        --shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
         font-family:
-          "Google Sans", "Noto Sans JP", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans",
+          "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
       }
 
       * {
@@ -25,329 +29,493 @@
 
       body {
         margin: 0;
-        background: var(--app-bg);
+        overflow-x: auto;
+        background: #e8ecf2;
+        color: var(--text);
       }
 
-      .page {
-        padding: 20px;
+      main {
+        display: grid;
+        width: max-content;
+        max-width: 100%;
+        gap: 28px;
+        padding: 24px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
       }
 
       h1 {
-        margin: 0 0 8px;
-        font-size: 22px;
+        font-size: 28px;
+        letter-spacing: 0;
       }
 
-      .note {
-        max-width: 980px;
-        margin: 0 0 18px;
-        color: #475569;
-        font-size: 14px;
-        line-height: 1.7;
-      }
-
-      .dashboard-grid {
+      .intro {
         display: grid;
-        width: 1500px;
-        height: 820px;
-        grid-template-columns: 1fr;
-        grid-template-rows: 14fr 76fr 10fr;
-        grid-template-areas:
-          "header"
-          "detail"
-          "quick";
-        gap: 1rem;
-      }
-
-      .card {
-        overflow: hidden;
-        border: 1px solid var(--panel-stroke);
-        border-radius: 24px;
-        background: var(--panel-bg);
-        box-shadow: var(--panel-shadow);
-      }
-
-      .header {
-        grid-area: header;
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        padding: 12px 24px;
-        background:
-          linear-gradient(90deg, rgba(66, 133, 244, 0.1), transparent 26%),
-          radial-gradient(circle at 92% 16%, rgba(251, 188, 5, 0.16), transparent 20%),
-          var(--panel-bg);
-      }
-
-      .clock {
-        margin: 0;
-        font-size: 48px;
-        font-weight: 650;
-        line-height: 1;
-      }
-
-      .meta {
-        margin: 8px 0 0;
-        color: #64748b;
-        font-size: 14px;
-        font-weight: 650;
-      }
-
-      .status {
-        display: flex;
+        max-width: 1120px;
         gap: 8px;
       }
 
-      .pill {
-        min-width: 112px;
-        padding: 8px 12px;
-        border: 1px solid var(--panel-stroke);
-        border-radius: 14px;
-        background: var(--control-bg);
-        text-align: right;
-      }
-
-      .pill span {
-        display: block;
-        color: #334155;
-        font-size: 14px;
-      }
-
-      .pill strong {
-        display: block;
-        margin-top: 4px;
+      .intro p {
+        color: #475569;
         font-size: 15px;
+        line-height: 1.55;
       }
 
-      .detail {
-        grid-area: detail;
+      .preview-title {
         display: grid;
-        min-height: 0;
-        grid-template-columns: 1.2fr 0.8fr;
-        grid-template-rows: auto minmax(0, 1fr);
-        grid-template-areas:
-          "summary summary"
-          "impact list";
-        gap: 16px;
-        padding: 18px;
-        border-top: 5px solid rgba(234, 67, 53, 0.34);
+        gap: 4px;
       }
 
-      .title-row {
-        grid-area: summary;
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 16px;
+      .preview-title h2 {
+        font-size: 22px;
       }
 
-      .heading {
-        display: flex;
-        min-width: 0;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .icon {
-        display: grid;
-        width: 42px;
-        height: 42px;
-        place-items: center;
-        border-radius: 999px;
-        background: var(--red);
-        color: #fff;
-        font-weight: 800;
-      }
-
-      .title {
-        margin: 0;
-        color: #64748b;
+      .preview-title p {
+        color: #475569;
         font-size: 14px;
+      }
+
+      .device {
+        width: 1524px;
+        height: 1016px;
+        overflow: hidden;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: var(--app-bg);
+        padding: 16px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+      }
+
+      .dashboard {
+        display: grid;
+        height: 100%;
+        grid-template-rows: 14fr 86fr;
+        gap: 16px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 26px;
+        background: rgba(255, 255, 255, 0.78);
+        padding: 22px 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .clock {
+        font-size: 60px;
+        font-weight: 430;
+        line-height: 1;
+      }
+
+      .date {
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .status-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .status-pill {
+        min-height: 44px;
+        border: 1px solid var(--stroke);
+        border-radius: 999px;
+        background: var(--chip);
+        padding: 11px 16px;
+        color: #334155;
+        font-size: 16px;
         font-weight: 750;
+      }
+
+      .traffic-card {
+        display: flex;
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-top: 5px solid #e57368;
+        border-radius: 26px;
+        background: var(--panel);
+        padding: 32px;
+        box-shadow: var(--shadow);
+      }
+
+      .traffic-heading {
+        display: flex;
+        min-height: 42px;
+        align-items: center;
+        gap: 14px;
+        color: #334155;
+        font-size: 18px;
         letter-spacing: 0.2em;
         text-transform: uppercase;
       }
 
-      .headline {
-        margin: 2px 0 0;
-        color: #b3261e;
-        font-size: 30px;
-        font-weight: 760;
-        line-height: 1.1;
-      }
-
-      .summary-strip {
+      .heading-icon {
         display: grid;
-        grid-template-columns: repeat(4, minmax(94px, 1fr));
-        gap: 10px;
-        min-width: 520px;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border: 1px solid #fad2cf;
+        border-radius: 999px;
+        background: #fce8e6;
+        color: #c5221f;
+        font-size: 18px;
+        font-weight: 850;
       }
 
-      .metric {
-        padding: 10px 12px;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 14px;
-        background: #f8fafc;
-      }
-
-      .metric span {
-        display: block;
-        color: #64748b;
-        font-size: 11px;
-        font-weight: 750;
-        letter-spacing: 0.08em;
-      }
-
-      .metric strong {
-        display: block;
-        margin-top: 3px;
-        font-size: 22px;
-        line-height: 1;
-      }
-
-      .impact {
-        grid-area: impact;
+      .detail {
         display: grid;
         min-height: 0;
-        grid-template-rows: auto minmax(0, 1fr) auto;
-        gap: 12px;
+        flex: 1;
+        grid-template-rows: 184px minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 14px;
       }
 
-      .section-title {
-        margin: 0;
+      .summary {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(520px, 0.88fr);
+        align-items: center;
+        gap: 18px;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: var(--item);
+        padding: 16px 20px;
+      }
+
+      .kicker {
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 780;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .headline {
+        margin-top: 8px;
+        overflow: hidden;
+        font-size: 34px;
+        font-weight: 780;
+        line-height: 1.08;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .headline.ok {
+        color: var(--green);
+      }
+
+      .headline.warn {
+        color: var(--red);
+      }
+
+      .headline.caution {
+        color: var(--amber);
+      }
+
+      .action-summary {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 9px 12px;
         color: #334155;
         font-size: 17px;
         font-weight: 760;
+        line-height: 1.25;
+      }
+
+      .action-summary::before {
+        display: block;
+        width: 6px;
+        height: 100%;
+        min-height: 34px;
+        border-radius: 999px;
+        content: "";
+      }
+
+      .action-summary.ok::before {
+        width: 5px;
+        background: var(--green);
+      }
+
+      .action-summary.caution::before {
+        width: 9px;
+        background: var(--amber);
+      }
+
+      .action-summary.warn::before {
+        width: 13px;
+        background: var(--red);
+      }
+
+      .action-summary.ok {
+        border: 1px solid rgba(21, 128, 61, 0.18);
+      }
+
+      .action-summary.caution {
+        border: 1px solid rgba(180, 83, 9, 0.22);
+      }
+
+      .action-summary.warn {
+        border: 1px solid rgba(220, 38, 38, 0.22);
+        font-size: 18px;
+        font-weight: 820;
+      }
+
+      .metric-grid {
+        display: grid;
+        min-width: 0;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .metric {
+        display: grid;
+        min-height: 68px;
+        min-width: 0;
+        align-content: center;
+        border-radius: 8px;
+        background: var(--chip);
+        padding: 9px 12px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 780;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .metric strong {
+        margin-top: 4px;
+        overflow: hidden;
+        font-size: 25px;
+        font-weight: 820;
+        line-height: 1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .main-grid {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+        gap: 14px;
+      }
+
+      .panel {
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: var(--item);
+      }
+
+      .impact {
+        display: grid;
+        grid-template-rows: 40px minmax(0, 1fr);
+        gap: 10px;
+        padding: 12px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .section-title {
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 780;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .section-note {
+        color: #475569;
+        font-size: 15px;
+        font-weight: 720;
       }
 
       .impact-list {
         display: grid;
         min-height: 0;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+        gap: 10px;
       }
 
       .impact-card {
         display: grid;
-        align-content: start;
-        gap: 10px;
         min-height: 0;
-        padding: 14px;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 16px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        overflow: hidden;
+        border-radius: 8px;
         background: #fff;
+        padding: 13px 14px;
       }
 
-      .impact-card h3 {
-        margin: 0;
-        font-size: 22px;
-        font-weight: 720;
+      .impact-main {
+        min-width: 0;
       }
 
-      .badges {
+      .line-title-row {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+        min-width: 0;
+        align-items: center;
+        gap: 10px;
       }
 
-      .badge {
-        padding: 6px 10px;
-        border-radius: 999px;
-        font-size: 13px;
-        font-weight: 800;
+      .line-title {
+        overflow: hidden;
+        font-size: 24px;
+        font-weight: 760;
+        line-height: 1.1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
-      .badge.warn {
-        background: rgba(234, 67, 53, 0.12);
-        color: #b3261e;
+      .route {
+        margin-top: 5px;
+        overflow: hidden;
+        color: #475569;
+        font-size: 16px;
+        font-weight: 680;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
-      .badge.caution {
-        background: rgba(251, 188, 5, 0.22);
-        color: #8a5a00;
-      }
-
-      .detail-grid {
+      .detail-row-grid {
         display: grid;
-        gap: 8px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 12px;
+        margin-top: 10px;
       }
 
       .detail-row {
         display: grid;
-        grid-template-columns: 86px minmax(0, 1fr);
-        gap: 10px;
-        color: #0f172a;
-        font-size: 15px;
-        line-height: 1.35;
+        min-width: 0;
+        gap: 2px;
       }
 
       .detail-row span {
-        color: #64748b;
-        font-weight: 700;
-      }
-
-      .station-note {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 14px;
-        border: 1px dashed rgba(100, 116, 139, 0.36);
-        border-radius: 16px;
-        background: rgba(248, 250, 252, 0.78);
-        color: #475569;
-        font-size: 14px;
-        line-height: 1.5;
-      }
-
-      .station-note strong {
-        display: block;
-        color: #334155;
-        font-size: 15px;
-      }
-
-      .station-note .phase {
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: #e2e8f0;
-        color: #334155;
+        color: var(--muted);
         font-size: 12px;
-        font-weight: 800;
+        font-weight: 780;
+        letter-spacing: 0.08em;
+      }
+
+      .detail-row strong {
+        overflow: hidden;
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 760;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .badge {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 15px;
+        font-weight: 850;
+        white-space: nowrap;
+      }
+
+      .badge.ok {
+        background: #dcfce7;
+        color: var(--green);
+      }
+
+      .badge.warn {
+        background: #fee2e2;
+        color: var(--red);
+      }
+
+      .badge.caution {
+        background: #fef3c7;
+        color: var(--amber);
+      }
+
+      .badge.unknown {
+        background: #e2e8f0;
+        color: #475569;
+      }
+
+      .updated {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 760;
       }
 
       .all-lines {
-        grid-area: list;
-        min-height: 0;
-        padding: 14px;
-        border: 1px solid rgba(15, 23, 42, 0.08);
-        border-radius: 16px;
-        background: #fff;
+        display: grid;
+        grid-template-rows: 40px minmax(0, 1fr);
+        gap: 10px;
+        padding: 12px;
       }
 
-      .table {
+      .line-table {
         display: grid;
-        margin-top: 10px;
+        min-height: 0;
+        align-content: start;
+        overflow: hidden;
       }
 
       .table-row {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) 58px 54px 96px;
+        min-height: 45px;
+        grid-template-columns: minmax(0, 1fr) 100px 88px minmax(118px, 0.62fr);
         align-items: center;
         gap: 10px;
-        min-height: 34px;
         border-bottom: 1px solid rgba(15, 23, 42, 0.07);
-        font-size: 14px;
+        font-size: 16px;
       }
 
       .table-row.header-row {
-        min-height: 26px;
-        color: #64748b;
+        min-height: 30px;
+        color: var(--muted);
         font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
+        font-weight: 850;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
       }
 
       .line-name {
         overflow: hidden;
+        font-weight: 760;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .line-meta {
+        overflow: hidden;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 700;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
@@ -357,144 +525,514 @@
       }
 
       .right {
+        overflow: hidden;
         text-align: right;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
-      .ok {
-        color: #137333;
+      .ok-text {
+        color: var(--green);
       }
 
       .warn-text {
-        color: #b3261e;
+        color: var(--red);
       }
 
-      .quick {
-        grid-area: quick;
+      .caution-text {
+        color: var(--amber);
+      }
+
+      .unknown-text {
+        color: #475569;
+      }
+
+      .normal-panel {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 14px;
-        padding: 18px;
+        min-height: 0;
+        place-items: center;
+        gap: 18px;
+        border-radius: 8px;
+        background: #fff;
+        padding: 36px;
+        text-align: center;
       }
 
-      .quick button {
-        height: 44px;
-        border: 1px solid #d8e0ea;
-        border-radius: 8px;
-        background: #eef3f9;
-        color: #334155;
-        font-size: 18px;
+      .normal-panel strong {
+        color: var(--green);
+        font-size: 54px;
+        line-height: 1;
+      }
+
+      .normal-panel p {
+        color: #475569;
+        font-size: 20px;
         font-weight: 700;
       }
 
-      .quick .active {
-        border-color: rgba(66, 133, 244, 0.34);
-        background: #e8f0fe;
+      .layout-probe {
+        --probe-color: rgba(34, 197, 94, 0.32);
+        outline: 1px solid var(--probe-color);
+        outline-offset: -1px;
+      }
+
+      .layout-probe.probe-fail {
+        --probe-color: rgba(220, 38, 38, 0.78);
+      }
+
+      .probe-report {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 10;
+        display: grid;
+        max-width: 420px;
+        gap: 6px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        padding: 12px 14px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
         color: #0f172a;
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      .probe-report strong {
+        font-size: 15px;
+      }
+
+      .probe-report .fail {
+        color: var(--red);
+      }
+
+      .probe-report .ok {
+        color: var(--green);
       }
     </style>
   </head>
   <body>
-    <div class="page">
-      <h1>Traffic Detail Preview</h1>
-      <p class="note">
-        運用上は登録路線の運行状況を詳細ページの中心にする。駅ごとの次発情報は便利だがデータ鮮度とAPI制約が別物なので、後続フェーズの拡張枠として扱う。
-      </p>
-
-      <section class="dashboard-grid">
-        <header class="card header">
-          <div>
-            <p class="clock">07:42</p>
-            <p class="meta">Tue, May 19 / Tokyo</p>
-          </div>
-          <div class="status">
-            <div class="pill"><span>Online</span><strong>Connected</strong></div>
-            <div class="pill"><span>Last Sync</span><strong>07:40</strong></div>
-          </div>
-        </header>
-
-        <article class="card detail">
-          <div class="title-row">
-            <div class="heading">
-              <span class="icon">T</span>
-              <div>
-                <p class="title">Traffic Detail</p>
-                <p class="headline">遅延 2/8・通常 6/8</p>
-              </div>
-            </div>
-            <div class="summary-strip">
-              <div class="metric"><span>遅延</span><strong class="warn-text">2/8</strong></div>
-              <div class="metric"><span>見合わせ</span><strong>0/8</strong></div>
-              <div class="metric"><span>通常</span><strong class="ok">6/8</strong></div>
-              <div class="metric"><span>更新</span><strong>07:40</strong></div>
-            </div>
-          </div>
-
-          <section class="impact">
-            <h2 class="section-title">重要な影響</h2>
-            <div class="impact-list">
-              <section class="impact-card">
-                <h3>中央線快速</h3>
-                <div class="badges">
-                  <span class="badge warn">遅延 +12分</span>
-                  <span class="badge caution">07:38更新</span>
-                </div>
-                <div class="detail-grid">
-                  <div class="detail-row"><span>影響区間</span><strong>三鷹から東京方面</strong></div>
-                  <div class="detail-row"><span>理由</span><strong>混雑の影響</strong></div>
-                  <div class="detail-row"><span>復旧見込み</span><strong>未定</strong></div>
-                  <div class="detail-row"><span>振替輸送</span><strong>なし</strong></div>
-                </div>
-              </section>
-
-              <section class="impact-card">
-                <h3>東京メトロ東西線</h3>
-                <div class="badges">
-                  <span class="badge caution">一部遅延</span>
-                  <span class="badge caution">07:35更新</span>
-                </div>
-                <div class="detail-grid">
-                  <div class="detail-row"><span>影響区間</span><strong>中野から西船橋方面</strong></div>
-                  <div class="detail-row"><span>理由</span><strong>一部列車の遅れ</strong></div>
-                  <div class="detail-row"><span>復旧見込み</span><strong>08:10頃</strong></div>
-                  <div class="detail-row"><span>振替輸送</span><strong>対象外</strong></div>
-                </div>
-              </section>
-            </div>
-
-            <div class="station-note">
-              <div>
-                <strong>登録駅の次発情報</strong>
-                駅別発車案内は便利だが、路線運行状況とは別データとして後続フェーズで追加する。MVPでは詳細ページに拡張余地だけ残す。
-              </div>
-              <span class="phase">Phase 4</span>
-            </div>
-          </section>
-
-          <section class="all-lines">
-            <h2 class="section-title">登録路線一覧</h2>
-            <div class="table">
-              <div class="table-row header-row">
-                <span>路線</span><span class="center">状態</span><span class="center">更新</span><span class="right">影響</span>
-              </div>
-              <div class="table-row"><span class="line-name">中央線快速</span><strong class="center warn-text">+12</strong><span class="center">07:38</span><span class="right">三鷹-東京</span></div>
-              <div class="table-row"><span class="line-name">東京メトロ東西線</span><strong class="center warn-text">一部</strong><span class="center">07:35</span><span class="right">一部列車</span></div>
-              <div class="table-row"><span class="line-name">山手線</span><strong class="center ok">OK</strong><span class="center">07:40</span><span class="right">-</span></div>
-              <div class="table-row"><span class="line-name">総武線各駅停車</span><strong class="center ok">OK</strong><span class="center">07:40</span><span class="right">-</span></div>
-              <div class="table-row"><span class="line-name">丸ノ内線</span><strong class="center ok">OK</strong><span class="center">07:39</span><span class="right">-</span></div>
-              <div class="table-row"><span class="line-name">銀座線</span><strong class="center ok">OK</strong><span class="center">07:39</span><span class="right">-</span></div>
-              <div class="table-row"><span class="line-name">京王線</span><strong class="center ok">OK</strong><span class="center">07:36</span><span class="right">-</span></div>
-              <div class="table-row"><span class="line-name">京王井の頭線</span><strong class="center ok">OK</strong><span class="center">07:36</span><span class="right">-</span></div>
-            </div>
-          </section>
-        </article>
-
-        <nav class="card quick">
-          <button>Home</button>
-          <button>Weather</button>
-          <button class="active">Traffic</button>
-          <button>News</button>
-        </nav>
+    <main>
+      <section class="intro">
+        <h1>Traffic Detail Layout Preview</h1>
+        <p>Target: 1524 x 1016 CSS px. The comparison keeps the same production-sized frame and tests four states: normal, delayed, suspended, and unknown. Impact information is prioritized above the full route list.</p>
       </section>
-    </div>
+
+      <section class="preview-title">
+        <h2>1. Normal</h2>
+        <p>全線通常時。大きな安心表示を主役にして、一覧は確認用として圧縮。</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Tue, May 19 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:40</span>
+              <span class="status-pill">Online</span>
+            </div>
+          </header>
+          <article class="layout-probe widget-detail-root traffic-detail-root traffic-card">
+            <div class="traffic-heading"><span class="heading-icon">T</span>Traffic</div>
+            <div class="layout-probe traffic-detail-content detail">
+              <section class="layout-probe traffic-detail-summary summary">
+                <div>
+                  <p class="kicker">Current status</p>
+                  <p class="headline ok">登録路線はすべて通常運行</p>
+                  <p class="action-summary ok">通常どおり移動できます。</p>
+                </div>
+                <div class="metric-grid">
+                  <div class="metric"><span>Impact</span><strong class="ok-text">0/8</strong></div>
+                  <div class="metric"><span>Suspended</span><strong>0/8</strong></div>
+                  <div class="metric"><span>Normal</span><strong class="ok-text">8/8</strong></div>
+                  <div class="metric"><span>Updated</span><strong>07:40</strong></div>
+                </div>
+              </section>
+              <div class="main-grid">
+                <section class="layout-probe widget-detail-primary traffic-detail-impact panel impact">
+                  <div class="section-head">
+                    <p class="section-title">Important Impact</p>
+                    <p class="section-note">異常なし</p>
+                  </div>
+                  <div class="normal-panel">
+                    <strong>OK</strong>
+                    <p>通勤・通学に影響する運行情報はありません。</p>
+                  </div>
+                </section>
+                <section class="layout-probe widget-detail-list traffic-detail-lines panel all-lines">
+                  <div class="section-head">
+                    <p class="section-title">Registered Lines</p>
+                    <p class="section-note">8 lines</p>
+                  </div>
+                  <div class="line-table">
+                    <div class="table-row header-row"><span>Line</span><span class="center">Status</span><span class="center">Updated</span><span class="right">Area</span></div>
+                    <div class="table-row"><span><span class="line-name">中央線快速</span><span class="line-meta">東京から高尾</span></span><strong class="center ok-text">OK</strong><span class="center">07:40</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">山手線</span><span class="line-meta">内回り・外回り</span></span><strong class="center ok-text">OK</strong><span class="center">07:40</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">東京メトロ東西線</span><span class="line-meta">中野から西船橋</span></span><strong class="center ok-text">OK</strong><span class="center">07:39</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">総武線各駅停車</span><span class="line-meta">三鷹から千葉</span></span><strong class="center ok-text">OK</strong><span class="center">07:39</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">丸ノ内線</span><span class="line-meta">荻窪から池袋</span></span><strong class="center ok-text">OK</strong><span class="center">07:38</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">銀座線</span><span class="line-meta">渋谷から浅草</span></span><strong class="center ok-text">OK</strong><span class="center">07:38</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">京王線</span><span class="line-meta">新宿から京王八王子</span></span><strong class="center ok-text">OK</strong><span class="center">07:37</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">京王井の頭線</span><span class="line-meta">渋谷から吉祥寺</span></span><strong class="center ok-text">OK</strong><span class="center">07:37</span><span class="right">-</span></div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="preview-title">
+        <h2>2. Delayed</h2>
+        <p>遅延あり。影響カードは最大3件を縦に並べ、一覧よりも判断材料を優先。</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Tue, May 19 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:40</span>
+              <span class="status-pill">Online</span>
+            </div>
+          </header>
+          <article class="layout-probe widget-detail-root traffic-detail-root traffic-card">
+            <div class="traffic-heading"><span class="heading-icon">T</span>Traffic</div>
+            <div class="layout-probe traffic-detail-content detail">
+              <section class="layout-probe traffic-detail-summary summary">
+                <div>
+                  <p class="kicker">Current status</p>
+                  <p class="headline warn">2路線に影響。見合わせなし</p>
+                  <p class="action-summary caution">出発時刻に余裕を持ってください。</p>
+                </div>
+                <div class="metric-grid">
+                  <div class="metric"><span>Impact</span><strong class="warn-text">2/8</strong></div>
+                  <div class="metric"><span>Suspended</span><strong>0/8</strong></div>
+                  <div class="metric"><span>Normal</span><strong class="ok-text">6/8</strong></div>
+                  <div class="metric"><span>Updated</span><strong>07:40</strong></div>
+                </div>
+              </section>
+              <div class="main-grid">
+                <section class="layout-probe widget-detail-primary traffic-detail-impact panel impact">
+                  <div class="section-head">
+                    <p class="section-title">Important Impact</p>
+                    <p class="section-note">遅延を優先表示</p>
+                  </div>
+                  <div class="impact-list">
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">中央線快速</h2><span class="badge warn">遅延 +12分</span></div>
+                        <p class="route">三鷹から東京方面</p>
+                        <div class="detail-row-grid">
+                          <div class="detail-row"><span>理由</span><strong>混雑の影響</strong></div>
+                          <div class="detail-row"><span>復旧見込み</span><strong>未定</strong></div>
+                          <div class="detail-row"><span>振替輸送</span><strong>なし</strong></div>
+                          <div class="detail-row"><span>確認</span><strong>07:38</strong></div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">東京メトロ東西線</h2><span class="badge caution">一部遅延</span></div>
+                        <p class="route">中野から西船橋方面</p>
+                        <div class="detail-row-grid">
+                          <div class="detail-row"><span>理由</span><strong>一部列車の遅れ</strong></div>
+                          <div class="detail-row"><span>復旧見込み</span><strong>08:10頃</strong></div>
+                          <div class="detail-row"><span>振替輸送</span><strong>対象外</strong></div>
+                          <div class="detail-row"><span>確認</span><strong>07:35</strong></div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">他の登録路線</h2><span class="badge ok">通常</span></div>
+                        <p class="route">残り6路線は通常運行</p>
+                      </div>
+                    </section>
+                  </div>
+                </section>
+                <section class="layout-probe widget-detail-list traffic-detail-lines panel all-lines">
+                  <div class="section-head">
+                    <p class="section-title">Registered Lines</p>
+                    <p class="section-note">8 lines</p>
+                  </div>
+                  <div class="line-table">
+                    <div class="table-row header-row"><span>Line</span><span class="center">Status</span><span class="center">Updated</span><span class="right">Area</span></div>
+                    <div class="table-row"><span><span class="line-name">中央線快速</span><span class="line-meta">東京から高尾</span></span><strong class="center warn-text">+12</strong><span class="center">07:38</span><span class="right">三鷹-東京</span></div>
+                    <div class="table-row"><span><span class="line-name">東京メトロ東西線</span><span class="line-meta">中野から西船橋</span></span><strong class="center caution-text">一部</strong><span class="center">07:35</span><span class="right">一部列車</span></div>
+                    <div class="table-row"><span><span class="line-name">山手線</span><span class="line-meta">内回り・外回り</span></span><strong class="center ok-text">OK</strong><span class="center">07:40</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">総武線各駅停車</span><span class="line-meta">三鷹から千葉</span></span><strong class="center ok-text">OK</strong><span class="center">07:40</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">丸ノ内線</span><span class="line-meta">荻窪から池袋</span></span><strong class="center ok-text">OK</strong><span class="center">07:39</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">銀座線</span><span class="line-meta">渋谷から浅草</span></span><strong class="center ok-text">OK</strong><span class="center">07:39</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">京王線</span><span class="line-meta">新宿から京王八王子</span></span><strong class="center ok-text">OK</strong><span class="center">07:36</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">京王井の頭線</span><span class="line-meta">渋谷から吉祥寺</span></span><strong class="center ok-text">OK</strong><span class="center">07:36</span><span class="right">-</span></div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="preview-title">
+        <h2>3. Suspended</h2>
+        <p>見合わせあり。赤の結論表示と最上段カードで、通常の遅延より強い危険度にする。</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Tue, May 19 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:40</span>
+              <span class="status-pill">Online</span>
+            </div>
+          </header>
+          <article class="layout-probe widget-detail-root traffic-detail-root traffic-card">
+            <div class="traffic-heading"><span class="heading-icon">T</span>Traffic</div>
+            <div class="layout-probe traffic-detail-content detail">
+              <section class="layout-probe traffic-detail-summary summary">
+                <div>
+                  <p class="kicker">Current status</p>
+                  <p class="headline warn">1路線で運転見合わせ</p>
+                  <p class="action-summary warn">経路変更を確認してください。</p>
+                </div>
+                <div class="metric-grid">
+                  <div class="metric"><span>Impact</span><strong class="warn-text">3/8</strong></div>
+                  <div class="metric"><span>Suspended</span><strong class="warn-text">1/8</strong></div>
+                  <div class="metric"><span>Normal</span><strong class="ok-text">5/8</strong></div>
+                  <div class="metric"><span>Updated</span><strong>07:40</strong></div>
+                </div>
+              </section>
+              <div class="main-grid">
+                <section class="layout-probe widget-detail-primary traffic-detail-impact panel impact">
+                  <div class="section-head">
+                    <p class="section-title">Important Impact</p>
+                    <p class="section-note">見合わせを最優先</p>
+                  </div>
+                  <div class="impact-list">
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">総武線各駅停車</h2><span class="badge warn">見合わせ</span></div>
+                        <p class="route">三鷹から御茶ノ水方面</p>
+                        <div class="detail-row-grid">
+                          <div class="detail-row"><span>理由</span><strong>設備点検</strong></div>
+                          <div class="detail-row"><span>復旧見込み</span><strong>08:30頃</strong></div>
+                          <div class="detail-row"><span>振替輸送</span><strong>あり</strong></div>
+                          <div class="detail-row"><span>確認</span><strong>07:39</strong></div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">中央線快速</h2><span class="badge caution">遅延</span></div>
+                        <p class="route">東京から高尾方面</p>
+                        <div class="detail-row-grid">
+                          <div class="detail-row"><span>理由</span><strong>混雑の影響</strong></div>
+                          <div class="detail-row"><span>復旧見込み</span><strong>未定</strong></div>
+                          <div class="detail-row"><span>振替輸送</span><strong>あり</strong></div>
+                          <div class="detail-row"><span>確認</span><strong>07:38</strong></div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">東京メトロ東西線</h2><span class="badge caution">一部遅延</span></div>
+                        <p class="route">中野から西船橋方面</p>
+                      </div>
+                    </section>
+                  </div>
+                </section>
+                <section class="layout-probe widget-detail-list traffic-detail-lines panel all-lines">
+                  <div class="section-head">
+                    <p class="section-title">Registered Lines</p>
+                    <p class="section-note">8 lines</p>
+                  </div>
+                  <div class="line-table">
+                    <div class="table-row header-row"><span>Line</span><span class="center">Status</span><span class="center">Updated</span><span class="right">Area</span></div>
+                    <div class="table-row"><span><span class="line-name">総武線各駅停車</span><span class="line-meta">三鷹から千葉</span></span><strong class="center warn-text">停止</strong><span class="center">07:39</span><span class="right">三鷹-御茶ノ水</span></div>
+                    <div class="table-row"><span><span class="line-name">中央線快速</span><span class="line-meta">東京から高尾</span></span><strong class="center caution-text">遅延</strong><span class="center">07:38</span><span class="right">東京-高尾</span></div>
+                    <div class="table-row"><span><span class="line-name">東京メトロ東西線</span><span class="line-meta">中野から西船橋</span></span><strong class="center caution-text">一部</strong><span class="center">07:35</span><span class="right">一部列車</span></div>
+                    <div class="table-row"><span><span class="line-name">山手線</span><span class="line-meta">内回り・外回り</span></span><strong class="center ok-text">OK</strong><span class="center">07:40</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">丸ノ内線</span><span class="line-meta">荻窪から池袋</span></span><strong class="center ok-text">OK</strong><span class="center">07:39</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">銀座線</span><span class="line-meta">渋谷から浅草</span></span><strong class="center ok-text">OK</strong><span class="center">07:39</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">京王線</span><span class="line-meta">新宿から京王八王子</span></span><strong class="center ok-text">OK</strong><span class="center">07:36</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">京王井の頭線</span><span class="line-meta">渋谷から吉祥寺</span></span><strong class="center ok-text">OK</strong><span class="center">07:36</span><span class="right">-</span></div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="preview-title">
+        <h2>4. Unknown</h2>
+        <p>未確認あり。正常とは区別し、データ鮮度の注意として見せる。</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Tue, May 19 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:18</span>
+              <span class="status-pill">Stale</span>
+            </div>
+          </header>
+          <article class="layout-probe widget-detail-root traffic-detail-root traffic-card">
+            <div class="traffic-heading"><span class="heading-icon">T</span>Traffic</div>
+            <div class="layout-probe traffic-detail-content detail">
+              <section class="layout-probe traffic-detail-summary summary">
+                <div>
+                  <p class="kicker">Current status</p>
+                  <p class="headline caution">2路線が未確認。前回情報を表示</p>
+                  <p class="action-summary caution">データ鮮度に注意してください。</p>
+                </div>
+                <div class="metric-grid">
+                  <div class="metric"><span>Impact</span><strong class="unknown-text">2/8</strong></div>
+                  <div class="metric"><span>Unknown</span><strong class="caution-text">2/8</strong></div>
+                  <div class="metric"><span>Normal</span><strong class="ok-text">6/8</strong></div>
+                  <div class="metric"><span>Updated</span><strong>07:18</strong></div>
+                </div>
+              </section>
+              <div class="main-grid">
+                <section class="layout-probe widget-detail-primary traffic-detail-impact panel impact">
+                  <div class="section-head">
+                    <p class="section-title">Important Impact</p>
+                    <p class="section-note">未確認を通常扱いしない</p>
+                  </div>
+                  <div class="impact-list">
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">中央線快速</h2><span class="badge unknown">未確認</span></div>
+                        <p class="route">前回取得時点の情報を表示</p>
+                        <div class="detail-row-grid">
+                          <div class="detail-row"><span>前回確認</span><strong>07:18</strong></div>
+                          <div class="detail-row"><span>状態</span><strong>確認待ち</strong></div>
+                          <div class="detail-row"><span>扱い</span><strong>通常とは別表示</strong></div>
+                          <div class="detail-row"><span>対応</span><strong>次回更新待ち</strong></div>
+                        </div>
+                      </div>
+                    </section>
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">山手線</h2><span class="badge unknown">未確認</span></div>
+                        <p class="route">前回取得時点の情報を表示</p>
+                      </div>
+                    </section>
+                    <section class="impact-card">
+                      <div class="impact-main">
+                        <div class="line-title-row"><h2 class="line-title">他の登録路線</h2><span class="badge ok">通常</span></div>
+                        <p class="route">確認済み6路線は通常運行</p>
+                      </div>
+                    </section>
+                  </div>
+                </section>
+                <section class="layout-probe widget-detail-list traffic-detail-lines panel all-lines">
+                  <div class="section-head">
+                    <p class="section-title">Registered Lines</p>
+                    <p class="section-note">8 lines</p>
+                  </div>
+                  <div class="line-table">
+                    <div class="table-row header-row"><span>Line</span><span class="center">Status</span><span class="center">Updated</span><span class="right">Area</span></div>
+                    <div class="table-row"><span><span class="line-name">中央線快速</span><span class="line-meta">東京から高尾</span></span><strong class="center unknown-text">確認</strong><span class="center">07:18</span><span class="right">前回情報</span></div>
+                    <div class="table-row"><span><span class="line-name">山手線</span><span class="line-meta">内回り・外回り</span></span><strong class="center unknown-text">確認</strong><span class="center">07:18</span><span class="right">前回情報</span></div>
+                    <div class="table-row"><span><span class="line-name">東京メトロ東西線</span><span class="line-meta">中野から西船橋</span></span><strong class="center ok-text">OK</strong><span class="center">07:18</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">総武線各駅停車</span><span class="line-meta">三鷹から千葉</span></span><strong class="center ok-text">OK</strong><span class="center">07:18</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">丸ノ内線</span><span class="line-meta">荻窪から池袋</span></span><strong class="center ok-text">OK</strong><span class="center">07:18</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">銀座線</span><span class="line-meta">渋谷から浅草</span></span><strong class="center ok-text">OK</strong><span class="center">07:18</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">京王線</span><span class="line-meta">新宿から京王八王子</span></span><strong class="center ok-text">OK</strong><span class="center">07:18</span><span class="right">-</span></div>
+                    <div class="table-row"><span><span class="line-name">京王井の頭線</span><span class="line-meta">渋谷から吉祥寺</span></span><strong class="center ok-text">OK</strong><span class="center">07:18</span><span class="right">-</span></div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+      <aside class="probe-report" id="probe-report" aria-live="polite">
+        <strong>Layout probes</strong>
+        <span>Measuring preview overflow...</span>
+      </aside>
+    </main>
+    <script>
+      function collectPreviewProbeResults() {
+        const tolerance = 1;
+        const probes = Array.from(document.querySelectorAll(".layout-probe"));
+
+        return probes.map((probe, index) => {
+          const rect = probe.getBoundingClientRect();
+          const verticalOverflow = probe.scrollHeight > probe.clientHeight + tolerance;
+          const horizontalOverflow = probe.scrollWidth > probe.clientWidth + tolerance;
+          const childOverflow = Array.from(probe.children).some((child) => {
+            const childRect = child.getBoundingClientRect();
+            return (
+              childRect.top < rect.top - tolerance ||
+              childRect.left < rect.left - tolerance ||
+              childRect.bottom > rect.bottom + tolerance ||
+              childRect.right > rect.right + tolerance
+            );
+          });
+          const failed = verticalOverflow || horizontalOverflow || childOverflow;
+          const label = Array.from(probe.classList)
+            .filter((className) => className !== "layout-probe")
+            .slice(0, 3)
+            .join(".");
+
+          probe.classList.toggle("probe-fail", failed);
+
+          return {
+            failed,
+            horizontalOverflow,
+            index,
+            label,
+            verticalOverflow,
+            childOverflow,
+          };
+        });
+      }
+
+      function renderProbeReport() {
+        const results = collectPreviewProbeResults();
+        const failures = results.filter((result) => result.failed);
+        const report = document.getElementById("probe-report");
+
+        if (!report) {
+          return;
+        }
+
+        if (failures.length === 0) {
+          report.innerHTML = `<strong>Layout probes</strong><span class="ok">${results.length} probes OK</span>`;
+          return;
+        }
+
+        report.innerHTML = [
+          "<strong>Layout probes</strong>",
+          `<span class="fail">${failures.length} / ${results.length} probes failing</span>`,
+          ...failures.slice(0, 6).map((result) => {
+            const reasons = [
+              result.verticalOverflow ? "vertical" : "",
+              result.horizontalOverflow ? "horizontal" : "",
+              result.childOverflow ? "child bounds" : "",
+            ].filter(Boolean).join(", ");
+
+            return `<span class="fail">#${result.index + 1} ${result.label}: ${reasons}</span>`;
+          }),
+        ].join("");
+      }
+
+      window.addEventListener("load", renderProbeReport);
+      window.addEventListener("resize", renderProbeReport);
+    </script>
   </body>
 </html>
+

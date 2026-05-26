@@ -66,8 +66,8 @@ describe("dashboard integration", () => {
     expect(screen.getByRole("button", { name: "Traffic detail" })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
-    expect(await screen.findByText(/通常 8\/8/)).toBeInTheDocument();
-    expect(screen.getByText(/登録路線はすべて通常運行です/)).toBeInTheDocument();
+    expect(await screen.findByText(/登録路線はすべて通常運行/)).toBeInTheDocument();
+    expect(screen.getByText(/通常どおり移動できます/)).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Home" }));
     expect(screen.getByRole("button", { name: "Weather detail" })).toBeInTheDocument();
