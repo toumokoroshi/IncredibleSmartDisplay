@@ -5,7 +5,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
 
-const viewport = { width: 1524, height: 1016 };
+const viewports = [
+  { label: "plan target", width: 1524, height: 1016 },
+  { label: "kiosk measured", width: 1524, height: 1015 },
+];
 const appPort = 4175;
 const debugPort = 9333;
 const baseUrl = `http://127.0.0.1:${appPort}`;
@@ -182,7 +185,7 @@ function createCdpClient(webSocketUrl) {
   };
 }
 
-async function openProbePage() {
+async function openProbePage(viewport) {
   await waitForDebugPort();
   const target = await requestJson(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(baseUrl)}`, { method: "PUT" });
   const client = createCdpClient(target.webSocketDebuggerUrl);
@@ -226,7 +229,31 @@ async function waitForSelector(client, selector) {
   throw new Error(`Timed out waiting for selector: ${selector}`);
 }
 
-async function runCheck(client, check) {
+async function assertViewportMetrics(client, viewport) {
+  const metrics = await evaluate(
+    client,
+    `({
+      innerWidth: window.innerWidth,
+      innerHeight: window.innerHeight,
+      documentClientWidth: document.documentElement.clientWidth,
+      documentClientHeight: document.documentElement.clientHeight,
+      aspectRatio: window.innerWidth / window.innerHeight
+    })`,
+  );
+
+  if (
+    metrics.innerWidth !== viewport.width ||
+    metrics.innerHeight !== viewport.height ||
+    metrics.documentClientWidth !== viewport.width ||
+    metrics.documentClientHeight !== viewport.height
+  ) {
+    throw new Error(
+      `${viewport.label} viewport mismatch: expected ${viewport.width}x${viewport.height}, got inner=${metrics.innerWidth}x${metrics.innerHeight} document=${metrics.documentClientWidth}x${metrics.documentClientHeight}`,
+    );
+  }
+}
+
+async function runCheck(client, check, viewport) {
   await evaluate(client, "document.querySelector('.home-command')?.click()");
   await waitForSelector(client, check.openSelector);
   await evaluate(client, `document.querySelector(${JSON.stringify(check.openSelector)})?.click()`);
@@ -250,10 +277,10 @@ async function runCheck(client, check) {
     const details = results.failed
       .map((failure) => `${failure.selector} missing=${failure.missing} vertical=${failure.verticalOverflow} horizontal=${failure.horizontalOverflow} size=${failure.clientWidth}x${failure.clientHeight} scroll=${failure.scrollWidth}x${failure.scrollHeight}`)
       .join("\n");
-    throw new Error(`${check.name} failed layout probes:\n${details}`);
+    throw new Error(`${viewport.label} ${viewport.width}x${viewport.height} ${check.name} failed layout probes:\n${details}`);
   }
 
-  console.log(`layout probe ok: ${check.name}`);
+  console.log(`layout probe ok: ${viewport.label} ${viewport.width}x${viewport.height}: ${check.name}`);
 }
 
 const server = await createServer({
@@ -282,9 +309,14 @@ try {
     "about:blank",
   ], { stdio: "ignore" });
 
-  client = await openProbePage();
-  for (const check of checks) {
-    await runCheck(client, check);
+  for (const viewport of viewports) {
+    client = await openProbePage(viewport);
+    await assertViewportMetrics(client, viewport);
+    for (const check of checks) {
+      await runCheck(client, check, viewport);
+    }
+    client.close();
+    client = undefined;
   }
 } finally {
   client?.close();
