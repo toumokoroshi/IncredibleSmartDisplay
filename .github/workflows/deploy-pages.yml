@@ -40,6 +40,9 @@ jobs:
       - name: Run tests
         run: npm run test:run
 
+      - name: Run layout probes
+        run: npm run test:layout
+
       - name: Build app
         run: npm run build
 
