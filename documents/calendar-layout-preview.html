@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calendar Layout Preview</title>
+    <style>
+      :root {
+        --page-bg: #e8ecf2;
+        --screen-bg: #f6f8fb;
+        --panel: #ffffff;
+        --item: #f8fafc;
+        --control: #eef2f7;
+        --stroke: rgba(15, 23, 42, 0.09);
+        --text: #0f172a;
+        --muted: #64748b;
+        --blue: #2563eb;
+        --cyan: #0891b2;
+        --green: #15803d;
+        --amber: #b45309;
+        --shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+        font-family:
+          "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans",
+          "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: auto;
+        background: var(--page-bg);
+        color: var(--text);
+      }
+
+      main {
+        display: grid;
+        width: max-content;
+        max-width: 100%;
+        gap: 24px;
+        padding: 24px;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 720;
+      }
+
+      h2 {
+        font-size: 22px;
+        font-weight: 720;
+      }
+
+      .intro {
+        display: grid;
+        max-width: 1040px;
+        gap: 8px;
+      }
+
+      .intro p,
+      .note {
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .preview-title {
+        display: grid;
+        gap: 5px;
+      }
+
+      .device {
+        width: 1524px;
+        height: 1016px;
+        overflow: hidden;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: var(--screen-bg);
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .dashboard {
+        display: grid;
+        height: 100%;
+        grid-template-rows: 118px minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.82);
+        padding: 20px 28px;
+      }
+
+      .clock {
+        font-size: 58px;
+        font-weight: 520;
+        line-height: 1;
+      }
+
+      .date {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .status-pill {
+        min-height: 42px;
+        border-radius: 999px;
+        background: var(--control);
+        padding: 10px 14px;
+        color: #475569;
+        font-size: 16px;
+        font-weight: 740;
+      }
+
+      .home-grid {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .placeholder,
+      .calendar-card,
+      .detail-card {
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .placeholder {
+        display: grid;
+        place-items: center;
+        color: #94a3b8;
+        font-size: 28px;
+        font-weight: 720;
+      }
+
+      .calendar-card {
+        display: flex;
+        flex-direction: column;
+        padding: 24px;
+      }
+
+      .widget-heading {
+        display: flex;
+        min-height: 42px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .heading-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .heading-icon {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid #bfdbfe;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: var(--blue);
+        font-size: 19px;
+        font-weight: 840;
+      }
+
+      .heading-title {
+        color: #475569;
+        font-size: 18px;
+        font-weight: 760;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .mini-pill {
+        border-radius: 999px;
+        background: #ecfeff;
+        padding: 8px 11px;
+        color: #0e7490;
+        font-size: 13px;
+        font-weight: 820;
+      }
+
+      .quick-main {
+        display: grid;
+        min-height: 0;
+        flex: 1;
+        grid-template-rows: minmax(0, 1fr) auto;
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .next-event {
+        display: grid;
+        min-height: 0;
+        align-content: center;
+        overflow: hidden;
+        border-radius: 8px;
+        background: var(--item);
+        padding: 24px;
+      }
+
+      .next-label {
+        color: var(--muted);
+        font-size: 15px;
+        font-weight: 780;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .next-time {
+        margin-top: 10px;
+        color: var(--blue);
+        font-size: 58px;
+        font-weight: 780;
+        line-height: 1;
+      }
+
+      .next-title {
+        margin-top: 14px;
+        display: -webkit-box;
+        overflow: hidden;
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 760;
+        line-height: 1.12;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .next-meta {
+        margin-top: 12px;
+        color: #475569;
+        font-size: 20px;
+        font-weight: 680;
+      }
+
+      .up-next {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .small-event {
+        min-width: 0;
+        border-radius: 8px;
+        background: #eef2f7;
+        padding: 12px 14px;
+      }
+
+      .small-event time {
+        color: var(--cyan);
+        font-size: 16px;
+        font-weight: 840;
+      }
+
+      .small-event p {
+        margin-top: 5px;
+        overflow: hidden;
+        color: #334155;
+        font-size: 19px;
+        font-weight: 720;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .detail-card {
+        display: grid;
+        grid-template-rows: 72px minmax(0, 1fr);
+        padding: 24px;
+      }
+
+      .detail-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .detail-title {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .detail-title h2 {
+        color: #334155;
+        font-size: 23px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .detail-subtitle {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .detail-grid {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1.03fr) minmax(0, 0.97fr);
+        grid-template-rows: 218px minmax(0, 1fr);
+        gap: 14px;
+        margin-top: 10px;
+      }
+
+      .panel {
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: var(--item);
+      }
+
+      .detail-next {
+        display: grid;
+        align-content: center;
+        padding: 22px 26px;
+      }
+
+      .detail-next-grid {
+        display: grid;
+        grid-template-columns: 162px minmax(0, 1fr);
+        align-items: center;
+        gap: 24px;
+      }
+
+      .time-block {
+        display: grid;
+        place-items: center;
+        min-height: 150px;
+        border-radius: 8px;
+        background: #dbeafe;
+        color: var(--blue);
+      }
+
+      .time-block strong {
+        font-size: 42px;
+        line-height: 1;
+      }
+
+      .time-block span {
+        margin-top: 8px;
+        font-size: 16px;
+        font-weight: 780;
+      }
+
+      .detail-next h3 {
+        overflow: hidden;
+        color: var(--text);
+        font-size: 36px;
+        font-weight: 780;
+        line-height: 1.08;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .detail-next p {
+        margin-top: 10px;
+        color: #475569;
+        font-size: 20px;
+        font-weight: 680;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .metric {
+        display: grid;
+        align-content: center;
+        border-radius: 8px;
+        background: #fff;
+        padding: 16px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      .metric strong {
+        margin-top: 8px;
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .metric p {
+        margin-top: 8px;
+        overflow: hidden;
+        color: #475569;
+        font-size: 15px;
+        font-weight: 680;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .events {
+        grid-column: 1 / 2;
+        display: grid;
+        grid-template-rows: 42px minmax(0, 1fr);
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .tomorrow {
+        grid-column: 2 / 3;
+        display: grid;
+        grid-template-rows: 42px minmax(0, 1fr);
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .section-title {
+        color: var(--muted);
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .section-note {
+        color: #475569;
+        font-size: 15px;
+        font-weight: 720;
+      }
+
+      .event-list {
+        display: grid;
+        min-height: 0;
+        align-content: start;
+        gap: 10px;
+        overflow: hidden;
+      }
+
+      .event-row {
+        display: grid;
+        min-height: 82px;
+        grid-template-columns: 112px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 14px;
+        border-radius: 8px;
+        background: #fff;
+        padding: 13px 16px;
+      }
+
+      .event-row time {
+        color: var(--blue);
+        font-size: 22px;
+        font-weight: 840;
+      }
+
+      .event-row h3 {
+        overflow: hidden;
+        color: #172033;
+        font-size: 24px;
+        font-weight: 760;
+        line-height: 1.08;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .event-row p {
+        margin-top: 5px;
+        overflow: hidden;
+        color: #64748b;
+        font-size: 15px;
+        font-weight: 680;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .event-type {
+        border-radius: 999px;
+        background: #fef3c7;
+        padding: 7px 10px;
+        color: var(--amber);
+        font-size: 13px;
+        font-weight: 840;
+        white-space: nowrap;
+      }
+
+      .event-type.work {
+        background: #dbeafe;
+        color: var(--blue);
+      }
+
+      .event-type.home {
+        background: #dcfce7;
+        color: var(--green);
+      }
+
+      .layout-probe {
+        outline: 1px solid rgba(34, 197, 94, 0.28);
+        outline-offset: -1px;
+      }
+
+      .probe-report {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 10;
+        display: grid;
+        gap: 6px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        padding: 12px 14px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      .probe-report .ok {
+        color: var(--green);
+      }
+
+      .probe-report .fail {
+        color: #dc2626;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="intro">
+        <h1>Calendar Layout Preview</h1>
+        <p>Target: 1524 x 1016 CSS px. Home quick-look focuses on the next event. Detail uses first-party layout intended for future Cloudflare Worker JSON rather than Google Calendar iframe.</p>
+      </section>
+
+      <section class="preview-title">
+        <h2>1. Home quick-look</h2>
+        <p class="note">Small CalendarWidget shows the next event first, then only two near-term events.</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Wed, May 27 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:40</span>
+              <span class="status-pill">Online</span>
+              <span class="status-pill">Home</span>
+            </div>
+          </header>
+          <div class="home-grid">
+            <div class="placeholder">Weather</div>
+            <article class="layout-probe calendar-card">
+              <div class="widget-heading">
+                <div class="heading-left">
+                  <span class="heading-icon">C</span>
+                  <p class="heading-title">Calendar</p>
+                </div>
+                <span class="mini-pill">3 today</span>
+              </div>
+              <div class="quick-main">
+                <section class="layout-probe next-event">
+                  <p class="next-label">Next event</p>
+                  <p class="next-time">09:30</p>
+                  <p class="next-title">週次レビューと買い出し前の確認</p>
+                  <p class="next-meta">in 1h 48m ・ Work calendar</p>
+                </section>
+                <div class="up-next">
+                  <section class="small-event">
+                    <time>12:15</time>
+                    <p>昼休み</p>
+                  </section>
+                  <section class="small-event">
+                    <time>18:30</time>
+                    <p>動物病院の予約確認</p>
+                  </section>
+                </div>
+              </div>
+            </article>
+            <div class="placeholder">Traffic</div>
+            <div class="placeholder">News / Pet Photo</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="preview-title">
+        <h2>2. Calendar detail</h2>
+        <p class="note">First-party detail layout: next event, day summary, today list, and tomorrow preview. This is probeable and Worker JSON friendly.</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Wed, May 27 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:40</span>
+              <span class="status-pill">Online</span>
+              <span class="status-pill">Detail</span>
+            </div>
+          </header>
+          <article class="layout-probe widget-detail-root calendar-detail-root detail-card">
+            <div class="detail-heading">
+              <div class="detail-title">
+                <span class="heading-icon">C</span>
+                <div>
+                  <h2>Calendar</h2>
+                  <p class="detail-subtitle">Today and next appointments</p>
+                </div>
+              </div>
+              <span class="mini-pill">Worker JSON ready</span>
+            </div>
+            <div class="detail-grid">
+              <section class="layout-probe widget-detail-primary calendar-detail-next panel detail-next">
+                <div class="detail-next-grid">
+                  <div class="time-block">
+                    <strong>09:30</strong>
+                    <span>in 1h 48m</span>
+                  </div>
+                  <div>
+                    <p class="next-label">Next event</p>
+                    <h3>週次レビューと買い出し前の確認</h3>
+                    <p>Work calendar ・ 45 min ・ Meet link hidden by Worker</p>
+                  </div>
+                </div>
+              </section>
+              <section class="layout-probe widget-detail-secondary calendar-detail-summary panel summary">
+                <div class="metric">
+                  <span>Today</span>
+                  <strong>3</strong>
+                  <p>events after now</p>
+                </div>
+                <div class="metric">
+                  <span>Free until</span>
+                  <strong>09:30</strong>
+                  <p>next fixed appointment</p>
+                </div>
+                <div class="metric">
+                  <span>All day</span>
+                  <strong>1</strong>
+                  <p>家族カレンダー</p>
+                </div>
+              </section>
+              <section class="layout-probe widget-detail-list calendar-detail-events panel events">
+                <div class="section-head">
+                  <p class="section-title">Today</p>
+                  <p class="section-note">May 27</p>
+                </div>
+                <div class="event-list">
+                  <section class="event-row">
+                    <time>09:30</time>
+                    <div>
+                      <h3>週次レビューと買い出し前の確認</h3>
+                      <p>45 min ・ Work calendar</p>
+                    </div>
+                    <span class="event-type work">Work</span>
+                  </section>
+                  <section class="event-row">
+                    <time>12:15</time>
+                    <div>
+                      <h3>昼休み</h3>
+                      <p>45 min ・ Personal</p>
+                    </div>
+                    <span class="event-type home">Home</span>
+                  </section>
+                  <section class="event-row">
+                    <time>18:30</time>
+                    <div>
+                      <h3>動物病院の予約確認</h3>
+                      <p>30 min ・ Family calendar</p>
+                    </div>
+                    <span class="event-type">Family</span>
+                  </section>
+                  <section class="event-row">
+                    <time>All day</time>
+                    <div>
+                      <h3>燃えるごみ</h3>
+                      <p>Worker maps all-day event without private notes</p>
+                    </div>
+                    <span class="event-type home">Home</span>
+                  </section>
+                </div>
+              </section>
+              <section class="layout-probe calendar-detail-tomorrow panel tomorrow">
+                <div class="section-head">
+                  <p class="section-title">Tomorrow</p>
+                  <p class="section-note">Top 3</p>
+                </div>
+                <div class="event-list">
+                  <section class="event-row">
+                    <time>08:45</time>
+                    <div>
+                      <h3>出発前チェック</h3>
+                      <p>15 min ・ Personal</p>
+                    </div>
+                    <span class="event-type home">Home</span>
+                  </section>
+                  <section class="event-row">
+                    <time>10:00</time>
+                    <div>
+                      <h3>プロジェクト定例</h3>
+                      <p>60 min ・ Work calendar</p>
+                    </div>
+                    <span class="event-type work">Work</span>
+                  </section>
+                  <section class="event-row">
+                    <time>19:00</time>
+                    <div>
+                      <h3>夕食の予定</h3>
+                      <p>Family calendar</p>
+                    </div>
+                    <span class="event-type">Family</span>
+                  </section>
+                </div>
+              </section>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <aside class="probe-report" id="probe-report" aria-live="polite">
+        <strong>Layout probes</strong>
+        <span>Measuring preview overflow...</span>
+      </aside>
+    </main>
+    <script>
+      function collectPreviewProbeResults() {
+        const tolerance = 1;
+        return Array.from(document.querySelectorAll(".layout-probe")).map((probe, index) => {
+          const verticalOverflow = probe.scrollHeight > probe.clientHeight + tolerance;
+          const horizontalOverflow = probe.scrollWidth > probe.clientWidth + tolerance;
+          const failed = verticalOverflow || horizontalOverflow;
+          return {
+            failed,
+            horizontalOverflow,
+            index,
+            label: Array.from(probe.classList).filter((name) => name !== "layout-probe").slice(0, 3).join("."),
+            verticalOverflow,
+          };
+        });
+      }
+
+      function renderProbeReport() {
+        const results = collectPreviewProbeResults();
+        const failures = results.filter((result) => result.failed);
+        const report = document.getElementById("probe-report");
+
+        if (!report) {
+          return;
+        }
+
+        if (failures.length === 0) {
+          report.innerHTML = `<strong>Layout probes</strong><span class="ok">${results.length} probes OK</span>`;
+          return;
+        }
+
+        report.innerHTML = [
+          "<strong>Layout probes</strong>",
+          `<span class="fail">${failures.length} / ${results.length} probes failing</span>`,
+          ...failures.map((failure) => `<span class="fail">#${failure.index + 1} ${failure.label}</span>`),
+        ].join("");
+      }
+
+      window.addEventListener("load", renderProbeReport);
+      window.addEventListener("resize", renderProbeReport);
+    </script>
+  </body>
+</html>

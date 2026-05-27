@@ -498,10 +498,11 @@ Calendar should keep the home quick-look and detail view as first-party app layo
 
 Preferred data path for real calendar integration:
 
-Google Calendar API
-  -> Cloudflare Worker or another server-side boundary
-  -> sanitized public JSON
-  -> `calendarService`
+Frontend `calendarService`
+  -> Cloudflare Worker endpoint
+  -> Google Calendar API
+  -> Cloudflare Worker filtering and mapping
+  -> sanitized JSON response
   -> `CalendarData`
   -> first-party Calendar quick-look and detail layouts
 
