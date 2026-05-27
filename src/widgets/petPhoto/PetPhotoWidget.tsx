@@ -43,7 +43,7 @@ function PetPhotoQuickLook({ src, totalPhotos }: { src: string; totalPhotos: num
   return (
     <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-3">
       <div className="min-h-0 overflow-hidden rounded-2xl bg-slate-200">
-        <img className="h-full w-full object-cover" src={src} alt="" />
+        <img className="h-full w-full object-contain" src={src} alt="" />
       </div>
       <p className="text-base font-semibold text-slate-500">{totalPhotos} photos / AM-PM pick</p>
     </div>
@@ -53,7 +53,7 @@ function PetPhotoQuickLook({ src, totalPhotos }: { src: string; totalPhotos: num
 function PetPhotoDetail({ src }: { src: string }) {
   return (
     <div className="widget-detail-root widget-detail-primary petPhoto-detail-root petPhoto-detail-media h-full w-full overflow-hidden rounded-[var(--radius-card)] bg-slate-200">
-      <img className="h-full w-full object-cover" src={src} alt="" />
+      <img className="h-full w-full object-contain" src={src} alt="" />
     </div>
   );
 }

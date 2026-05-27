@@ -147,7 +147,7 @@ describe("layout measurement probes", () => {
     expectProbe(container, ".widget-detail-secondary.weather-detail-daily-stack");
     expectProbe(container, ".weather-detail-now");
     expectProbe(container, ".weather-detail-daily");
-    expectProbe(container, ".weather-detail-alerts");
+    expectProbe(container, ".weather-detail-note");
     expectProbe(container, ".widget-scroll-region.weather-detail-hourly");
   });
 
@@ -158,6 +158,7 @@ describe("layout measurement probes", () => {
 
     const traffic = render(<TrafficWidget config={trafficConfig} data={trafficData} isEmpty={false} isHighlighted status="success" />);
     expectProbe(traffic.container, ".widget-detail-root.traffic-detail-root");
+    expectProbe(traffic.container, ".widget-detail-secondary.traffic-detail-summary");
     expectProbe(traffic.container, ".widget-detail-primary.traffic-detail-impact");
     expectProbe(traffic.container, ".widget-detail-list.traffic-detail-lines");
 
