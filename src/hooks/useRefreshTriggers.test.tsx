@@ -49,7 +49,9 @@ describe("refresh trigger hooks", () => {
   });
 
   it("refreshes only weather and calendar at midnight", () => {
-    vi.setSystemTime(new Date("2026-05-20T23:59:59.000+09:00"));
+    const oneSecondBeforeLocalMidnight = new Date("2026-05-20T12:00:00.000");
+    oneSecondBeforeLocalMidnight.setHours(23, 59, 59, 0);
+    vi.setSystemTime(oneSecondBeforeLocalMidnight);
     const queryClient = new QueryClient();
     const invalidate = vi.spyOn(queryClient, "invalidateQueries");
 
