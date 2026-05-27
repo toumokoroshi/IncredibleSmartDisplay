@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import type { DisplayMode } from "../types/command";
 import type { HeaderStatus } from "../types/dashboard";
@@ -10,9 +10,14 @@ type DashboardContextValue = {
   setDisplayMode: (mode: DisplayMode) => void;
   headerStatus: HeaderStatus;
   reportWidgetState: (widgetId: string, status: WidgetStatus, lastSyncedAt?: string) => void;
+  widgetStatuses: Record<string, WidgetStatus>;
 };
 
 const DashboardContext = createContext<DashboardContextValue | null>(null);
+
+function getNavigatorOnline() {
+  return typeof navigator === "undefined" ? true : navigator.onLine;
+}
 
 export function DashboardProvider({
   children,
@@ -23,6 +28,25 @@ export function DashboardProvider({
 }) {
   const [statuses, setStatuses] = useState<Record<string, WidgetStatus>>({});
   const [lastSyncedAt, setLastSyncedAt] = useState<string | undefined>();
+  const [online, setOnline] = useState(getNavigatorOnline);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const updateOnline = () => {
+      setOnline(getNavigatorOnline());
+    };
+
+    window.addEventListener("online", updateOnline);
+    window.addEventListener("offline", updateOnline);
+
+    return () => {
+      window.removeEventListener("online", updateOnline);
+      window.removeEventListener("offline", updateOnline);
+    };
+  }, []);
 
   const reportWidgetState = useCallback((widgetId: string, status: WidgetStatus, nextLastSyncedAt?: string) => {
     setStatuses((current) => {
@@ -40,15 +64,15 @@ export function DashboardProvider({
   const headerStatus = useMemo<HeaderStatus>(
     () => summarizeHeaderStatus({
       lastSyncedAt,
-      online: typeof navigator === "undefined" ? true : navigator.onLine,
+      online,
       statuses,
     }),
-    [lastSyncedAt, statuses],
+    [lastSyncedAt, online, statuses],
   );
 
   const contextValue = useMemo(
-    () => ({ ...value, headerStatus, reportWidgetState }),
-    [headerStatus, reportWidgetState, value],
+    () => ({ ...value, headerStatus, reportWidgetState, widgetStatuses: statuses }),
+    [headerStatus, reportWidgetState, statuses, value],
   );
 
   return <DashboardContext.Provider value={contextValue}>{children}</DashboardContext.Provider>;

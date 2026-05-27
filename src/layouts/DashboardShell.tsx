@@ -3,9 +3,15 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import { HeaderBar } from "../components/HeaderBar";
 import { UnknownWidget } from "../components/UnknownWidget";
 import { useDashboardContext } from "../contexts/DashboardContext";
+import { useAutoReload } from "../hooks/useAutoReload";
+import { useMidnightRefresh } from "../hooks/useMidnightRefresh";
+import { useOnlineRefresh } from "../hooks/useOnlineRefresh";
 import { useWidgetData } from "../hooks/useWidgetData";
 import { widgetRegistry } from "../registry/widgetRegistry";
 import type { DisplayMode } from "../types/command";
+import { dashboardConfig } from "../config/dashboard.config";
+import { useQueryClient } from "@tanstack/react-query";
+import { getWidgetQueryKey } from "../utils/widgetQuery";
 
 function getHighlightedType(displayMode: string) {
   if (displayMode === "home") {
@@ -22,18 +28,34 @@ function getDetailModeForWidgetType(widgetType: string): DisplayMode | null {
 }
 
 export function DashboardShell() {
-  const { displayMode, headerStatus, setDisplayMode } = useDashboardContext();
+  const { displayMode, headerStatus, setDisplayMode, widgetStatuses } = useDashboardContext();
+  const queryClient = useQueryClient();
   const { widgets } = validateDashboardConfig();
   const highlightedType = getHighlightedType(displayMode);
   const weatherWidget = widgets.find((widget) => widget.type === "weather");
   const weatherSettings = weatherWidget?.settings as { locationName?: unknown } | undefined;
   const weatherLocationName = typeof weatherSettings?.locationName === "string" ? weatherSettings.locationName : undefined;
   const visibleWidgets = highlightedType === null ? widgets : widgets.filter((widget) => widget.type === highlightedType);
+  useAutoReload(dashboardConfig.app.autoReload);
+  useOnlineRefresh(widgets, widgetStatuses);
+  useMidnightRefresh(widgets);
+
+  const refreshVisibleWidgets = () => {
+    for (const widget of visibleWidgets) {
+      void queryClient.invalidateQueries({ queryKey: getWidgetQueryKey(widget.id) });
+    }
+  };
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--app-bg)] p-4 text-slate-100">
       <section className="dashboard-grid mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] gap-3">
-        <HeaderBar isDetailMode={displayMode !== "home"} locationName={weatherLocationName} onHomeClick={() => setDisplayMode("home")} status={headerStatus} />
+        <HeaderBar
+          isDetailMode={displayMode !== "home"}
+          locationName={weatherLocationName}
+          onHomeClick={() => setDisplayMode("home")}
+          onRefreshClick={refreshVisibleWidgets}
+          status={headerStatus}
+        />
         {visibleWidgets.map((widget) => (
           <ErrorBoundary key={widget.id}>
             <WidgetSlot widget={widget} isHighlighted={highlightedType === widget.type} />

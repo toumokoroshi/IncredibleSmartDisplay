@@ -1,4 +1,4 @@
-import { House } from "lucide-react";
+import { House, RefreshCw } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { formatHeaderDateLabel, formatTimeLabel } from "../utils/date";
@@ -8,11 +8,13 @@ export function HeaderBar({
   isDetailMode,
   locationName,
   onHomeClick,
+  onRefreshClick,
   status,
 }: {
   isDetailMode: boolean;
   locationName?: string;
   onHomeClick: () => void;
+  onRefreshClick: () => void;
   status: HeaderStatus;
 }) {
   const now = new Date();
@@ -36,6 +38,14 @@ export function HeaderBar({
               <House aria-hidden="true" className="inline-block align-[-0.2em]" size={20} strokeWidth={1.8} />
             </button>
           ) : null}
+          <button
+            type="button"
+            className="home-command min-h-11 rounded-[calc(var(--radius-card)-10px)] border border-[color:var(--panel-stroke)] bg-[var(--control-bg)] px-4 py-2 text-sm font-semibold text-slate-900"
+            onClick={onRefreshClick}
+            aria-label="Refresh"
+          >
+            <RefreshCw aria-hidden="true" className="inline-block align-[-0.2em]" size={20} strokeWidth={1.8} />
+          </button>
           <QuietStatusPill>{syncLabel}</QuietStatusPill>
           <QuietStatusPill tone={status.online ? "ok" : "warn"}>{status.online ? "Online" : "Offline"}</QuietStatusPill>
           {status.refreshingCount > 0 ? <QuietStatusPill>Syncing {status.refreshingCount}</QuietStatusPill> : null}

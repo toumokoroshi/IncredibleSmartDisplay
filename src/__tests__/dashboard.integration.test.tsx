@@ -72,4 +72,56 @@ describe("dashboard integration", () => {
     await userEvent.click(screen.getByRole("button", { name: "Home" }));
     expect(screen.getByRole("button", { name: "Weather detail" })).toBeInTheDocument();
   });
+
+  it("does not refetch when display mode changes", async () => {
+    let trafficFetchCount = 0;
+
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      const url = String(input);
+
+      if (url.includes("/data/traffic.json")) {
+        trafficFetchCount += 1;
+        return {
+          json: async () => ({
+            lines: [
+              { id: "jr-chuo-rapid", name: "中央線快速", operator: "JR東日本", status: "normal", updatedAt: "2026-05-22T07:30:00+09:00" },
+            ],
+            updatedAt: "2026-05-22T07:30:00+09:00",
+          }),
+          ok: true,
+          status: 200,
+        } as Response;
+      }
+
+      if (url.includes("/data/news.json")) {
+        return {
+          json: async () => ({ items: [{ id: "static-1", title: "News", source: "Local JSON" }] }),
+          ok: true,
+          status: 200,
+        } as Response;
+      }
+
+      if (url.includes("/pets/manifest.json")) {
+        return {
+          json: async () => ({ photos: [] }),
+          ok: true,
+          status: 200,
+        } as Response;
+      }
+
+      throw new Error("offline");
+    });
+
+    render(<App />);
+
+    await screen.findByRole("button", { name: "Traffic detail" });
+    expect(trafficFetchCount).toBe(1);
+
+    await userEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
+    await screen.findByRole("button", { name: "Home" });
+    await userEvent.click(screen.getByRole("button", { name: "Home" }));
+    await screen.findByRole("button", { name: "Traffic detail" });
+
+    expect(trafficFetchCount).toBe(1);
+  });
 });

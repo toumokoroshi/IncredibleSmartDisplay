@@ -3,8 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useDashboardContext } from "../contexts/DashboardContext";
 import type { AnyWidgetDefinition, WidgetError, WidgetStatus } from "../types/widget";
-import { isCacheExpired, readWidgetCache, writeWidgetCache } from "../utils/cache";
+import { readWidgetCache, writeWidgetCache } from "../utils/cache";
 import { widgetQueryPolicy } from "../utils/queryPolicy";
+import { getWidgetQueryKey } from "../utils/widgetQuery";
+import { resolveWidgetStatus } from "../utils/widgetStatus";
 
 function getTtlHours(widgetType: string) {
   switch (widgetType) {
@@ -38,7 +40,7 @@ export function useWidgetData(
   const cache = readWidgetCache<any>(config.id);
 
   const query = useQuery<any, WidgetError>({
-    queryKey: ["widget-data", config.id],
+    queryKey: getWidgetQueryKey(config.id),
     queryFn: async () => {
       if (definition?.createService === undefined || config.settings === undefined) {
         return undefined;
@@ -59,20 +61,14 @@ export function useWidgetData(
   const photo = data && typeof data === "object" ? (data as { photo?: unknown }).photo : undefined;
   const isEmpty = Array.isArray(items) ? items.length === 0 : Array.isArray(lines) ? lines.length === 0 : data && typeof data === "object" && "photo" in data ? photo === undefined : false;
 
-  let status: WidgetStatus;
-  if (query.isFetched === false && query.isPending === true && cache?.data === undefined) {
-    status = "loading";
-  } else if (query.isError === true && cache?.data !== undefined) {
-    status = "stale";
-  } else if (query.isError === true && typeof navigator !== "undefined" && navigator.onLine === false) {
-    status = "offline";
-  } else if (query.isError === true) {
-    status = "error";
-  } else if (cache !== null && cache !== undefined && isCacheExpired(cache) && query.isFetching === false) {
-    status = "stale";
-  } else {
-    status = "success";
-  }
+  const status: WidgetStatus = resolveWidgetStatus({
+    cache,
+    isError: query.isError,
+    isFetched: query.isFetched,
+    isFetching: query.isFetching,
+    isOnline: typeof navigator === "undefined" ? true : navigator.onLine,
+    isPending: query.isPending,
+  });
 
   useEffect(() => {
     reportWidgetState(config.id, status, query.isSuccess ? new Date().toISOString() : undefined);

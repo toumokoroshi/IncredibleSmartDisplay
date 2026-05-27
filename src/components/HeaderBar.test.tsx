@@ -11,6 +11,7 @@ describe("HeaderBar", () => {
         isDetailMode={false}
         locationName="Tokyo"
         onHomeClick={vi.fn()}
+        onRefreshClick={vi.fn()}
         status={{
           errorCount: 2,
           lastSyncedAt: "2026-05-21T09:00:00.000Z",
@@ -32,11 +33,13 @@ describe("HeaderBar", () => {
 
   it("renders offline state and home command in detail mode", async () => {
     const onHomeClick = vi.fn();
+    const onRefreshClick = vi.fn();
 
     render(
       <HeaderBar
         isDetailMode
         onHomeClick={onHomeClick}
+        onRefreshClick={onRefreshClick}
         status={{
           errorCount: 0,
           online: false,
@@ -52,5 +55,8 @@ describe("HeaderBar", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Home" }));
     expect(onHomeClick).toHaveBeenCalledTimes(1);
+
+    await userEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    expect(onRefreshClick).toHaveBeenCalledTimes(1);
   });
 });
