@@ -515,3 +515,6 @@ Rules:
 - Google Calendar iframe is acceptable only for short-term validation or as an auxiliary view for public-safe calendars.
 - iframe content is not layout-probeable and should not be the primary surface for kiosk reliability decisions.
 - Calendar provider names must make the data boundary explicit, for example `mock`, `staticJson`, or `workerJson`.
+- Calendar detail should keep `week` and `month` as internal Calendar view modes instead of separate dashboard `DisplayMode` values or separate widget types. This keeps Dashboard routing, Registry registration, commands, and layout probes centered on one Calendar widget.
+- The initial maintainable implementation should prefer one Calendar detail screen with a segmented `Week` / `Month` control. `Week` remains the operational default; `Month` must include a selected-day rail so it still answers the immediate "what is next" question.
+- Avoid implementing `calendar-week` and `calendar-month` as separate widgets or separate dashboard modes unless a future command surface has a concrete need for that distinction.

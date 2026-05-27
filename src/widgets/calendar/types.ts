@@ -11,6 +11,9 @@ export type CalendarData = {
     id: string;
     title: string;
     startsAt: string;
+    endsAt?: string;
     isAllDay?: boolean;
+    calendarName?: string;
+    location?: string;
   }>;
 };

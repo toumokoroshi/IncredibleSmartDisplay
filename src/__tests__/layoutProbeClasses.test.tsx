@@ -154,7 +154,9 @@ describe("layout measurement probes", () => {
   it("exposes stable probes on all highlighted widget layouts", () => {
     const calendar = render(<CalendarWidget config={calendarConfig} data={mockCalendarData} isEmpty={false} isHighlighted status="success" />);
     expectProbe(calendar.container, ".widget-detail-root.calendar-detail-root");
-    expectProbe(calendar.container, ".widget-detail-list.calendar-detail-events");
+    expectProbe(calendar.container, ".widget-detail-primary.calendar-detail-next");
+    expectProbe(calendar.container, ".widget-detail-secondary.calendar-detail-summary");
+    expectProbe(calendar.container, ".widget-detail-list.calendar-detail-week");
 
     const traffic = render(<TrafficWidget config={trafficConfig} data={trafficData} isEmpty={false} isHighlighted status="success" />);
     expectProbe(traffic.container, ".widget-detail-root.traffic-detail-root");

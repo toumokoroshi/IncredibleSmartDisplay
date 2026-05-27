@@ -28,6 +28,26 @@ const checks = [
     ],
   },
   {
+    name: "calendar detail",
+    openSelector: ".widget-calendar .widget-detail-touch-target",
+    rules: [
+      { selector: ".widget-detail-root.calendar-detail-root" },
+      { selector: ".widget-detail-primary.calendar-detail-next" },
+      { selector: ".widget-detail-secondary.calendar-detail-summary" },
+      { selector: ".widget-detail-list.calendar-detail-week" },
+    ],
+    afterDefaultCheck: async (client) => {
+      await evaluate(client, "Array.from(document.querySelectorAll('button')).find((button) => button.textContent?.trim() === 'Month')?.click()");
+      await waitForSelector(client, ".calendar-detail-month");
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      return [
+        { selector: ".widget-detail-root.calendar-detail-root" },
+        { selector: ".widget-detail-list.calendar-detail-month" },
+        { selector: ".widget-detail-secondary.calendar-detail-selected-day" },
+      ];
+    },
+  },
+  {
     name: "traffic detail",
     openSelector: ".widget-traffic .widget-detail-touch-target",
     rules: [
@@ -281,6 +301,31 @@ async function runCheck(client, check, viewport) {
   }
 
   console.log(`layout probe ok: ${viewport.label} ${viewport.width}x${viewport.height}: ${check.name}`);
+
+  if (check.afterDefaultCheck) {
+    const nextRules = await check.afterDefaultCheck(client);
+    const nextResults = await evaluate(
+      client,
+      `(() => {
+        const rules = ${JSON.stringify(nextRules)};
+        const probe = window.__layoutProbe;
+        if (!probe) {
+          throw new Error("window.__layoutProbe is not available");
+        }
+        const results = probe.collect(rules);
+        return { results, failed: probe.getFailed(results) };
+      })()`,
+    );
+
+    if (nextResults.failed.length > 0) {
+      const details = nextResults.failed
+        .map((failure) => `${failure.selector} missing=${failure.missing} vertical=${failure.verticalOverflow} horizontal=${failure.horizontalOverflow} size=${failure.clientWidth}x${failure.clientHeight} scroll=${failure.scrollWidth}x${failure.scrollHeight}`)
+        .join("\n");
+      throw new Error(`${viewport.label} ${viewport.width}x${viewport.height} ${check.name} secondary state failed layout probes:\n${details}`);
+    }
+
+    console.log(`layout probe ok: ${viewport.label} ${viewport.width}x${viewport.height}: ${check.name} secondary state`);
+  }
 }
 
 const server = await createServer({
