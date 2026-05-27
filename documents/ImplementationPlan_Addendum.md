@@ -491,3 +491,26 @@ Widget-specific probe classes should be added beside the shared classes, for exa
 Quantitative checks should use the `1524 x 1016` CSS px target viewport first. A detail layout passes when important non-scroll regions have `scrollHeight <= clientHeight + 1`, important child bounds remain inside the parent card, and horizontal overflow exists only in regions intentionally marked as scroll regions. Smaller fallback viewport checks such as `1366 x 912` and `1219 x 812` should be added when browser automation is available.
 
 Use `collectLayoutProbeResults` from `src/utils/layoutProbe.ts` as the shared overflow checker when browser-based layout automation is available. Unit tests should keep the probe class contract and overflow decision rules stable even before full browser automation is introduced.
+
+## Addendum 19. Calendar real data and layout direction
+
+Calendar should keep the home quick-look and detail view as first-party app layouts. Google Calendar iframe embedding may be used only as a temporary or auxiliary view, not as the long-term primary detail UI.
+
+Preferred data path for real calendar integration:
+
+Google Calendar API
+  -> Cloudflare Worker or another server-side boundary
+  -> sanitized public JSON
+  -> `calendarService`
+  -> `CalendarData`
+  -> first-party Calendar quick-look and detail layouts
+
+Rules:
+
+- The home Calendar quick-look should be a custom layout focused on the next upcoming event and a small number of near-term events.
+- The Calendar detail view should eventually be a custom layout backed by `CalendarData`, so it can participate in loading, empty, error, stale, offline, and layout-probe behavior.
+- Cloudflare Worker should own Google Calendar API access, private calendar URLs, OAuth tokens, API keys, and any filtering needed before data reaches GitHub Pages.
+- Frontend code must not contain private iCal URLs, OAuth secrets, API keys, or webhook URLs.
+- Google Calendar iframe is acceptable only for short-term validation or as an auxiliary view for public-safe calendars.
+- iframe content is not layout-probeable and should not be the primary surface for kiosk reliability decisions.
+- Calendar provider names must make the data boundary explicit, for example `mock`, `staticJson`, or `workerJson`.
