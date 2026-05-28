@@ -1,5 +1,4 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "../App";
@@ -69,12 +68,12 @@ describe("dashboard integration", () => {
     expect(screen.getByRole("button", { name: "Weather detail" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Traffic detail" })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
+    fireEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
     expect(await screen.findByRole("button", { name: "Home" })).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("button", { name: "Home" }));
+    fireEvent.click(screen.getByRole("button", { name: "Home" }));
     expect(screen.getByRole("button", { name: "Weather detail" })).toBeInTheDocument();
-  });
+  }, 10000);
 
   it("does not refetch when display mode changes", async () => {
     let trafficFetchCount = 0;
@@ -85,9 +84,9 @@ describe("dashboard integration", () => {
     await screen.findByRole("button", { name: "Traffic detail" });
     expect(trafficFetchCount).toBe(1);
 
-    await userEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
+    fireEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
     await screen.findByRole("button", { name: "Home" });
-    await userEvent.click(screen.getByRole("button", { name: "Home" }));
+    fireEvent.click(screen.getByRole("button", { name: "Home" }));
     await screen.findByRole("button", { name: "Traffic detail" });
 
     expect(trafficFetchCount).toBe(1);

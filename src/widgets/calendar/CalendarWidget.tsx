@@ -68,8 +68,16 @@ function getEventsForDay(items: CalendarEvent[], date: Date) {
 }
 
 function getNextEvent(items: CalendarEvent[], now: Date) {
+  const upcomingTimedEvent = items
+    .filter((item) => !item.isAllDay && new Date(item.startsAt).getTime() >= now.getTime())
+    .sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime())[0];
+
+  if (upcomingTimedEvent) {
+    return upcomingTimedEvent;
+  }
+
   return items
-    .filter((item) => item.isAllDay || new Date(item.startsAt).getTime() >= now.getTime())
+    .filter((item) => item.isAllDay && isSameDay(new Date(item.startsAt), now))
     .sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime())[0];
 }
 
@@ -85,7 +93,7 @@ export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, st
   const now = useMemo(() => new Date(), []);
 
   return (
-    <Card className={isHighlighted ? "ring-2 ring-cyan-400/60" : ""}>
+    <Card className={`flex flex-col ${isHighlighted ? "ring-2 ring-cyan-400/60" : ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="widget-heading flex min-w-0 items-center gap-3">
           <span className="widget-heading-icon">
