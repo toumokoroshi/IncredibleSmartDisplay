@@ -1,6 +1,59 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { mapWeatherCodeToDisplayCondition } from "./weatherService";
+import { mockWeatherData } from "../../test/mocks/weather";
+import { createWeatherService, mapWeatherCodeToDisplayCondition } from "./weatherService";
+
+const openMeteoSettings = {
+  provider: "openMeteo" as const,
+  latitude: 35.6812,
+  locationName: "Tokyo",
+  longitude: 139.7671,
+  showHumidity: true,
+  showTomorrow: true,
+  showWind: false,
+  units: "metric" as const,
+};
+
+describe("createWeatherService", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.mocked(fetch).mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("keeps mock provider as an explicit successful data source", async () => {
+    await expect(createWeatherService().fetch({ ...openMeteoSettings, provider: "mock" })).resolves.toEqual(mockWeatherData);
+  });
+
+  it("rejects Open-Meteo failures instead of silently returning mock data", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+    } as Response);
+
+    await expect(createWeatherService().fetch(openMeteoSettings)).rejects.toMatchObject({
+      code: "NETWORK_ERROR",
+      message: "NETWORK_ERROR",
+      retryable: true,
+    });
+  });
+
+  it("marks Open-Meteo rate limits as non-retryable", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: false,
+      status: 429,
+    } as Response);
+
+    await expect(createWeatherService().fetch(openMeteoSettings)).rejects.toMatchObject({
+      code: "API_RATE_LIMIT",
+      retryable: false,
+    });
+  });
+});
 
 describe("mapWeatherCodeToDisplayCondition", () => {
   it.each([

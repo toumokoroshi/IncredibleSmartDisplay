@@ -1,5 +1,5 @@
 import { mockWeatherData } from "../../test/mocks/weather";
-import type { WidgetService } from "../../types/widget";
+import type { WidgetError, WidgetErrorCode, WidgetService } from "../../types/widget";
 import { withTimeout } from "../../utils/timeout";
 import type { WeatherConditionKind, WeatherDailySummary, WeatherData, WeatherDisplayCondition, WeatherModifier, WeatherSettings } from "../../widgets/weather";
 
@@ -39,6 +39,28 @@ type OpenMeteoResponse = {
   };
 };
 
+type ServiceError = Error & WidgetError;
+
+function createServiceError(code: WidgetErrorCode, message = code, retryable = true): ServiceError {
+  const error = new Error(message) as ServiceError;
+  error.code = code;
+  error.retryable = retryable;
+  return error;
+}
+
+function normalizeOpenMeteoError(error: unknown): ServiceError {
+  const candidate = error as Partial<ServiceError> | undefined;
+  if (candidate?.code) {
+    return candidate as ServiceError;
+  }
+
+  if (error instanceof Error && error.message === "TIMEOUT") {
+    return createServiceError("TIMEOUT", "TIMEOUT", false);
+  }
+
+  return createServiceError("NETWORK_ERROR", "NETWORK_ERROR");
+}
+
 export function createWeatherService(): WidgetService<WeatherSettings, WeatherData> {
   return {
     async fetch(settings) {
@@ -58,7 +80,13 @@ export function createWeatherService(): WidgetService<WeatherSettings, WeatherDa
 
         const response = await withTimeout(fetch(url), 10000);
         if (!response.ok) {
-          throw new Error("NETWORK_ERROR");
+          if (response.status === 401 || response.status === 403) {
+            throw createServiceError("AUTH_ERROR", "AUTH_ERROR", false);
+          }
+          if (response.status === 429) {
+            throw createServiceError("API_RATE_LIMIT", "API_RATE_LIMIT", false);
+          }
+          throw createServiceError("NETWORK_ERROR", "NETWORK_ERROR");
         }
 
         const payload = (await response.json()) as OpenMeteoResponse;
@@ -87,8 +115,8 @@ export function createWeatherService(): WidgetService<WeatherSettings, WeatherDa
           hourlyForecast: mapHourlyForecast(payload),
           updatedAt: new Date().toISOString(),
         };
-      } catch {
-        return mockWeatherData;
+      } catch (error) {
+        throw normalizeOpenMeteoError(error);
       }
     },
   };

@@ -114,7 +114,21 @@ describe("useWidgetData", () => {
     await waitFor(() => expect(result.current.status).toBe("error"));
 
     expect(result.current.data).toBeUndefined();
-    expect(result.current.error).toMatchObject({ code: "UNKNOWN_ERROR", message: "service failed", retryable: true });
+    expect(result.current.error).toMatchObject({ code: "UNKNOWN_ERROR", message: "service failed", retryable: false });
+  });
+
+  it("preserves service error codes for widget UI", async () => {
+    const error = new Error("rate limited") as Error & { code: "API_RATE_LIMIT"; retryable: false };
+    error.code = "API_RATE_LIMIT";
+    error.retryable = false;
+    const definition = createDefinition(async () => {
+      throw error;
+    });
+    const { result } = renderUseWidgetData({ definition });
+
+    await waitFor(() => expect(result.current.status).toBe("error"));
+
+    expect(result.current.error).toMatchObject({ code: "API_RATE_LIMIT", message: "rate limited", retryable: false });
   });
 
   it("returns stale data when fetch fails with cache", async () => {
