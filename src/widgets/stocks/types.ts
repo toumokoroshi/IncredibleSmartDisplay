@@ -1,10 +1,26 @@
-export type StocksSettings = {
-  provider: "mock";
+type StocksBaseSettings = {
   symbols: string[];
   maxItems: number;
   showCurrency: boolean;
   showMarketState: boolean;
 };
+
+export type MockStocksSettings = StocksBaseSettings & {
+  provider: "mock";
+};
+
+export type StaticJsonStocksSettings = StocksBaseSettings & {
+  provider: "staticJson";
+  url: string;
+  cacheBusterIntervalSec?: number;
+};
+
+export type WorkerJsonStocksSettings = StocksBaseSettings & {
+  provider: "workerJson";
+  url: string;
+};
+
+export type StocksSettings = MockStocksSettings | StaticJsonStocksSettings | WorkerJsonStocksSettings;
 
 export type StocksData = {
   items: Array<{
