@@ -217,6 +217,7 @@ type WidgetCacheRecord<TData> = {
 - オンライン復帰時: `error`, `stale`, `offline` 状態のWidgetを優先再取得する
 - displayMode変更時: 再取得は原則行わず、表示切替のみ行う
 - 手動refresh操作追加時: 対象Widgetのみ再取得する
+- 複数Widget更新は `REFRESH_WIDGETS` のように対象IDリストを受け取る汎用Commandで表現し、`visible` などUI状態に依存する語をCommand型へ持ち込まない
 
 ## 追記 8.1. MVP mock policy
 

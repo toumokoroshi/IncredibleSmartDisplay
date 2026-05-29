@@ -61,7 +61,7 @@ export function DashboardProvider({
         case "REFRESH_WIDGET":
           void queryClient.invalidateQueries({ queryKey: getWidgetQueryKey(command.widgetId) });
           return;
-        case "REFRESH_VISIBLE_WIDGETS":
+        case "REFRESH_WIDGETS":
           for (const widgetId of command.widgetIds) {
             void queryClient.invalidateQueries({ queryKey: getWidgetQueryKey(widgetId) });
           }

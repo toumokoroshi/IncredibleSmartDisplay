@@ -27,7 +27,7 @@ export function DashboardShell() {
   useMidnightRefresh(widgets);
 
   const refreshVisibleWidgets = () => {
-    executeCommand({ type: "REFRESH_VISIBLE_WIDGETS", widgetIds: visibleWidgets.map((widget) => widget.id) });
+    executeCommand({ type: "REFRESH_WIDGETS", widgetIds: visibleWidgets.map((widget) => widget.id) });
   };
 
   return (

@@ -51,8 +51,8 @@ describe("DashboardProvider", () => {
           <button type="button" onClick={() => executeCommand({ type: "SET_DISPLAY_MODE", mode: "weather" })}>
             Weather command
           </button>
-          <button type="button" onClick={() => executeCommand({ type: "REFRESH_VISIBLE_WIDGETS", widgetIds: ["weather-main", "traffic-main"] })}>
-            Refresh visible command
+          <button type="button" onClick={() => executeCommand({ type: "REFRESH_WIDGETS", widgetIds: ["weather-main", "traffic-main"] })}>
+            Refresh widgets command
           </button>
         </>
       );
@@ -64,7 +64,7 @@ describe("DashboardProvider", () => {
     await user.click(screen.getByRole("button", { name: "Weather command" }));
     expect(setDisplayMode).toHaveBeenCalledWith("weather");
 
-    await user.click(screen.getByRole("button", { name: "Refresh visible command" }));
+    await user.click(screen.getByRole("button", { name: "Refresh widgets command" }));
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["widget-data", "weather-main"] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["widget-data", "traffic-main"] });
   });
