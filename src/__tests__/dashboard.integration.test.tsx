@@ -1,9 +1,15 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import App from "../App";
 
-function mockDashboardFetch({ countTrafficFetch }: { countTrafficFetch?: () => void } = {}) {
+function mockDashboardFetch({
+  countNewsFetch,
+  countTrafficFetch,
+}: {
+  countNewsFetch?: () => void;
+  countTrafficFetch?: () => void;
+} = {}) {
   vi.mocked(fetch).mockImplementation(async (input) => {
     const url = String(input);
 
@@ -23,6 +29,7 @@ function mockDashboardFetch({ countTrafficFetch }: { countTrafficFetch?: () => v
     }
 
     if (url.includes("/data/news.json")) {
+      countNewsFetch?.();
       return {
         json: async () => ({
           items: [
@@ -90,5 +97,38 @@ describe("dashboard integration", () => {
     await screen.findByRole("button", { name: "Traffic detail" });
 
     expect(trafficFetchCount).toBe(1);
+  });
+
+  it("refreshes only the widgets currently rendered in the dashboard shell", async () => {
+    let newsFetchCount = 0;
+    let trafficFetchCount = 0;
+    mockDashboardFetch({
+      countNewsFetch: () => {
+        newsFetchCount += 1;
+      },
+      countTrafficFetch: () => {
+        trafficFetchCount += 1;
+      },
+    });
+
+    render(<App />);
+
+    await screen.findByRole("button", { name: "Traffic detail" });
+    expect(newsFetchCount).toBe(1);
+    expect(trafficFetchCount).toBe(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
+    await screen.findByRole("button", { name: "Home" });
+    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+
+    await waitFor(() => expect(trafficFetchCount).toBe(2));
+    expect(newsFetchCount).toBe(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Home" }));
+    await screen.findByRole("button", { name: "Traffic detail" });
+    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+
+    await waitFor(() => expect(trafficFetchCount).toBe(3));
+    await waitFor(() => expect(newsFetchCount).toBe(2));
   });
 });

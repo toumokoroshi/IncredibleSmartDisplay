@@ -10,8 +10,6 @@ import { useWidgetData } from "../hooks/useWidgetData";
 import { widgetRegistry } from "../registry/widgetRegistry";
 import type { DisplayMode } from "../types/command";
 import { dashboardConfig } from "../config/dashboard.config";
-import { useQueryClient } from "@tanstack/react-query";
-import { getWidgetQueryKey } from "../utils/widgetQuery";
 
 function getHighlightedType(displayMode: string) {
   if (displayMode === "home") {
@@ -28,8 +26,7 @@ function getDetailModeForWidgetType(widgetType: string): DisplayMode | null {
 }
 
 export function DashboardShell() {
-  const { displayMode, headerStatus, setDisplayMode, widgetStatuses } = useDashboardContext();
-  const queryClient = useQueryClient();
+  const { displayMode, executeCommand, headerStatus, widgetStatuses } = useDashboardContext();
   const { widgets } = validateDashboardConfig();
   const highlightedType = getHighlightedType(displayMode);
   const weatherWidget = widgets.find((widget) => widget.type === "weather");
@@ -41,9 +38,7 @@ export function DashboardShell() {
   useMidnightRefresh(widgets);
 
   const refreshVisibleWidgets = () => {
-    for (const widget of visibleWidgets) {
-      void queryClient.invalidateQueries({ queryKey: getWidgetQueryKey(widget.id) });
-    }
+    executeCommand({ type: "REFRESH_VISIBLE_WIDGETS", widgetIds: visibleWidgets.map((widget) => widget.id) });
   };
 
   return (
@@ -52,7 +47,7 @@ export function DashboardShell() {
         <HeaderBar
           isDetailMode={displayMode !== "home"}
           locationName={weatherLocationName}
-          onHomeClick={() => setDisplayMode("home")}
+          onHomeClick={() => executeCommand({ type: "SET_DISPLAY_MODE", mode: "home" })}
           onRefreshClick={refreshVisibleWidgets}
           status={headerStatus}
         />
@@ -76,7 +71,7 @@ function WidgetSlot({
   const definition = widgetRegistry[widget.type];
   const detailMode = getDetailModeForWidgetType(widget.type);
   const canOpenDetail = detailMode !== null && !isHighlighted;
-  const { setDisplayMode } = useDashboardContext();
+  const { executeCommand } = useDashboardContext();
 
   if (definition === undefined) {
     return <UnknownWidget title={widget.title} type={widget.type} />;
@@ -87,7 +82,7 @@ function WidgetSlot({
       canOpenDetail={canOpenDetail}
       definition={definition}
       isHighlighted={isHighlighted}
-      onOpenDetail={detailMode === null ? undefined : () => setDisplayMode(detailMode)}
+      onOpenDetail={detailMode === null ? undefined : () => executeCommand({ type: "SET_DISPLAY_MODE", mode: detailMode })}
       widget={widget}
     />
   );
