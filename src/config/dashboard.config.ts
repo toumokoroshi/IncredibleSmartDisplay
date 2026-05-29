@@ -53,7 +53,9 @@ export const dashboardConfig: DashboardConfig = {
       order: 2,
       area: "main-right",
       settings: {
-        provider: "mock",
+        provider: "staticJson",
+        url: "/data/calendar.json",
+        cacheBusterIntervalSec: 600,
         daysAhead: 2,
         maxTodayEvents: 4,
         maxTomorrowEvents: 2,

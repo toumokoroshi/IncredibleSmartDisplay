@@ -28,6 +28,23 @@ function mockDashboardFetch({
       } as Response;
     }
 
+    if (url.includes("/data/calendar.json")) {
+      return {
+        json: async () => ({
+          items: [
+            {
+              calendarName: "Home",
+              id: "calendar-static-1",
+              startsAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+              title: "Static JSON calendar provider is available",
+            },
+          ],
+        }),
+        ok: true,
+        status: 200,
+      } as Response;
+    }
+
     if (url.includes("/data/news.json")) {
       countNewsFetch?.();
       return {

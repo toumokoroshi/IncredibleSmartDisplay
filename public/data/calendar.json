@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "id": "static-calendar-morning-check",
+      "title": "朝の確認",
+      "startsAt": "2026-05-30T08:30:00+09:00",
+      "endsAt": "2026-05-30T08:45:00+09:00",
+      "calendarName": "Home"
+    },
+    {
+      "id": "static-calendar-shopping",
+      "title": "買い出し",
+      "startsAt": "2026-05-30T11:00:00+09:00",
+      "endsAt": "2026-05-30T12:00:00+09:00",
+      "calendarName": "Family",
+      "location": "近所"
+    },
+    {
+      "id": "static-calendar-trash",
+      "title": "資源ごみ",
+      "startsAt": "2026-05-30T00:00:00+09:00",
+      "isAllDay": true,
+      "calendarName": "Home"
+    },
+    {
+      "id": "static-calendar-maintenance",
+      "title": "API移行チェック",
+      "startsAt": "2026-05-31T10:00:00+09:00",
+      "endsAt": "2026-05-31T10:30:00+09:00",
+      "calendarName": "Work"
+    },
+    {
+      "id": "static-calendar-weekly-review",
+      "title": "週次レビュー",
+      "startsAt": "2026-06-01T09:30:00+09:00",
+      "endsAt": "2026-06-01T10:15:00+09:00",
+      "calendarName": "Work"
+    }
+  ]
+}
