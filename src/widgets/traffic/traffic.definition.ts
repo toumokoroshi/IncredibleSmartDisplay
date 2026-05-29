@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { createTrafficService } from "../../services/traffic/trafficService";
 import { TrafficWidget } from "./TrafficWidget";
+import type { TrafficData } from "./types";
 
 const trafficLineConfigSchema = z.object({
   id: z.string().min(1),
@@ -39,4 +40,6 @@ export const trafficDefinition = {
   createService: createTrafficService,
   fallbackArea: "sub-left",
   defaultRefreshIntervalSec: 300,
+  cacheTtlHours: 1,
+  isEmpty: (data: TrafficData) => data.lines.length === 0,
 } as const;

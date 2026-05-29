@@ -8,24 +8,6 @@ import { widgetQueryPolicy } from "../utils/queryPolicy";
 import { getWidgetQueryKey } from "../utils/widgetQuery";
 import { resolveWidgetStatus } from "../utils/widgetStatus";
 
-function getTtlHours(widgetType: string) {
-  switch (widgetType) {
-    case "weather":
-      return 3;
-    case "calendar":
-      return 24;
-    case "stocks":
-    case "news":
-      return 12;
-    case "traffic":
-      return 1;
-    case "petPhoto":
-      return 24;
-    default:
-      return 6;
-  }
-}
-
 function normalizeError(error: unknown): WidgetError {
   const message = error instanceof Error ? error.message : "Unknown error";
   const candidate = error as Partial<WidgetError> | undefined;
@@ -52,7 +34,7 @@ export function useWidgetData(
       }
       const service = definition.createService();
       const result = await service.fetch(config.settings);
-      writeWidgetCache(config.id, result, getTtlHours(config.type));
+      writeWidgetCache(config.id, result, definition.cacheTtlHours);
       return result;
     },
     enabled: definition?.createService !== undefined && config.settingsError === undefined && config.unknownType === undefined,
@@ -61,10 +43,7 @@ export function useWidgetData(
   });
 
   const data = query.data ?? cache?.data;
-  const items = data && typeof data === "object" ? (data as { items?: unknown[] }).items : undefined;
-  const lines = data && typeof data === "object" ? (data as { lines?: unknown[] }).lines : undefined;
-  const photo = data && typeof data === "object" ? (data as { photo?: unknown }).photo : undefined;
-  const isEmpty = Array.isArray(items) ? items.length === 0 : Array.isArray(lines) ? lines.length === 0 : data && typeof data === "object" && "photo" in data ? photo === undefined : false;
+  const isEmpty = data !== undefined && definition?.isEmpty(data) === true;
 
   const status: WidgetStatus = resolveWidgetStatus({
     cache,

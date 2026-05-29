@@ -28,8 +28,10 @@ function createDefinition(fetch: WidgetService<TestSettings, TestData>["fetch"])
   return {
     component: () => null,
     createService: () => ({ fetch }),
+    cacheTtlHours: 12,
     defaultRefreshIntervalSec: 0,
     fallbackArea: "sub-right",
+    isEmpty: (data: TestData) => data.items.length === 0,
     settingsSchema: z.object({ provider: z.literal("mock") }),
     type: "news",
   };
@@ -102,7 +104,9 @@ describe("useWidgetData", () => {
 
     expect(result.current.data).toEqual({ items: ["fresh"] });
     expect(result.current.isEmpty).toBe(false);
-    expect(JSON.parse(localStorage.getItem("widget-cache:test-widget") ?? "{}").data).toEqual({ items: ["fresh"] });
+    const cacheRecord = JSON.parse(localStorage.getItem("widget-cache:test-widget") ?? "{}") as WidgetCacheRecord<TestData>;
+    expect(cacheRecord.data).toEqual({ items: ["fresh"] });
+    expect(new Date(cacheRecord.expiresAt).getTime() - new Date(cacheRecord.fetchedAt).getTime()).toBe(12 * 60 * 60 * 1000);
   });
 
   it("returns error when fetch fails without cache", async () => {
@@ -179,6 +183,19 @@ describe("useWidgetData", () => {
 
     await waitFor(() => expect(result.current.status).toBe("success"));
 
+    expect(result.current.isEmpty).toBe(true);
+  });
+
+  it("delegates empty detection to the widget definition", async () => {
+    const definition = {
+      ...createDefinition(async () => ({ items: ["not-empty-by-shape"] })),
+      isEmpty: () => true,
+    };
+    const { result } = renderUseWidgetData({ definition });
+
+    await waitFor(() => expect(result.current.status).toBe("success"));
+
+    expect(result.current.data).toEqual({ items: ["not-empty-by-shape"] });
     expect(result.current.isEmpty).toBe(true);
   });
 });

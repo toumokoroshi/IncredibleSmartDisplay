@@ -70,6 +70,8 @@ export type WidgetDefinition<TSettings = unknown, TData = unknown> = {
   createService?: () => WidgetService<TSettings, TData>;
   fallbackArea: DashboardArea;
   defaultRefreshIntervalSec: number;
+  cacheTtlHours: number;
+  isEmpty: (data: TData) => boolean;
 };
 
 export type AnyWidgetDefinition = WidgetDefinition<any, any>;

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { createNewsService } from "../../services/news/newsService";
 import { NewsWidget } from "./NewsWidget";
+import type { NewsData } from "./types";
 
 const newsBaseSettingsSchema = {
   maxItems: z.number().int().positive(),
@@ -30,4 +31,6 @@ export const newsDefinition = {
   createService: createNewsService,
   fallbackArea: "sub-right",
   defaultRefreshIntervalSec: 1800,
+  cacheTtlHours: 12,
+  isEmpty: (data: NewsData) => data.items.length === 0,
 } as const;

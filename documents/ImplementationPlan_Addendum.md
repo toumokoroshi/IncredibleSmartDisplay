@@ -151,6 +151,8 @@ type WidgetDefinition<TSettings, TData> = {
   createService: () => WidgetService<TSettings, TData>;
   fallbackArea: DashboardArea;
   defaultRefreshIntervalSec: number;
+  cacheTtlHours: number;
+  isEmpty: (data: TData) => boolean;
 };
 ```
 
@@ -159,6 +161,8 @@ type WidgetDefinition<TSettings, TData> = {
 - `settingsSchema` を持たせることで、config validation時にWidget単位で検証できる
 - `createService` を持たせることで、provider差し替えの責務をRegistry配下へ閉じ込められる
 - `fallbackArea` を持たせることで、不正configでもDashboard全体を壊しにくくする
+- `cacheTtlHours` を持たせることで、Widget固有のキャッシュ期限をHook層のtype分岐から分離する
+- `isEmpty` を持たせることで、WidgetDataの形に依存した空判定をHook層へ持ち込まない
 
 ## 追記 7. Config validation 詳細ルール
 

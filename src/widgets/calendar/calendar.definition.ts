@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { createCalendarService } from "../../services/calendar/calendarService";
 import { CalendarWidget } from "./CalendarWidget";
+import type { CalendarData } from "./types";
 
 const calendarBaseSettingsSchema = z.object({
   daysAhead: z.number().int().nonnegative(),
@@ -28,4 +29,6 @@ export const calendarDefinition = {
   createService: createCalendarService,
   fallbackArea: "main-right",
   defaultRefreshIntervalSec: 600,
+  cacheTtlHours: 24,
+  isEmpty: (data: CalendarData) => data.items.length === 0,
 } as const;

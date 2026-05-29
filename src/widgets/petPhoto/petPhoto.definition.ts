@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { createPetPhotoService } from "../../services/petPhoto/petPhotoService";
 import { PetPhotoWidget } from "./PetPhotoWidget";
+import type { PetPhotoData } from "./types";
 
 export const petPhotoSettingsSchema = z.object({
   provider: z.literal("staticManifest"),
@@ -16,4 +17,6 @@ export const petPhotoDefinition = {
   createService: createPetPhotoService,
   fallbackArea: "sub-right",
   defaultRefreshIntervalSec: 43200,
+  cacheTtlHours: 24,
+  isEmpty: (data: PetPhotoData) => data.photo === undefined,
 } as const;

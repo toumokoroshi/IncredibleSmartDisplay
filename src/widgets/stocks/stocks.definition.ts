@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { createStockService } from "../../services/stocks/stockService";
 import { StocksWidget } from "./StocksWidget";
+import type { StocksData } from "./types";
 
 export const stocksSettingsSchema = z.object({
   provider: z.literal("mock"),
@@ -18,4 +19,6 @@ export const stocksDefinition = {
   createService: createStockService,
   fallbackArea: "sub-left",
   defaultRefreshIntervalSec: 600,
+  cacheTtlHours: 12,
+  isEmpty: (data: StocksData) => data.items.length === 0,
 } as const;

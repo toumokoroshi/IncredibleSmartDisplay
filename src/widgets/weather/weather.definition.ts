@@ -21,4 +21,6 @@ export const weatherDefinition = {
   createService: createWeatherService,
   fallbackArea: "main-left",
   defaultRefreshIntervalSec: 1800,
+  cacheTtlHours: 3,
+  isEmpty: () => false,
 } as const;
