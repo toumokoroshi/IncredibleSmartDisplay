@@ -115,6 +115,28 @@ async function waitForDebugPort() {
   throw lastError ?? new Error("Timed out waiting for browser debug port.");
 }
 
+async function waitForDebugPortFromProcess(browserProcess) {
+  const deadline = Date.now() + 10000;
+  let lastError;
+
+  while (Date.now() < deadline) {
+    if (browserProcess.exitCode !== null || browserProcess.signalCode !== null) {
+      throw new Error(
+        `Browser exited before debug port became available (exitCode=${browserProcess.exitCode}, signal=${browserProcess.signalCode ?? "none"}).`,
+      );
+    }
+
+    try {
+      return await waitForDebugPort();
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 150));
+    }
+  }
+
+  throw lastError ?? new Error("Timed out waiting for browser debug port.");
+}
+
 async function waitForProcessExit(process) {
   if (!process || process.exitCode !== null || process.signalCode !== null) {
     return;
@@ -205,8 +227,8 @@ function createCdpClient(webSocketUrl) {
   };
 }
 
-async function openProbePage(viewport) {
-  await waitForDebugPort();
+async function openProbePage(viewport, browserProcess) {
+  await waitForDebugPortFromProcess(browserProcess);
   const target = await requestJson(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(baseUrl)}`, { method: "PUT" });
   const client = createCdpClient(target.webSocketDebuggerUrl);
   await client.ready();
@@ -349,13 +371,14 @@ try {
     `--user-data-dir=${userDataDir}`,
     "--disable-gpu",
     "--disable-dev-shm-usage",
+    "--no-sandbox",
     "--no-first-run",
     "--no-default-browser-check",
     "about:blank",
   ], { stdio: "ignore" });
 
   for (const viewport of viewports) {
-    client = await openProbePage(viewport);
+    client = await openProbePage(viewport, chrome);
     await assertViewportMetrics(client, viewport);
     for (const check of checks) {
       await runCheck(client, check, viewport);
