@@ -12,6 +12,7 @@ export type HeaderStatus = {
 export type DashboardConfig = {
   app: {
     name: string;
+    locationName: string;
     locale: string;
     timezone: string;
     defaultDisplayMode: DisplayMode;

@@ -3,6 +3,7 @@
 export const dashboardConfig: DashboardConfig = {
   app: {
     name: "Living Dashboard",
+    locationName: "Tokyo",
     locale: "ja-JP",
     timezone: "Asia/Tokyo",
     defaultDisplayMode: "home",

@@ -21,9 +21,6 @@ export function DashboardShell() {
   const { displayMode, executeCommand, headerStatus, widgetStatuses } = useDashboardContext();
   const { widgets } = validateDashboardConfig();
   const highlightedType = getHighlightedType(displayMode);
-  const weatherWidget = widgets.find((widget) => widget.type === "weather");
-  const weatherSettings = weatherWidget?.settings as { locationName?: unknown } | undefined;
-  const weatherLocationName = typeof weatherSettings?.locationName === "string" ? weatherSettings.locationName : undefined;
   const visibleWidgets = highlightedType === null ? widgets : widgets.filter((widget) => widget.type === highlightedType);
   useAutoReload(dashboardConfig.app.autoReload);
   useOnlineRefresh(widgets, widgetStatuses);
@@ -38,7 +35,7 @@ export function DashboardShell() {
       <section className="dashboard-grid mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] gap-3">
         <HeaderBar
           isDetailMode={displayMode !== "home"}
-          locationName={weatherLocationName}
+          locationName={dashboardConfig.app.locationName}
           onHomeClick={() => executeCommand({ type: "SET_DISPLAY_MODE", mode: "home" })}
           onRefreshClick={refreshVisibleWidgets}
           status={headerStatus}
