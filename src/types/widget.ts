@@ -11,6 +11,7 @@ export type DashboardArea =
   | "main-right"
   | "sub-left"
   | "sub-right"
+  | "quick-area"
   | "detail";
 
 export type WidgetStatus = "idle" | "loading" | "success" | "error" | "stale" | "offline";

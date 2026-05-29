@@ -19,4 +19,15 @@ describe("config validation", () => {
     expect(result.widgets[0].refreshIntervalSec).toBeGreaterThanOrEqual(0);
     dashboardConfig.widgets[0].refreshIntervalSec = original;
   });
+
+  it("keeps quick-area as a valid reserved dashboard area", () => {
+    const original = dashboardConfig.widgets[0].area;
+    dashboardConfig.widgets[0].area = "quick-area";
+
+    const result = validateDashboardConfig();
+
+    expect(result.widgets[0].area).toBe("quick-area");
+    expect(result.warnings.some((warning) => warning.code === "INVALID_WIDGET_AREA")).toBe(false);
+    dashboardConfig.widgets[0].area = original;
+  });
 });
