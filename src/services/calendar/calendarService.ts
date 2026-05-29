@@ -1,6 +1,5 @@
 import type { WidgetService } from "../../types/widget";
-import { appendCacheBuster } from "../../utils/cacheBuster";
-import { resolvePublicAssetPath } from "../../utils/publicAssetPath";
+import { fetchStaticJson } from "../jsonProvider";
 import { mockCalendarData } from "./mockData";
 import type { CalendarData, CalendarSettings } from "../../widgets/calendar";
 
@@ -80,16 +79,13 @@ function applyCalendarSettings(data: CalendarData, settings: CalendarSettings): 
 }
 
 async function fetchStaticJsonCalendar(settings: Extract<CalendarSettings, { provider: "staticJson" }>) {
-  const response = await fetch(appendCacheBuster(resolvePublicAssetPath(settings.url), settings.cacheBusterIntervalSec));
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch calendar JSON: ${response.status}`);
-  }
-
-  const payload: unknown = await response.json();
-  if (!isCalendarData(payload)) {
-    throw new Error("Invalid calendar JSON");
-  }
+  const payload = await fetchStaticJson({
+    cacheBusterIntervalSec: settings.cacheBusterIntervalSec,
+    failureMessagePrefix: "Failed to fetch calendar JSON",
+    invalidMessage: "Invalid calendar JSON",
+    url: settings.url,
+    validate: isCalendarData,
+  });
 
   return applyCalendarSettings(payload, settings);
 }

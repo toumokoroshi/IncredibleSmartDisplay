@@ -1,6 +1,5 @@
 import type { WidgetService } from "../../types/widget";
-import { appendCacheBuster } from "../../utils/cacheBuster";
-import { resolvePublicAssetPath } from "../../utils/publicAssetPath";
+import { fetchStaticJson } from "../jsonProvider";
 import { mockTrafficLines } from "./mockData";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "../../widgets/traffic";
 
@@ -76,16 +75,13 @@ function optionalString(value: unknown) {
 }
 
 async function fetchStaticJsonTraffic(settings: Extract<TrafficSettings, { provider: "staticJson" }>) {
-  const response = await fetch(appendCacheBuster(resolvePublicAssetPath(settings.url), settings.cacheBusterIntervalSec));
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch traffic JSON: ${response.status}`);
-  }
-
-  const payload: unknown = await response.json();
-  if (!isTrafficData(payload)) {
-    throw new Error("Invalid traffic JSON");
-  }
+  const payload = await fetchStaticJson({
+    cacheBusterIntervalSec: settings.cacheBusterIntervalSec,
+    failureMessagePrefix: "Failed to fetch traffic JSON",
+    invalidMessage: "Invalid traffic JSON",
+    url: settings.url,
+    validate: isTrafficData,
+  });
 
   const lineIds = settings.lines ? new Set(settings.lines.map((line) => line.id)) : undefined;
   const lines = lineIds ? payload.lines.filter((line) => lineIds.has(line.id)) : payload.lines;
