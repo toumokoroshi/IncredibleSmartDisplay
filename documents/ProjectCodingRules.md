@@ -151,6 +151,7 @@ not be treated as a substitute for smaller commits or smaller assets.
 - Use TODO comments only when the required follow-up condition is clear.
 - Mock, fixed, and placeholder implementations should be named so their temporary nature is obvious.
 - If a user action is required, explain both the steps and the reason.
+- If a required implementation decision is not covered by the specification or project rules, do not silently invent the product behavior. State the recommended interpretation, explain the tradeoff, and ask the user to decide before implementing that behavior.
 
 ## 10. Review Checklist
 
