@@ -1,7 +1,7 @@
-import { mockWeatherData } from "../../test/mocks/weather";
 import type { WidgetError, WidgetErrorCode, WidgetService } from "../../types/widget";
 import { withTimeout } from "../../utils/timeout";
 import type { WeatherConditionKind, WeatherDailySummary, WeatherData, WeatherDisplayCondition, WeatherModifier, WeatherSettings } from "../../widgets/weather";
+import { mockWeatherData } from "./mockData";
 
 type OpenMeteoResponse = {
   current?: {

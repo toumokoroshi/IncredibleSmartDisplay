@@ -60,4 +60,20 @@ describe("petPhotoService", () => {
     expect(data.totalPhotos).toBe(0);
     expect(data.photo).toBeUndefined();
   });
+
+  it("rejects malformed manifests as invalid widget data", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({ photos: [{ id: "missing-src" }] }),
+      })),
+    );
+
+    await expect(createPetPhotoService().fetch(settings)).rejects.toMatchObject({
+      code: "DATA_INVALID",
+      message: "Invalid pet photo manifest",
+      retryable: false,
+    });
+  });
 });

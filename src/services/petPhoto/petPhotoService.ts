@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-import type { WidgetService } from "../../types/widget";
+import type { WidgetError, WidgetService } from "../../types/widget";
 import { resolvePublicAssetPath } from "../../utils/publicAssetPath";
+import { fetchJsonProvider } from "../jsonProvider";
 import type { PetPhotoData, PetPhotoManifest, PetPhotoSettings } from "../../widgets/petPhoto";
 
 const petPhotoManifestSchema = z.object({
@@ -35,6 +36,13 @@ function hashString(value: string) {
 
 export { resolvePublicAssetPath };
 
+function createDataInvalidError(message: string) {
+  const error = new Error(message) as Error & WidgetError;
+  error.code = "DATA_INVALID";
+  error.retryable = false;
+  return error;
+}
+
 function selectHalfDayPhoto(manifest: PetPhotoManifest) {
   const candidates = manifest.photos.filter((photo) => photo.favorite);
   const selectedForPeriod = getHalfDaySelectionKey();
@@ -50,14 +58,16 @@ function selectHalfDayPhoto(manifest: PetPhotoManifest) {
 }
 
 async function fetchManifest(path: string): Promise<PetPhotoManifest> {
-  const response = await fetch(path, { cache: "no-store" });
-  if (!response.ok) {
-    throw new Error(`Failed to load pet photo manifest: ${response.status}`);
-  }
-
-  const parsed = petPhotoManifestSchema.safeParse(await response.json());
+  const payload = await fetchJsonProvider({
+    failureMessagePrefix: "Failed to load pet photo manifest",
+    init: { cache: "no-store" },
+    invalidMessage: "Invalid pet photo manifest",
+    url: path,
+    validate: (value): value is unknown => value !== undefined,
+  });
+  const parsed = petPhotoManifestSchema.safeParse(payload);
   if (!parsed.success) {
-    throw new Error("Invalid pet photo manifest");
+    throw createDataInvalidError("Invalid pet photo manifest");
   }
 
   return parsed.data;
