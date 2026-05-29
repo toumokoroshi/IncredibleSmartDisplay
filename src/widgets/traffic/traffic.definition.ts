@@ -42,4 +42,5 @@ export const trafficDefinition = {
   defaultRefreshIntervalSec: 300,
   cacheTtlHours: 1,
   isEmpty: (data: TrafficData) => data.lines.length === 0,
+  detailDisplayMode: "traffic",
 } as const;

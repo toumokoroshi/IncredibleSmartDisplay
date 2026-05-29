@@ -21,4 +21,5 @@ export const stocksDefinition = {
   defaultRefreshIntervalSec: 600,
   cacheTtlHours: 12,
   isEmpty: (data: StocksData) => data.items.length === 0,
+  detailDisplayMode: "stocks",
 } as const;

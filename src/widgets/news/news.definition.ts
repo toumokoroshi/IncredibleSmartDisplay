@@ -33,4 +33,5 @@ export const newsDefinition = {
   defaultRefreshIntervalSec: 1800,
   cacheTtlHours: 12,
   isEmpty: (data: NewsData) => data.items.length === 0,
+  detailDisplayMode: "news",
 } as const;

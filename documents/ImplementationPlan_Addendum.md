@@ -153,6 +153,7 @@ type WidgetDefinition<TSettings, TData> = {
   defaultRefreshIntervalSec: number;
   cacheTtlHours: number;
   isEmpty: (data: TData) => boolean;
+  detailDisplayMode?: DisplayMode;
 };
 ```
 
@@ -163,6 +164,7 @@ type WidgetDefinition<TSettings, TData> = {
 - `fallbackArea` を持たせることで、不正configでもDashboard全体を壊しにくくする
 - `cacheTtlHours` を持たせることで、Widget固有のキャッシュ期限をHook層のtype分岐から分離する
 - `isEmpty` を持たせることで、WidgetDataの形に依存した空判定をHook層へ持ち込まない
+- `detailDisplayMode` を持たせることで、detail表示へ遷移できるWidget種別をLayout層のtype分岐から分離する
 
 ## 追記 7. Config validation 詳細ルール
 

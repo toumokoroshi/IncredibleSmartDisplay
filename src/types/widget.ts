@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { ZodType } from "zod";
+import type { DisplayMode } from "./command";
 
 export type WidgetId = string;
 export type WidgetType = "header" | "weather" | "calendar" | "stocks" | "news" | "traffic" | "petPhoto";
@@ -72,6 +73,7 @@ export type WidgetDefinition<TSettings = unknown, TData = unknown> = {
   defaultRefreshIntervalSec: number;
   cacheTtlHours: number;
   isEmpty: (data: TData) => boolean;
+  detailDisplayMode?: DisplayMode;
 };
 
 export type AnyWidgetDefinition = WidgetDefinition<any, any>;

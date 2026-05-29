@@ -8,7 +8,6 @@ import { useMidnightRefresh } from "../hooks/useMidnightRefresh";
 import { useOnlineRefresh } from "../hooks/useOnlineRefresh";
 import { useWidgetData } from "../hooks/useWidgetData";
 import { widgetRegistry } from "../registry/widgetRegistry";
-import type { DisplayMode } from "../types/command";
 import { dashboardConfig } from "../config/dashboard.config";
 
 function getHighlightedType(displayMode: string) {
@@ -16,13 +15,6 @@ function getHighlightedType(displayMode: string) {
     return null;
   }
   return displayMode === "stocks" ? "stocks" : displayMode;
-}
-
-function getDetailModeForWidgetType(widgetType: string): DisplayMode | null {
-  if (widgetType === "weather" || widgetType === "calendar" || widgetType === "news" || widgetType === "traffic" || widgetType === "petPhoto" || widgetType === "stocks") {
-    return widgetType;
-  }
-  return null;
 }
 
 export function DashboardShell() {
@@ -69,8 +61,8 @@ function WidgetSlot({
   isHighlighted: boolean;
 }) {
   const definition = widgetRegistry[widget.type];
-  const detailMode = getDetailModeForWidgetType(widget.type);
-  const canOpenDetail = detailMode !== null && !isHighlighted;
+  const detailMode = definition?.detailDisplayMode;
+  const canOpenDetail = detailMode !== undefined && !isHighlighted;
   const { executeCommand } = useDashboardContext();
 
   if (definition === undefined) {
@@ -82,7 +74,7 @@ function WidgetSlot({
       canOpenDetail={canOpenDetail}
       definition={definition}
       isHighlighted={isHighlighted}
-      onOpenDetail={detailMode === null ? undefined : () => executeCommand({ type: "SET_DISPLAY_MODE", mode: detailMode })}
+      onOpenDetail={detailMode === undefined ? undefined : () => executeCommand({ type: "SET_DISPLAY_MODE", mode: detailMode })}
       widget={widget}
     />
   );

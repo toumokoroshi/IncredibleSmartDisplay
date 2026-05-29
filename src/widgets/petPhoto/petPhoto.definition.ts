@@ -19,4 +19,5 @@ export const petPhotoDefinition = {
   defaultRefreshIntervalSec: 43200,
   cacheTtlHours: 24,
   isEmpty: (data: PetPhotoData) => data.photo === undefined,
+  detailDisplayMode: "petPhoto",
 } as const;

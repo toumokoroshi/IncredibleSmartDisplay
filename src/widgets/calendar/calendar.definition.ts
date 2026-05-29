@@ -31,4 +31,5 @@ export const calendarDefinition = {
   defaultRefreshIntervalSec: 600,
   cacheTtlHours: 24,
   isEmpty: (data: CalendarData) => data.items.length === 0,
+  detailDisplayMode: "calendar",
 } as const;

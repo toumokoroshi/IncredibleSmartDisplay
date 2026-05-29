@@ -23,4 +23,5 @@ export const weatherDefinition = {
   defaultRefreshIntervalSec: 1800,
   cacheTtlHours: 3,
   isEmpty: () => false,
+  detailDisplayMode: "weather",
 } as const;
