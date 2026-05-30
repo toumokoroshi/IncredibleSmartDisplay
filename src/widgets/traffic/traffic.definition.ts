@@ -31,6 +31,12 @@ export const trafficSettingsSchema = z.discriminatedUnion("provider", [
     provider: z.literal("staticJson"),
     url: z.string().min(1),
   }),
+  z.object({
+    ...trafficBaseSettingsSchema,
+    lines: z.array(trafficLineConfigSchema).optional(),
+    provider: z.literal("workerJson"),
+    url: z.string().min(1),
+  }),
 ]);
 
 const trafficDataSchema: z.ZodType<TrafficData> = z.object({

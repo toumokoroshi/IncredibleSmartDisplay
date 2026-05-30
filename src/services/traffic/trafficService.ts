@@ -1,5 +1,5 @@
 import type { WidgetService } from "../../types/widget";
-import { fetchStaticJson } from "../jsonProvider";
+import { fetchStaticJson, fetchWorkerJson } from "../jsonProvider";
 import { mockTrafficLines } from "./mockData";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "../../widgets/traffic";
 
@@ -105,11 +105,32 @@ async function fetchStaticJsonTraffic(settings: Extract<TrafficSettings, { provi
   };
 }
 
+async function fetchWorkerJsonTraffic(settings: Extract<TrafficSettings, { provider: "workerJson" }>) {
+  const payload = await fetchWorkerJson({
+    failureMessagePrefix: "Failed to fetch traffic worker JSON",
+    invalidMessage: "Invalid traffic JSON",
+    url: settings.url,
+    validate: isTrafficData,
+  });
+
+  const lines = prepareTrafficLines(payload.lines, settings);
+
+  return {
+    generatedAt: payload.generatedAt,
+    lines: lines.slice(0, settings.maxItems),
+    updatedAt: payload.updatedAt,
+  };
+}
+
 export function createTrafficService(): WidgetService<TrafficSettings, TrafficData> {
   return {
     async fetch(settings) {
       if (settings.provider === "staticJson") {
         return fetchStaticJsonTraffic(settings);
+      }
+
+      if (settings.provider === "workerJson") {
+        return fetchWorkerJsonTraffic(settings);
       }
 
       // Operational path: keep the widget contract stable, then replace this mock source with public/static

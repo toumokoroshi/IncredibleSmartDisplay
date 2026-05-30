@@ -630,3 +630,35 @@ Rules:
 - Traffic の初期生成元は `data-sources/traffic.manual.json` とし、`scripts/generate-traffic-json.mjs` が `public/data/traffic.json` を生成する。
 - 通常 CI は RSS や外部交通 API へ実通信しない。Generator の parser / normalizer は fixture test で検証する。
 - Traffic の外部 API または Cloudflare Worker 化は次フェーズとし、フロントエンドは引き続き `staticJson` provider を使う。
+
+## Addendum 24. Traffic workerJson contract
+
+Traffic は将来 Cloudflare Worker + cache へ移行できるよう、`workerJson` provider を受け付ける。
+ただし現在の通常運用 config は `staticJson` のままとし、`workerJson` は live Worker が必要になった段階で `dashboard.config.ts` の provider と URL を明示的に切り替える。
+
+Successful Worker response contract is the existing `TrafficData` contract:
+
+```json
+{
+  "generatedAt": "2026-05-30T03:30:00.000Z",
+  "updatedAt": "2026-05-30T12:30:00+09:00",
+  "lines": [
+    {
+      "id": "jr-yamanote",
+      "name": "山手線",
+      "operator": "JR東日本",
+      "status": "normal",
+      "updatedAt": "2026-05-30T12:29:00+09:00"
+    }
+  ]
+}
+```
+
+Rules:
+
+- Worker success payload must already be normalized to `TrafficData`; frontend must not receive transit API response shapes, RSS shapes, provider-specific status codes, or provider error payloads.
+- `lines[].status` must be one of `"normal"`, `"delayed"`, `"partiallyDelayed"`, `"suspended"`, or `"unknown"`.
+- Worker failure payload must use Addendum 21 structured error format with frontend `WidgetErrorCode` values only.
+- Worker error messages must be safe for UI and logs. They must not include API keys, tokens, private URLs, webhook URLs, or provider-specific throttling internals.
+- `trafficService` may filter, sort, apply local display overrides, and validate the payload, but must not branch on Worker-internal API provider names.
+- Contract tests should mock `fetch`; they must cover normalized success, malformed payload rejection, and structured Worker error normalization without real external API calls.

@@ -102,6 +102,101 @@ describe("traffic service", () => {
     expect(data.lines[1]).toMatchObject({ id: "tokyo-metro-tozai", name: "Tozai", operator: "Metro" });
   });
 
+  it("fetches worker JSON as normalized TrafficData without exposing worker internals", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({
+        generatedAt: "2026-05-30T03:30:00.000Z",
+        lines: [
+          { id: "jr-yamanote", name: "Provider Yamanote", operator: "Provider JR", status: "normal", updatedAt: "2026-05-30T12:29:00+09:00" },
+          { id: "tokyo-metro-tozai", name: "Provider Tozai", operator: "Provider Metro", status: "delayed", updatedAt: "2026-05-30T12:28:00+09:00" },
+          { id: "jr-chuo-rapid", name: "Provider Chuo", operator: "Provider JR", status: "suspended", updatedAt: "2026-05-30T12:27:00+09:00" },
+        ],
+        updatedAt: "2026-05-30T12:30:00+09:00",
+      }),
+      ok: true,
+      status: 200,
+    } as Response);
+
+    const service = createTrafficService();
+    const data = await service.fetch({
+      allowLocalOverride: true,
+      lines: [
+        { id: "jr-yamanote", name: "Yamanote", operator: "JR", priority: 1 },
+        { displayName: "Tozai", id: "tokyo-metro-tozai", name: "Tozai Line", operator: "Metro", priority: 2 },
+        { id: "jr-chuo-rapid", name: "Chuo Rapid", operator: "JR", priority: 3 },
+      ],
+      maxItems: 8,
+      provider: "workerJson",
+      showLineUpdatedAt: true,
+      url: "https://traffic-worker.example.test/traffic",
+    });
+
+    expect(fetch).toHaveBeenCalledWith("https://traffic-worker.example.test/traffic", {
+      cache: "no-store",
+      method: "GET",
+    });
+    expect(data).toEqual({
+      generatedAt: "2026-05-30T03:30:00.000Z",
+      lines: [
+        { id: "jr-chuo-rapid", name: "Chuo Rapid", operator: "JR", status: "suspended", updatedAt: "2026-05-30T12:27:00+09:00" },
+        { id: "tokyo-metro-tozai", name: "Tozai", operator: "Metro", status: "delayed", updatedAt: "2026-05-30T12:28:00+09:00" },
+        { id: "jr-yamanote", name: "Yamanote", operator: "JR", status: "normal", updatedAt: "2026-05-30T12:29:00+09:00" },
+      ],
+      updatedAt: "2026-05-30T12:30:00+09:00",
+    });
+  });
+
+  it("normalizes structured worker JSON errors", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({ error: { code: "API_RATE_LIMIT", message: "Provider rate limited the request", retryable: true } }),
+      ok: false,
+      status: 429,
+    } as Response);
+
+    const service = createTrafficService();
+
+    await expect(
+      service.fetch({
+        allowLocalOverride: true,
+        maxItems: 8,
+        provider: "workerJson",
+        showLineUpdatedAt: true,
+        url: "https://traffic-worker.example.test/traffic",
+      }),
+    ).rejects.toMatchObject({
+      code: "API_RATE_LIMIT",
+      message: "Provider rate limited the request",
+      retryable: true,
+    });
+  });
+
+  it("rejects malformed worker JSON traffic data", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({
+        lines: [{ id: "jr-yamanote", name: "Yamanote", providerSpecificStatus: "green" }],
+        updatedAt: "2026-05-30T12:30:00+09:00",
+      }),
+      ok: true,
+      status: 200,
+    } as Response);
+
+    const service = createTrafficService();
+
+    await expect(
+      service.fetch({
+        allowLocalOverride: true,
+        maxItems: 8,
+        provider: "workerJson",
+        showLineUpdatedAt: true,
+        url: "https://traffic-worker.example.test/traffic",
+      }),
+    ).rejects.toMatchObject({
+      code: "DATA_INVALID",
+      message: "Invalid traffic JSON",
+      retryable: false,
+    });
+  });
+
   it("rejects malformed static JSON traffic data", async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       json: async () => ({ lines: [{ id: "missing-status", name: "Broken" }], updatedAt: "2026-05-22T07:30:00+09:00" }),
