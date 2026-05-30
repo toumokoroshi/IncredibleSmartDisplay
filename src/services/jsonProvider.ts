@@ -28,6 +28,53 @@ function createJsonProviderError(code: WidgetErrorCode, message: string, retryab
   return error;
 }
 
+function isWidgetErrorCode(value: unknown): value is WidgetErrorCode {
+  return (
+    value === "NETWORK_ERROR" ||
+    value === "CORS_ERROR" ||
+    value === "API_RATE_LIMIT" ||
+    value === "AUTH_ERROR" ||
+    value === "DATA_EMPTY" ||
+    value === "DATA_INVALID" ||
+    value === "TIMEOUT" ||
+    value === "UNKNOWN_ERROR"
+  );
+}
+
+function isRetryableErrorCode(code: WidgetErrorCode) {
+  return code === "NETWORK_ERROR" || code === "CORS_ERROR" || code === "API_RATE_LIMIT" || code === "TIMEOUT" || code === "UNKNOWN_ERROR";
+}
+
+function getStructuredErrorPayload(payload: unknown) {
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    return undefined;
+  }
+
+  const candidate = "error" in payload ? (payload as { error?: unknown }).error : payload;
+  if (candidate === null || typeof candidate !== "object" || Array.isArray(candidate)) {
+    return undefined;
+  }
+
+  const error = candidate as { code?: unknown; message?: unknown; retryable?: unknown };
+  if (!isWidgetErrorCode(error.code)) {
+    return undefined;
+  }
+
+  return {
+    code: error.code,
+    message: typeof error.message === "string" && error.message.length > 0 ? error.message : error.code,
+    retryable: typeof error.retryable === "boolean" ? error.retryable : isRetryableErrorCode(error.code),
+  };
+}
+
+async function readStructuredError(response: Response) {
+  try {
+    return getStructuredErrorPayload(await response.json());
+  } catch {
+    return undefined;
+  }
+}
+
 function createHttpError(status: number, message: string) {
   if (status === 401 || status === 403) {
     return createJsonProviderError("AUTH_ERROR", message, false);
@@ -64,6 +111,11 @@ export async function fetchJsonProvider<TData>({
   });
 
   if (!response.ok) {
+    const structuredError = await readStructuredError(response);
+    if (structuredError !== undefined) {
+      throw createJsonProviderError(structuredError.code, structuredError.message, structuredError.retryable);
+    }
+
     throw createHttpError(response.status, `${failureMessagePrefix}: ${response.status}`);
   }
 

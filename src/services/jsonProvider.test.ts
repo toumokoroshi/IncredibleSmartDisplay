@@ -87,4 +87,46 @@ describe("jsonProvider", () => {
       }),
     ).rejects.toMatchObject({ code: "DATA_INVALID", message: "Invalid test JSON", retryable: false });
   });
+
+  it("normalizes structured worker errors", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({ error: { code: "API_RATE_LIMIT", message: "Calendar worker rate limited", retryable: false } }),
+      ok: false,
+      status: 429,
+    } as Response);
+
+    await expect(
+      fetchWorkerJson({
+        failureMessagePrefix: "Failed worker JSON",
+        invalidMessage: "Invalid worker JSON",
+        url: "https://worker.example.test/calendar",
+        validate: isTestData,
+      }),
+    ).rejects.toMatchObject({
+      code: "API_RATE_LIMIT",
+      message: "Calendar worker rate limited",
+      retryable: false,
+    });
+  });
+
+  it("falls back to HTTP status when worker error payload has an unknown code", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({ error: { code: "GOOGLE_CALENDAR_DOWN", message: "Provider failed" } }),
+      ok: false,
+      status: 503,
+    } as Response);
+
+    await expect(
+      fetchWorkerJson({
+        failureMessagePrefix: "Failed worker JSON",
+        invalidMessage: "Invalid worker JSON",
+        url: "https://worker.example.test/calendar",
+        validate: isTestData,
+      }),
+    ).rejects.toMatchObject({
+      code: "NETWORK_ERROR",
+      message: "Failed worker JSON: 503",
+      retryable: true,
+    });
+  });
 });
