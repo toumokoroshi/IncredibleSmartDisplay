@@ -24,6 +24,20 @@ export const newsSettingsSchema = z.discriminatedUnion("provider", [
   }),
 ]);
 
+const newsDataSchema: z.ZodType<NewsData> = z.object({
+  items: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      summary: z.string().optional(),
+      category: z.string().optional(),
+      priority: z.enum(["top", "normal"]).optional(),
+      source: z.string().optional(),
+      publishedAt: z.string().optional(),
+    }),
+  ),
+});
+
 export const newsDefinition = {
   type: "news",
   component: NewsWidget,
@@ -32,6 +46,7 @@ export const newsDefinition = {
   fallbackArea: "sub-right",
   defaultRefreshIntervalSec: 1800,
   cacheTtlHours: 12,
+  validateData: (data: unknown): data is NewsData => newsDataSchema.safeParse(data).success,
   isEmpty: (data: NewsData) => data.items.length === 0,
   detailDisplayMode: "news",
 } as const;

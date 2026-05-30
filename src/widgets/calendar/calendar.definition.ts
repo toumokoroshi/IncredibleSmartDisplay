@@ -26,6 +26,23 @@ export const calendarSettingsSchema = z.discriminatedUnion("provider", [
   }),
 ]);
 
+const calendarDataSchema: z.ZodType<CalendarData> = z.object({
+  items: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      startsAt: z.string().refine((value) => Number.isNaN(Date.parse(value)) === false),
+      endsAt: z
+        .string()
+        .refine((value) => Number.isNaN(Date.parse(value)) === false)
+        .optional(),
+      isAllDay: z.boolean().optional(),
+      calendarName: z.string().optional(),
+      location: z.string().optional(),
+    }),
+  ),
+});
+
 export const calendarDefinition = {
   type: "calendar",
   component: CalendarWidget,
@@ -34,6 +51,7 @@ export const calendarDefinition = {
   fallbackArea: "main-right",
   defaultRefreshIntervalSec: 600,
   cacheTtlHours: 24,
+  validateData: (data: unknown): data is CalendarData => calendarDataSchema.safeParse(data).success,
   isEmpty: (data: CalendarData) => data.items.length === 0,
   detailDisplayMode: "calendar",
 } as const;

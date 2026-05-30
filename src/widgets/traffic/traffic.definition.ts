@@ -33,6 +33,25 @@ export const trafficSettingsSchema = z.discriminatedUnion("provider", [
   }),
 ]);
 
+const trafficDataSchema: z.ZodType<TrafficData> = z.object({
+  updatedAt: z.string().refine((value) => Number.isNaN(Date.parse(value)) === false),
+  lines: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      operator: z.string().optional(),
+      status: z.enum(["normal", "delayed", "partiallyDelayed", "suspended", "unknown"]),
+      updatedAt: z.string().refine((value) => Number.isNaN(Date.parse(value)) === false),
+      delayMinutes: z.number().optional(),
+      statusText: z.string().optional(),
+      detail: z.string().optional(),
+      reason: z.string().optional(),
+      recoveryEstimate: z.string().optional(),
+      alternateTransport: z.string().optional(),
+    }),
+  ),
+});
+
 export const trafficDefinition = {
   type: "traffic",
   component: TrafficWidget,
@@ -41,6 +60,7 @@ export const trafficDefinition = {
   fallbackArea: "sub-left",
   defaultRefreshIntervalSec: 300,
   cacheTtlHours: 1,
+  validateData: (data: unknown): data is TrafficData => trafficDataSchema.safeParse(data).success,
   isEmpty: (data: TrafficData) => data.lines.length === 0,
   detailDisplayMode: "traffic",
 } as const;

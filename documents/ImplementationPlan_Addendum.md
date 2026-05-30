@@ -152,6 +152,7 @@ type WidgetDefinition<TSettings, TData> = {
   fallbackArea: DashboardArea;
   defaultRefreshIntervalSec: number;
   cacheTtlHours: number;
+  validateData: (data: unknown) => data is TData;
   isEmpty: (data: TData) => boolean;
   detailDisplayMode?: DisplayMode;
 };
@@ -163,6 +164,7 @@ type WidgetDefinition<TSettings, TData> = {
 - `createService` を持たせることで、provider差し替えの責務をRegistry配下へ閉じ込められる
 - `fallbackArea` を持たせることで、不正configでもDashboard全体を壊しにくくする
 - `cacheTtlHours` を持たせることで、Widget固有のキャッシュ期限をHook層のtype分岐から分離する
+- `validateData` を持たせることで、cache restore と将来の provider 移行を WidgetData contract の内側に留める
 - `isEmpty` を持たせることで、WidgetDataの形に依存した空判定をHook層へ持ち込まない
 - `detailDisplayMode` を持たせることで、detail表示へ遷移できるWidget種別をLayout層のtype分岐から分離する
 

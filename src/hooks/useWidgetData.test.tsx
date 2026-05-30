@@ -34,6 +34,11 @@ function createDefinition(fetch: WidgetService<TestSettings, TestData>["fetch"])
     isEmpty: (data: TestData) => data.items.length === 0,
     settingsSchema: z.object({ provider: z.literal("mock") }),
     type: "news",
+    validateData: (data: unknown): data is TestData =>
+      data !== null &&
+      typeof data === "object" &&
+      Array.isArray((data as { items?: unknown }).items) &&
+      (data as { items: unknown[] }).items.every((item) => typeof item === "string"),
   };
 }
 
@@ -145,6 +150,18 @@ describe("useWidgetData", () => {
     await waitFor(() => expect(result.current.status).toBe("stale"));
 
     expect(result.current.data).toEqual({ items: ["cached"] });
+  });
+
+  it("ignores cache data that fails widget data validation", async () => {
+    writeCache({ data: { items: [123] } as unknown as TestData });
+    const definition = createDefinition(async () => {
+      throw nonRetryableError("service failed");
+    });
+    const { result } = renderUseWidgetData({ definition });
+
+    await waitFor(() => expect(result.current.status).toBe("error"));
+
+    expect(result.current.data).toBeUndefined();
   });
 
   it("returns offline when fetch fails while offline and no cache exists", async () => {

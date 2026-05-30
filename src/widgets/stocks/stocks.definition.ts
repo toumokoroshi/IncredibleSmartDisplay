@@ -29,6 +29,18 @@ export const stocksSettingsSchema = z.discriminatedUnion("provider", [
   }),
 ]);
 
+const stocksDataSchema: z.ZodType<StocksData> = z.object({
+  items: z.array(
+    z.object({
+      symbol: z.string(),
+      name: z.string(),
+      price: z.number(),
+      changePercent: z.number().optional(),
+      marketState: z.string().optional(),
+    }),
+  ),
+});
+
 export const stocksDefinition = {
   type: "stocks",
   component: StocksWidget,
@@ -37,6 +49,7 @@ export const stocksDefinition = {
   fallbackArea: "sub-left",
   defaultRefreshIntervalSec: 600,
   cacheTtlHours: 12,
+  validateData: (data: unknown): data is StocksData => stocksDataSchema.safeParse(data).success,
   isEmpty: (data: StocksData) => data.items.length === 0,
   detailDisplayMode: "stocks",
 } as const;

@@ -24,7 +24,8 @@ export function useWidgetData(
   definition?: AnyWidgetDefinition,
 ) {
   const { reportWidgetState } = useDashboardContext();
-  const cache = readWidgetCache<any>(config.id);
+  const cacheRecord = readWidgetCache<unknown>(config.id);
+  const cache = cacheRecord !== null && definition?.validateData(cacheRecord.data) === true ? cacheRecord : null;
 
   const query = useQuery<any, WidgetError>({
     queryKey: getWidgetQueryKey(config.id),

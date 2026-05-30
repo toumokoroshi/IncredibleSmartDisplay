@@ -73,6 +73,7 @@ export type WidgetDefinition<TSettings = unknown, TData = unknown> = {
   fallbackArea: DashboardArea;
   defaultRefreshIntervalSec: number;
   cacheTtlHours: number;
+  validateData: (data: unknown) => data is TData;
   isEmpty: (data: TData) => boolean;
   detailDisplayMode?: DisplayMode;
 };
