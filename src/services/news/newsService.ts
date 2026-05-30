@@ -25,12 +25,16 @@ function isNewsItem(value: unknown): value is NewsItem {
     optionalString(item.category) &&
     (item.priority === undefined || item.priority === "top" || item.priority === "normal") &&
     optionalString(item.source) &&
-    optionalString(item.publishedAt)
+    optionalIsoDateTimeString(item.publishedAt)
   );
 }
 
 function optionalString(value: unknown) {
   return value === undefined || typeof value === "string";
+}
+
+function optionalIsoDateTimeString(value: unknown) {
+  return value === undefined || (typeof value === "string" && Number.isNaN(Date.parse(value)) === false);
 }
 
 async function fetchStaticJsonNews(settings: Extract<NewsSettings, { provider: "staticJson" }>) {

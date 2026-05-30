@@ -33,7 +33,10 @@ const newsDataSchema: z.ZodType<NewsData> = z.object({
       category: z.string().optional(),
       priority: z.enum(["top", "normal"]).optional(),
       source: z.string().optional(),
-      publishedAt: z.string().optional(),
+      publishedAt: z
+        .string()
+        .refine((value) => Number.isNaN(Date.parse(value)) === false)
+        .optional(),
     }),
   ),
 });

@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { dashboardConfig } from "../../config/dashboard.config";
+import type { NewsSettings } from "../../widgets/news";
+import { newsDefinition } from "../../widgets/news";
 import { createNewsService } from "./newsService";
+import newsJsonRaw from "../../../public/data/news.json?raw";
 
 describe("createNewsService", () => {
   beforeEach(() => {
@@ -76,6 +80,26 @@ describe("createNewsService", () => {
     ).rejects.toThrow("Invalid news JSON");
   });
 
+  it("rejects static JSON news data with invalid published dates", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({ items: [{ id: "bad-date", publishedAt: "not-a-date", title: "Bad date" }] }),
+      ok: true,
+      status: 200,
+    } as Response);
+
+    const service = createNewsService();
+
+    await expect(
+      service.fetch({
+        maxItems: 5,
+        provider: "staticJson",
+        showPublishedAt: true,
+        showSource: true,
+        url: "/data/news.json",
+      }),
+    ).rejects.toThrow("Invalid news JSON");
+  });
+
   it("rejects failed static JSON responses", async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       json: async () => ({}),
@@ -94,5 +118,39 @@ describe("createNewsService", () => {
         url: "/data/news.json",
       }),
     ).rejects.toThrow("Failed to fetch news JSON: 404");
+  });
+
+  it("keeps the published news JSON aligned with the static provider contract", () => {
+    const newsWidget = dashboardConfig.widgets.find((widget) => widget.id === "news-main");
+    const newsSettings = newsWidget?.settings as Extract<NewsSettings, { provider: "staticJson" }> | undefined;
+    const payload = JSON.parse(newsJsonRaw) as unknown;
+
+    expect(newsSettings?.provider).toBe("staticJson");
+    expect(newsDefinition.validateData(payload)).toBe(true);
+
+    if (!newsSettings || !newsDefinition.validateData(payload)) {
+      throw new Error("news-main static JSON contract is not testable");
+    }
+
+    expect(payload.items.length).toBeGreaterThan(0);
+    expect(payload.items.length).toBeLessThanOrEqual(newsSettings.maxItems);
+    expect(new Set(payload.items.map((item) => item.id)).size).toBe(payload.items.length);
+
+    const timestamps = payload.items.map((item) => Date.parse(item.publishedAt ?? ""));
+    for (const timestamp of timestamps) {
+      expect(timestamp).not.toBeNaN();
+    }
+
+    expect(timestamps).toEqual([...timestamps].sort((left, right) => right - left));
+    expect(payload.items[0]?.priority).toBe("top");
+
+    for (const [index, item] of payload.items.entries()) {
+      expect(item.title.trim()).toBe(item.title);
+      expect(item.title.length).toBeGreaterThan(0);
+      expect(item.source).toBeTruthy();
+      expect(item.category).toBeTruthy();
+      expect(item.priority).toBe(index === 0 ? "top" : "normal");
+      expect(item.title).not.toMatch(/placeholder|dummy|mock|static json/i);
+    }
   });
 });

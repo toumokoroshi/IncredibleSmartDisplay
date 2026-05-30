@@ -588,3 +588,28 @@ Rules:
 - The frontend must not branch on Worker-internal API types. It should branch only on explicit frontend provider names such as `mock`, `staticJson`, or `workerJson`.
 - Calendar, News, Traffic, and Stocks should use the same `workerJson` boundary when a live Worker endpoint is required.
 - Tests should cover both the normalized success payload and the structured error payload. Tests must not call real third-party APIs.
+
+## Addendum 22. News static JSON generator
+
+News の初期実運用経路は `scripts/generate-news-json.mjs` で公開 RSS を取得し、`public/data/news.json` を生成する方式とする。
+これは Addendum 20 の `staticJson` 主運用に沿った経路であり、GitHub Pages frontend は RSS、外部 API レスポンス、provider 固有 payload を直接扱わない。
+
+生成経路:
+
+External RSS / public API
+  -> `scripts/generate-news-json.mjs`
+  -> normalized `NewsData`
+  -> `public/data/news.json`
+  -> frontend `staticJson` provider
+  -> `NewsData`
+  -> `NewsWidget`
+
+Rules:
+
+- generator は秘密情報、API キー、private URL、認証付き feed を前提にしない。
+- generator は `NewsData` contract に正規化し、`id`, `title`, `source`, `category`, `publishedAt`, `priority` を安定して出力する。
+- generated JSON は新しい記事順に並べ、最初の item のみ `priority: "top"`、以降は `priority: "normal"` とする。
+- `NEWS_FEEDS_JSON`, `NEWS_MAX_ITEMS`, `NEWS_OUTPUT_PATH`, `NEWS_TIMEOUT_MS` で運用時に入力 feed、件数、出力先、timeout を調整できる。
+- frontend service は generated JSON を再検証し、malformed JSON、必須項目欠落、不正日時を `DATA_INVALID` として扱う。
+- contract tests should read the published `public/data/news.json` and verify shape, item count, date validity, descending date order, unique ids, and placeholder text absence.
+- A scheduled GitHub Actions job may later run the generator and commit or otherwise publish the generated JSON, but the frontend provider should remain `staticJson` unless truly live worker fetches become necessary.

@@ -12,6 +12,7 @@
     "test:layout": "node scripts/layout-probe-check.mjs",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
+    "generate-news": "node scripts/generate-news-json.mjs",
     "prepare-pet-photos": "node scripts/prepare-pet-photos.mjs"
   },
   "dependencies": {

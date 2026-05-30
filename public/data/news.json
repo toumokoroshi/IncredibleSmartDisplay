@@ -1,22 +1,49 @@
 {
   "items": [
     {
-      "id": "static-1",
-      "title": "Static JSON news provider is available",
-      "summary": "This file proves the dashboard can read news data from a public JSON source without changing NewsWidget.",
-      "category": "System",
+      "id": "hacker-news-jpjpqm",
+      "title": "Corporate America Is Starting to Ration AI as Cost Skyrockets",
+      "summary": "Article URL: https://www.wsj.com/tech/ai/corporate-america-is-starting-to-ration-ai-as-cost-skyrockets-1eb99d7a Comments URL: https://news.ycombinator.com/item?id=48335388 Points:…",
+      "category": "Tech",
       "priority": "top",
-      "source": "Local JSON",
-      "publishedAt": "2026-05-21T00:00:00.000Z"
+      "source": "Hacker News",
+      "publishedAt": "2026-05-30T12:17:33.000Z"
     },
     {
-      "id": "static-2",
-      "title": "Mock data remains available as a fallback provider",
-      "summary": "Provider selection stays in the service layer so future RSS or worker-backed sources can be added safely.",
-      "category": "System",
+      "id": "hacker-news-16r9smc",
+      "title": "Proposed new US funding rules: We can cancel any grant at any time",
+      "summary": "Article URL: https://arstechnica.com/science/2026/05/the-office-of-management-and-budget-tries-again-to-cripple-us-science/ Comments URL: https://news.ycombinator.com/item?id=4833…",
+      "category": "Tech",
       "priority": "normal",
-      "source": "Local JSON",
-      "publishedAt": "2026-05-21T00:10:00.000Z"
+      "source": "Hacker News",
+      "publishedAt": "2026-05-30T11:41:29.000Z"
+    },
+    {
+      "id": "hacker-news-19zm48m",
+      "title": "Show HN: Helios – what plug-in solar could generate for any address in Britain",
+      "summary": "Plug-in solar panels (no electrician needed) have just become legal in the UK and will go on sale soon. Helios estimates how much electricity a typical installation could generate…",
+      "category": "Tech",
+      "priority": "normal",
+      "source": "Hacker News",
+      "publishedAt": "2026-05-30T11:08:37.000Z"
+    },
+    {
+      "id": "hacker-news-1v0ziq",
+      "title": "Leo's first encyclical attacks technological messianism",
+      "summary": "Article URL: https://www.economist.com/europe/2026/05/28/leos-first-encyclical-attacks-technological-messianism Comments URL: https://news.ycombinator.com/item?id=48334710 Points:…",
+      "category": "Tech",
+      "priority": "normal",
+      "source": "Hacker News",
+      "publishedAt": "2026-05-30T10:30:50.000Z"
+    },
+    {
+      "id": "hacker-news-12tp45w",
+      "title": "Pandoc Templates",
+      "summary": "Article URL: https://pandoc-templates.org/ Comments URL: https://news.ycombinator.com/item?id=48334515 Points: 110 # Comments: 7",
+      "category": "Tech",
+      "priority": "normal",
+      "source": "Hacker News",
+      "publishedAt": "2026-05-30T09:56:42.000Z"
     }
   ]
 }
