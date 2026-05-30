@@ -55,6 +55,35 @@ describe("createCalendarService", () => {
     expect(result.items.map((item) => item.id)).toEqual(["today-1", "tomorrow-1"]);
   });
 
+  it("fetches and validates worker JSON calendar data", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({
+        items: [
+          { id: "today-1", title: "Today 1", startsAt: "2026-05-30T09:00:00+09:00", calendarName: "Home" },
+          { id: "tomorrow-1", title: "Tomorrow", startsAt: "2026-05-31T10:00:00+09:00", calendarName: "Work" },
+          { id: "outside-range", title: "Outside", startsAt: "2026-06-03T10:00:00+09:00" },
+        ],
+      }),
+      ok: true,
+      status: 200,
+    } as Response);
+
+    const result = await createCalendarService().fetch({
+      daysAhead: 1,
+      maxTodayEvents: 4,
+      maxTomorrowEvents: 2,
+      provider: "workerJson",
+      showAllDayEvents: true,
+      url: "https://example.test/calendar",
+    });
+
+    expect(fetch).toHaveBeenCalledWith("https://example.test/calendar", {
+      cache: "no-store",
+      method: "GET",
+    });
+    expect(result.items.map((item) => item.id)).toEqual(["today-1", "tomorrow-1"]);
+  });
+
   it("rejects malformed static JSON calendar data", async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       json: async () => ({ items: [{ id: "missing-start", title: "Broken" }] }),
@@ -91,5 +120,24 @@ describe("createCalendarService", () => {
         url: "/data/calendar.json",
       }),
     ).rejects.toThrow("Failed to fetch calendar JSON: 404");
+  });
+
+  it("rejects failed worker JSON calendar responses", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({}),
+      ok: false,
+      status: 401,
+    } as Response);
+
+    await expect(
+      createCalendarService().fetch({
+        daysAhead: 2,
+        maxTodayEvents: 4,
+        maxTomorrowEvents: 2,
+        provider: "workerJson",
+        showAllDayEvents: true,
+        url: "https://example.test/calendar",
+      }),
+    ).rejects.toMatchObject({ code: "AUTH_ERROR", retryable: false });
   });
 });

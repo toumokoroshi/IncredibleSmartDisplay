@@ -1,5 +1,5 @@
 import type { WidgetService } from "../../types/widget";
-import { fetchStaticJson } from "../jsonProvider";
+import { fetchStaticJson, fetchWorkerJson } from "../jsonProvider";
 import { mockCalendarData } from "./mockData";
 import type { CalendarData, CalendarSettings } from "../../widgets/calendar";
 
@@ -90,11 +90,26 @@ async function fetchStaticJsonCalendar(settings: Extract<CalendarSettings, { pro
   return applyCalendarSettings(payload, settings);
 }
 
+async function fetchWorkerJsonCalendar(settings: Extract<CalendarSettings, { provider: "workerJson" }>) {
+  const payload = await fetchWorkerJson({
+    failureMessagePrefix: "Failed to fetch calendar worker JSON",
+    invalidMessage: "Invalid calendar JSON",
+    url: settings.url,
+    validate: isCalendarData,
+  });
+
+  return applyCalendarSettings(payload, settings);
+}
+
 export function createCalendarService(): WidgetService<CalendarSettings, CalendarData> {
   return {
     async fetch(settings) {
       if (settings.provider === "staticJson") {
         return fetchStaticJsonCalendar(settings);
+      }
+
+      if (settings.provider === "workerJson") {
+        return fetchWorkerJsonCalendar(settings);
       }
 
       return applyCalendarSettings(mockCalendarData, settings);

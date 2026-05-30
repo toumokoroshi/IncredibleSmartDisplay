@@ -20,6 +20,10 @@ export const calendarSettingsSchema = z.discriminatedUnion("provider", [
     provider: z.literal("staticJson"),
     url: z.string().min(1),
   }),
+  calendarBaseSettingsSchema.extend({
+    provider: z.literal("workerJson"),
+    url: z.string().min(1),
+  }),
 ]);
 
 export const calendarDefinition = {

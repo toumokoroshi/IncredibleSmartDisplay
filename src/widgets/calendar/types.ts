@@ -15,7 +15,12 @@ export type StaticJsonCalendarSettings = CalendarBaseSettings & {
   cacheBusterIntervalSec?: number;
 };
 
-export type CalendarSettings = MockCalendarSettings | StaticJsonCalendarSettings;
+export type WorkerJsonCalendarSettings = CalendarBaseSettings & {
+  provider: "workerJson";
+  url: string;
+};
+
+export type CalendarSettings = MockCalendarSettings | StaticJsonCalendarSettings | WorkerJsonCalendarSettings;
 
 export type CalendarData = {
   items: Array<{
