@@ -549,3 +549,42 @@ Rules:
 - If News or Traffic later require live Worker fetches, add an explicit `workerJson` provider and keep it as a thin transport wrapper over the same widget data contract.
 - API keys, RSS credentials, private URLs, webhook URLs, and provider-specific throttling rules must remain outside GitHub Pages frontend code.
 - Contract tests should cover malformed generated JSON so upstream feed changes do not silently become widget rendering failures.
+
+## Addendum 21. Generic workerJson provider contract
+
+`workerJson` is a generic provider boundary, not a Calendar-specific integration pattern.
+
+The frontend should treat any `workerJson` endpoint as a transport that returns already-normalized widget data. The frontend service may validate, filter, and map that data into the widget's final view contract, but it must not know which third-party API, credential type, feed format, or vendor-specific response shape the Worker used internally.
+
+Successful response contract:
+
+```json
+{
+  "items": []
+}
+```
+
+The exact success payload is the widget data contract for that widget, such as `CalendarData`, `NewsData`, `TrafficData`, or `StocksData`. Do not wrap successful responses in a generic `{ "data": ... }` envelope unless the widget data contract itself requires that shape.
+
+Failure response contract:
+
+```json
+{
+  "error": {
+    "code": "API_RATE_LIMIT",
+    "message": "Provider rate limited the request",
+    "retryable": true
+  }
+}
+```
+
+Rules:
+
+- `code` must use the frontend `WidgetErrorCode` set: `NETWORK_ERROR`, `CORS_ERROR`, `API_RATE_LIMIT`, `AUTH_ERROR`, `DATA_EMPTY`, `DATA_INVALID`, `TIMEOUT`, or `UNKNOWN_ERROR`.
+- `message` should be safe for logs and UI diagnostics. It must not include secrets, private URLs, OAuth tokens, API keys, personal iCal URLs, or webhook URLs.
+- `retryable` should reflect whether an immediate or scheduled retry can reasonably recover.
+- Worker implementations may use internal provider adapters, for example Google Calendar, RSS, transit APIs, or market-data APIs.
+- Widget-specific logic belongs inside the Worker adapter and the frontend service for that widget. Shared Worker transport, error normalization, CORS, secret handling, throttling, and cache policy should stay provider-neutral.
+- The frontend must not branch on Worker-internal API types. It should branch only on explicit frontend provider names such as `mock`, `staticJson`, or `workerJson`.
+- Calendar, News, Traffic, and Stocks should use the same `workerJson` boundary when a live Worker endpoint is required.
+- Tests should cover both the normalized success payload and the structured error payload. Tests must not call real third-party APIs.
