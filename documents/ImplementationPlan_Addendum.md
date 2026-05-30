@@ -525,3 +525,25 @@ Rules:
 - Calendar detail should keep `week` and `month` as internal Calendar view modes instead of separate dashboard `DisplayMode` values or separate widget types. This keeps Dashboard routing, Registry registration, commands, and layout probes centered on one Calendar widget.
 - The initial maintainable implementation should prefer one Calendar detail screen with a segmented `Week` / `Month` control. `Week` remains the operational default; `Month` must include a selected-day rail so it still answers the immediate "what is next" question.
 - Avoid implementing `calendar-week` and `calendar-month` as separate widgets or separate dashboard modes unless a future command surface has a concrete need for that distinction.
+
+## Addendum 20. News and Traffic API migration boundary
+
+News and Traffic should not call live third-party APIs directly from the GitHub Pages frontend during the current API migration.
+
+Preferred data path:
+
+External News / Traffic API, RSS feed, Cloudflare Worker, or GitHub Actions job
+  -> provider-specific fetch, filtering, throttling, and normalization outside the widget
+  -> stable public JSON contract
+  -> frontend `staticJson` provider
+  -> service-layer validation and mapping
+  -> widget data
+
+Rules:
+
+- The frontend News and Traffic widgets should keep using `staticJson` as the primary real-data provider unless a future requirement needs truly live Worker fetches.
+- A Worker may still be used, but initially it should generate or serve JSON that matches the existing `NewsData` or `TrafficData` contract instead of exposing provider-specific response shapes to the frontend.
+- The widget layer must not receive RSS, transit API, provider error payloads, or third-party API response shapes directly.
+- If News or Traffic later require live Worker fetches, add an explicit `workerJson` provider and keep it as a thin transport wrapper over the same widget data contract.
+- API keys, RSS credentials, private URLs, webhook URLs, and provider-specific throttling rules must remain outside GitHub Pages frontend code.
+- Contract tests should cover malformed generated JSON so upstream feed changes do not silently become widget rendering failures.
