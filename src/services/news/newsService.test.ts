@@ -134,6 +134,7 @@ describe("createNewsService", () => {
 
     expect(payload.items.length).toBeGreaterThan(0);
     expect(payload.items.length).toBeLessThanOrEqual(newsSettings.maxItems);
+    expect(Date.parse(payload.generatedAt ?? "")).not.toBeNaN();
     expect(new Set(payload.items.map((item) => item.id)).size).toBe(payload.items.length);
 
     const timestamps = payload.items.map((item) => Date.parse(item.publishedAt ?? ""));

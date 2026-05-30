@@ -1,7 +1,8 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const DEFAULT_FEEDS = [
+export const DEFAULT_NEWS_FEEDS = [
   {
     id: "itmedia-news",
     name: "ITmedia NEWS",
@@ -16,31 +17,50 @@ const DEFAULT_FEEDS = [
   },
 ];
 
-const outputPath = resolve(process.cwd(), process.env.NEWS_OUTPUT_PATH ?? "public/data/news.json");
-const maxItems = parsePositiveInteger(process.env.NEWS_MAX_ITEMS, 5);
-const timeoutMs = parsePositiveInteger(process.env.NEWS_TIMEOUT_MS, 15000);
-const feeds = parseFeeds(process.env.NEWS_FEEDS_JSON) ?? DEFAULT_FEEDS;
-
-const items = await collectNewsItems(feeds);
-if (items.length === 0) {
-  throw new Error("No news items were generated from configured feeds");
+if (isDirectRun()) {
+  await generateNewsJsonFromEnv();
 }
 
-const normalizedItems = items
-  .sort((left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime() || left.title.localeCompare(right.title))
-  .slice(0, maxItems)
-  .map((item, index) => ({
-    ...item,
-    priority: index === 0 ? "top" : "normal",
-  }));
+export async function generateNewsJsonFromEnv(env = process.env) {
+  return generateNewsJson({
+    feeds: parseFeeds(env.NEWS_FEEDS_JSON) ?? DEFAULT_NEWS_FEEDS,
+    maxItems: parsePositiveInteger(env.NEWS_MAX_ITEMS, 5),
+    outputPath: resolve(process.cwd(), env.NEWS_OUTPUT_PATH ?? "public/data/news.json"),
+    timeoutMs: parsePositiveInteger(env.NEWS_TIMEOUT_MS, 15000),
+  });
+}
 
-await mkdir(dirname(outputPath), { recursive: true });
-await writeFile(outputPath, `${JSON.stringify({ items: normalizedItems }, null, 2)}\n`, "utf8");
+export async function generateNewsJson({ feeds, maxItems, outputPath, timeoutMs }) {
+  const items = await collectNewsItems(feeds, timeoutMs);
+  if (items.length === 0) {
+    throw new Error("No news items were generated from configured feeds");
+  }
 
-console.log(`Generated ${normalizedItems.length} news items at ${outputPath}`);
+  const data = buildNewsData(items, maxItems, new Date());
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 
-async function collectNewsItems(configuredFeeds) {
-  const results = await Promise.allSettled(configuredFeeds.map(fetchFeedItems));
+  console.log(`Generated ${data.items.length} news items at ${outputPath}`);
+  return data;
+}
+
+export function buildNewsData(items, maxItems, generatedAtDate) {
+  const normalizedItems = dedupeNewsItems(items)
+    .sort((left, right) => new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime() || left.title.localeCompare(right.title))
+    .slice(0, maxItems)
+    .map((item, index) => ({
+      ...item,
+      priority: index === 0 ? "top" : "normal",
+    }));
+
+  return {
+    generatedAt: generatedAtDate.toISOString(),
+    items: normalizedItems,
+  };
+}
+
+export async function collectNewsItems(configuredFeeds, timeoutMs) {
+  const results = await Promise.allSettled(configuredFeeds.map((feed) => fetchFeedItems(feed, timeoutMs)));
   const items = [];
 
   for (const result of results) {
@@ -55,7 +75,7 @@ async function collectNewsItems(configuredFeeds) {
   return dedupeNewsItems(items);
 }
 
-async function fetchFeedItems(feed) {
+export async function fetchFeedItems(feed, timeoutMs) {
   validateFeedConfig(feed);
 
   const controller = new AbortController();
@@ -73,12 +93,18 @@ async function fetchFeedItems(feed) {
       throw new Error(`Failed to fetch ${feed.id}: ${response.status}`);
     }
 
-    const xml = await response.text();
-    const entries = parseFeedEntries(xml);
-    return entries.map((entry, index) => normalizeFeedEntry(entry, feed, index)).filter(Boolean);
+    return parseFeedItems(await response.text(), feed);
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export function parseFeedItems(xml, feed) {
+  validateFeedConfig(feed);
+
+  return parseFeedEntries(xml)
+    .map((entry, index) => normalizeFeedEntry(entry, feed, index))
+    .filter(Boolean);
 }
 
 function normalizeFeedEntry(entry, feed, index) {
@@ -178,7 +204,7 @@ function clampText(value, maxLength) {
     return value;
   }
 
-  return `${value.slice(0, maxLength - 1).trim()}…`;
+  return `${value.slice(0, maxLength - 1).trim()}...`;
 }
 
 function decodeXmlText(value) {
@@ -246,4 +272,8 @@ function validateFeedConfig(feed) {
       throw new Error(`Invalid news feed config: ${key}`);
     }
   }
+}
+
+function isDirectRun() {
+  return process.argv[1] !== undefined && fileURLToPath(import.meta.url) === process.argv[1];
 }

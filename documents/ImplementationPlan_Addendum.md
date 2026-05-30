@@ -613,3 +613,20 @@ Rules:
 - frontend service は generated JSON を再検証し、malformed JSON、必須項目欠落、不正日時を `DATA_INVALID` として扱う。
 - contract tests should read the published `public/data/news.json` and verify shape, item count, date validity, descending date order, unique ids, and placeholder text absence.
 - A scheduled GitHub Actions job may later run the generator and commit or otherwise publish the generated JSON, but the frontend provider should remain `staticJson` unless truly live worker fetches become necessary.
+
+## Addendum 23. Artifact-only static JSON refresh
+
+News と Traffic の定期更新は、当面 GitHub Pages artifact 生成時に static JSON を生成する方式とする。
+生成結果は repository history へ commit せず、Actions の作業ディレクトリ内で `public/data/*.json` を更新してから build し、公開 artifact のみを最新化する。
+
+Rules:
+
+- Deploy workflow は `main` push、manual dispatch、scheduled run で実行できる。
+- Scheduled run は 15 分ごとを目標とし、毎時 00 分付近を避ける。
+- Artifact-only 運用では各 run が fresh checkout から始まるため、News と Traffic は同じ scheduled run で毎回生成する。
+- News の希望鮮度は 1 時間程度だが、古い repository copy へ戻ることを避けるため scheduled artifact では 15 分ごとに再生成してよい。
+- 生成失敗または contract test 失敗時は deploy を失敗させ、前回成功した Pages artifact を表示継続させる。
+- `NewsData` と `TrafficData` は `generatedAt` を持てる。Generated JSON では必ず `generatedAt` を出力し、UI と tests は artifact freshness の手掛かりとして扱う。
+- Traffic の初期生成元は `data-sources/traffic.manual.json` とし、`scripts/generate-traffic-json.mjs` が `public/data/traffic.json` を生成する。
+- 通常 CI は RSS や外部交通 API へ実通信しない。Generator の parser / normalizer は fixture test で検証する。
+- Traffic の外部 API または Cloudflare Worker 化は次フェーズとし、フロントエンドは引き続き `staticJson` provider を使う。

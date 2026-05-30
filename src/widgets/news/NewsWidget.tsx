@@ -18,7 +18,10 @@ export function NewsWidget({ config, data, error, isEmpty, isHighlighted, status
           </span>
           <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
         </div>
-        {status === "stale" ? <StaleBadge /> : null}
+        <div className="text-right text-xs font-semibold text-slate-500">
+          {status === "stale" ? <StaleBadge /> : null}
+          {data?.generatedAt ? <p className="mt-1">更新 {formatTime(data.generatedAt)}</p> : null}
+        </div>
       </div>
       {status === "loading" ? <LoadingState /> : null}
       {status === "error" ? <ErrorState error={error} /> : null}
@@ -32,6 +35,14 @@ export function NewsWidget({ config, data, error, isEmpty, isHighlighted, status
       ) : null}
     </Card>
   );
+}
+
+function formatTime(value: string) {
+  return new Intl.DateTimeFormat("ja-JP", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(value));
 }
 
 function NewsQuickLook({ data, maxItems }: { data: NewsData; maxItems: number }) {

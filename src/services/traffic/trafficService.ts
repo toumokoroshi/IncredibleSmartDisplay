@@ -47,7 +47,7 @@ function isTrafficData(value: unknown): value is TrafficData {
   }
 
   const payload = value as Partial<TrafficData>;
-  return isIsoDateTimeString(payload.updatedAt) && Array.isArray(payload.lines) && payload.lines.every(isTrafficLineData);
+  return optionalIsoDateTimeString(payload.generatedAt) && isIsoDateTimeString(payload.updatedAt) && Array.isArray(payload.lines) && payload.lines.every(isTrafficLineData);
 }
 
 function isTrafficLineData(value: unknown): value is TrafficLineData {
@@ -79,6 +79,10 @@ function optionalString(value: unknown) {
   return value === undefined || typeof value === "string";
 }
 
+function optionalIsoDateTimeString(value: unknown) {
+  return value === undefined || isIsoDateTimeString(value);
+}
+
 function isIsoDateTimeString(value: unknown) {
   return typeof value === "string" && Number.isNaN(Date.parse(value)) === false;
 }
@@ -95,6 +99,7 @@ async function fetchStaticJsonTraffic(settings: Extract<TrafficSettings, { provi
   const lines = prepareTrafficLines(payload.lines, settings);
 
   return {
+    generatedAt: payload.generatedAt,
     lines: lines.slice(0, settings.maxItems),
     updatedAt: payload.updatedAt,
   };

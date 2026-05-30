@@ -13,6 +13,7 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "generate-news": "node scripts/generate-news-json.mjs",
+    "generate-traffic": "node scripts/generate-traffic-json.mjs",
     "prepare-pet-photos": "node scripts/prepare-pet-photos.mjs"
   },
   "dependencies": {

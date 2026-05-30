@@ -28,5 +28,6 @@ export type NewsItem = {
 };
 
 export type NewsData = {
+  generatedAt?: string;
   items: NewsItem[];
 };

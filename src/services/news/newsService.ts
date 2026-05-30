@@ -9,7 +9,8 @@ function isNewsData(value: unknown): value is NewsData {
   }
 
   const items = (value as { items?: unknown }).items;
-  return Array.isArray(items) && items.every(isNewsItem);
+  const generatedAt = (value as { generatedAt?: unknown }).generatedAt;
+  return optionalIsoDateTimeString(generatedAt) && Array.isArray(items) && items.every(isNewsItem);
 }
 
 function isNewsItem(value: unknown): value is NewsItem {
@@ -47,6 +48,7 @@ async function fetchStaticJsonNews(settings: Extract<NewsSettings, { provider: "
   });
 
   return {
+    generatedAt: payload.generatedAt,
     items: payload.items.slice(0, settings.maxItems),
   };
 }

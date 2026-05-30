@@ -34,6 +34,10 @@ export const trafficSettingsSchema = z.discriminatedUnion("provider", [
 ]);
 
 const trafficDataSchema: z.ZodType<TrafficData> = z.object({
+  generatedAt: z
+    .string()
+    .refine((value) => Number.isNaN(Date.parse(value)) === false)
+    .optional(),
   updatedAt: z.string().refine((value) => Number.isNaN(Date.parse(value)) === false),
   lines: z.array(
     z.object({

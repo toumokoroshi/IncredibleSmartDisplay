@@ -44,6 +44,7 @@ export type TrafficLineData = {
 };
 
 export type TrafficData = {
+  generatedAt?: string;
   lines: TrafficLineData[];
   updatedAt: string;
 };

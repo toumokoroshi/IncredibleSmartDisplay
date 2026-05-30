@@ -204,7 +204,7 @@ export function TrafficWidget({ config, data, error, isEmpty, isHighlighted, sta
         </div>
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
           {status === "stale" ? <StaleBadge /> : null}
-          {data?.updatedAt ? <span>{formatTime(data.updatedAt)}</span> : null}
+          {data?.generatedAt || data?.updatedAt ? <span>{formatTime(data.generatedAt ?? data.updatedAt)}</span> : null}
         </div>
       </div>
 

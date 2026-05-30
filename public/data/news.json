@@ -1,49 +1,50 @@
 {
+  "generatedAt": "2026-05-30T13:48:36.739Z",
   "items": [
     {
-      "id": "hacker-news-jpjpqm",
-      "title": "Corporate America Is Starting to Ration AI as Cost Skyrockets",
-      "summary": "Article URL: https://www.wsj.com/tech/ai/corporate-america-is-starting-to-ration-ai-as-cost-skyrockets-1eb99d7a Comments URL: https://news.ycombinator.com/item?id=48335388 Points:…",
+      "id": "hacker-news-hvhowf",
+      "title": "Adding Linux support back for the BASIC (free) version of Vivado",
+      "summary": "Article URL: https://adaptivesupport.amd.com/s/question/0D5Pd00001aT5IcKAK/adding-linux-support-back-for-the-basic-free-version-of-vivado?language=en_US Comments URL: https://news...",
       "category": "Tech",
       "priority": "top",
+      "source": "Hacker News",
+      "publishedAt": "2026-05-30T12:25:08.000Z"
+    },
+    {
+      "id": "hacker-news-jzjbfl",
+      "title": "Corporate America Is Starting to Ration AI as Cost Skyrockets",
+      "summary": "Article URL: https://www.wsj.com/tech/ai/corporate-america-is-starting-to-ration-ai-as-cost-skyrockets-1eb99d7a Comments URL: https://news.ycombinator.com/item?id=48335388 Points:...",
+      "category": "Tech",
+      "priority": "normal",
       "source": "Hacker News",
       "publishedAt": "2026-05-30T12:17:33.000Z"
     },
     {
-      "id": "hacker-news-16r9smc",
+      "id": "hacker-news-17l8lp9",
       "title": "Proposed new US funding rules: We can cancel any grant at any time",
-      "summary": "Article URL: https://arstechnica.com/science/2026/05/the-office-of-management-and-budget-tries-again-to-cripple-us-science/ Comments URL: https://news.ycombinator.com/item?id=4833…",
+      "summary": "Article URL: https://arstechnica.com/science/2026/05/the-office-of-management-and-budget-tries-again-to-cripple-us-science/ Comments URL: https://news.ycombinator.com/item?id=4833...",
       "category": "Tech",
       "priority": "normal",
       "source": "Hacker News",
       "publishedAt": "2026-05-30T11:41:29.000Z"
     },
     {
-      "id": "hacker-news-19zm48m",
+      "id": "hacker-news-1a9lpxl",
       "title": "Show HN: Helios – what plug-in solar could generate for any address in Britain",
-      "summary": "Plug-in solar panels (no electrician needed) have just become legal in the UK and will go on sale soon. Helios estimates how much electricity a typical installation could generate…",
+      "summary": "Plug-in solar panels (no electrician needed) have just become legal in the UK and will go on sale soon. Helios estimates how much electricity a typical installation could generate...",
       "category": "Tech",
       "priority": "normal",
       "source": "Hacker News",
       "publishedAt": "2026-05-30T11:08:37.000Z"
     },
     {
-      "id": "hacker-news-1v0ziq",
-      "title": "Leo's first encyclical attacks technological messianism",
-      "summary": "Article URL: https://www.economist.com/europe/2026/05/28/leos-first-encyclical-attacks-technological-messianism Comments URL: https://news.ycombinator.com/item?id=48334710 Points:…",
+      "id": "hacker-news-dew5ph",
+      "title": "Openrsync: An implementation of rsync, by the OpenBSD team",
+      "summary": "Article URL: https://github.com/kristapsdz/openrsync Comments URL: https://news.ycombinator.com/item?id=48334854 Points: 26 # Comments: 10",
       "category": "Tech",
       "priority": "normal",
       "source": "Hacker News",
-      "publishedAt": "2026-05-30T10:30:50.000Z"
-    },
-    {
-      "id": "hacker-news-12tp45w",
-      "title": "Pandoc Templates",
-      "summary": "Article URL: https://pandoc-templates.org/ Comments URL: https://news.ycombinator.com/item?id=48334515 Points: 110 # Comments: 7",
-      "category": "Tech",
-      "priority": "normal",
-      "source": "Hacker News",
-      "publishedAt": "2026-05-30T09:56:42.000Z"
+      "publishedAt": "2026-05-30T10:51:48.000Z"
     }
   ]
 }

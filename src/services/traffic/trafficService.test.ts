@@ -163,6 +163,7 @@ describe("traffic service", () => {
 
     expect(new Set(payloadLineIds).size).toBe(payloadLineIds.length);
     expect(payloadLineIds.sort()).toEqual(trafficSettings.lines.map((line) => line.id).sort());
+    expect(Date.parse(payload.generatedAt ?? "")).not.toBeNaN();
     expect(Date.parse(payload.updatedAt)).not.toBeNaN();
 
     for (const line of payload.lines) {

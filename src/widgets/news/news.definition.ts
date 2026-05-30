@@ -25,6 +25,10 @@ export const newsSettingsSchema = z.discriminatedUnion("provider", [
 ]);
 
 const newsDataSchema: z.ZodType<NewsData> = z.object({
+  generatedAt: z
+    .string()
+    .refine((value) => Number.isNaN(Date.parse(value)) === false)
+    .optional(),
   items: z.array(
     z.object({
       id: z.string(),
