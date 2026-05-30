@@ -14,6 +14,42 @@ const openMeteoSettings = {
   units: "metric" as const,
 };
 
+const openMeteoPayload = {
+  current: {
+    apparent_temperature: 20.4,
+    is_day: 1,
+    relative_humidity_2m: 62,
+    temperature_2m: 21.2,
+    weather_code: 2,
+    wind_direction_10m: 180,
+    wind_speed_10m: 12.5,
+  },
+  daily: {
+    apparent_temperature_max: [22.5, 24.1],
+    apparent_temperature_min: [16.4, 17.1],
+    precipitation_probability_max: [30, 40],
+    sunrise: ["2026-05-30T04:27", "2026-05-31T04:26"],
+    sunset: ["2026-05-30T18:49", "2026-05-31T18:50"],
+    temperature_2m_max: [23.2, 25.1],
+    temperature_2m_min: [17.3, 18.2],
+    time: ["2026-05-30", "2026-05-31"],
+    uv_index_max: [6.1, 7.2],
+    weather_code: [2, 61],
+    wind_speed_10m_max: [20.3, 24.5],
+  },
+  hourly: {
+    apparent_temperature: [20.4, 21.1],
+    precipitation: [0, 0.2],
+    precipitation_probability: [20, 30],
+    relative_humidity_2m: [62, 64],
+    temperature_2m: [21.2, 22.3],
+    time: ["2026-05-30T09:00", "2026-05-30T10:00"],
+    weather_code: [2, 3],
+    wind_direction_10m: [180, 190],
+    wind_speed_10m: [12.5, 13.4],
+  },
+};
+
 describe("createWeatherService", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -27,6 +63,31 @@ describe("createWeatherService", () => {
 
   it("keeps mock provider as an explicit successful data source", async () => {
     await expect(createWeatherService().fetch({ ...openMeteoSettings, provider: "mock" })).resolves.toEqual(mockWeatherData);
+  });
+
+  it("maps a valid Open-Meteo response into weather data", async () => {
+    vi.setSystemTime(new Date("2026-05-30T00:10:30.000+09:00"));
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => openMeteoPayload,
+      ok: true,
+      status: 200,
+    } as Response);
+
+    await expect(createWeatherService().fetch(openMeteoSettings)).resolves.toMatchObject({
+      conditionCode: 2,
+      currentTempC: 21,
+      dailyForecast: [
+        expect.objectContaining({ date: "2026-05-30", highTempC: 23.2 }),
+        expect.objectContaining({ date: "2026-05-31", highTempC: 25.1 }),
+      ],
+      hourlyForecast: [
+        expect.objectContaining({ tempC: 21, time: "2026-05-30T09:00" }),
+        expect.objectContaining({ tempC: 22, time: "2026-05-30T10:00" }),
+      ],
+      humidityPercent: 62,
+      locationName: "Tokyo",
+      updatedAt: "2026-05-29T15:10:30.000Z",
+    });
   });
 
   it("rejects Open-Meteo failures instead of silently returning mock data", async () => {
@@ -50,6 +111,20 @@ describe("createWeatherService", () => {
 
     await expect(createWeatherService().fetch(openMeteoSettings)).rejects.toMatchObject({
       code: "API_RATE_LIMIT",
+      retryable: false,
+    });
+  });
+
+  it("rejects malformed Open-Meteo success responses", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => ({ current: { weather_code: 2 } }),
+      ok: true,
+      status: 200,
+    } as Response);
+
+    await expect(createWeatherService().fetch(openMeteoSettings)).rejects.toMatchObject({
+      code: "DATA_INVALID",
+      message: "DATA_INVALID",
       retryable: false,
     });
   });
