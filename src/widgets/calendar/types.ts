@@ -9,6 +9,10 @@ export type MockCalendarSettings = CalendarBaseSettings & {
   provider: "mock";
 };
 
+export type LocalDateCalendarSettings = CalendarBaseSettings & {
+  provider: "localDate";
+};
+
 export type StaticJsonCalendarSettings = CalendarBaseSettings & {
   provider: "staticJson";
   url: string;
@@ -20,7 +24,7 @@ export type WorkerJsonCalendarSettings = CalendarBaseSettings & {
   url: string;
 };
 
-export type CalendarSettings = MockCalendarSettings | StaticJsonCalendarSettings | WorkerJsonCalendarSettings;
+export type CalendarSettings = LocalDateCalendarSettings | MockCalendarSettings | StaticJsonCalendarSettings | WorkerJsonCalendarSettings;
 
 export type CalendarData = {
   items: Array<{

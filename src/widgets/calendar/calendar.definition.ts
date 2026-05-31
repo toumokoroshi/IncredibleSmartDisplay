@@ -13,6 +13,9 @@ const calendarBaseSettingsSchema = z.object({
 
 export const calendarSettingsSchema = z.discriminatedUnion("provider", [
   calendarBaseSettingsSchema.extend({
+    provider: z.literal("localDate"),
+  }),
+  calendarBaseSettingsSchema.extend({
     provider: z.literal("mock"),
   }),
   calendarBaseSettingsSchema.extend({
@@ -52,6 +55,6 @@ export const calendarDefinition = {
   defaultRefreshIntervalSec: 600,
   cacheTtlHours: 24,
   validateData: (data: unknown): data is CalendarData => calendarDataSchema.safeParse(data).success,
-  isEmpty: (data: CalendarData) => data.items.length === 0,
+  isEmpty: () => false,
   detailDisplayMode: "calendar",
 } as const;

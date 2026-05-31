@@ -54,9 +54,7 @@ export const dashboardConfig: DashboardConfig = {
       order: 2,
       area: "main-right",
       settings: {
-        provider: "staticJson",
-        url: "/data/calendar.json",
-        cacheBusterIntervalSec: 600,
+        provider: "localDate",
         daysAhead: 2,
         maxTodayEvents: 4,
         maxTomorrowEvents: 2,

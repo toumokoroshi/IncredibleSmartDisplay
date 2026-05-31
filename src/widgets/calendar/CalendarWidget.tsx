@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 
 import { Card } from "../../components/Card";
-import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
@@ -33,8 +32,16 @@ function formatDayName(date: Date) {
   return new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
 }
 
+function formatLongDayName(date: Date) {
+  return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+}
+
 function formatDayNumber(date: Date) {
   return new Intl.DateTimeFormat("en-US", { day: "numeric" }).format(date);
+}
+
+function formatShortDate(date: Date) {
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date);
 }
 
 function formatMonthTitle(date: Date) {
@@ -88,6 +95,11 @@ function getMonthDays(anchor: Date) {
   return Array.from({ length: 35 }, (_, index) => addDays(firstVisibleDay, index));
 }
 
+function getWeekDays(anchor: Date) {
+  const firstVisibleDay = addDays(startOfDay(anchor), -anchor.getDay());
+  return Array.from({ length: 7 }, (_, index) => addDays(firstVisibleDay, index));
+}
+
 export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<CalendarSettings, CalendarData>) {
   const [viewMode, setViewMode] = useState<CalendarViewMode>("week");
   const now = useMemo(() => new Date(), []);
@@ -105,7 +117,6 @@ export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, st
       </div>
       {status === "loading" ? <LoadingState /> : null}
       {status === "error" ? <ErrorState error={error} /> : null}
-      {isEmpty ? <EmptyState /> : null}
       {data && status !== "error" && status !== "loading" && !isEmpty ? (
         isHighlighted ? (
           <CalendarDetail data={data} now={now} viewMode={viewMode} onViewModeChange={setViewMode} />
@@ -126,7 +137,7 @@ function CalendarQuickLook({ data, now }: { data: CalendarData; now: Date }) {
     .slice(0, 2);
 
   if (!nextEvent) {
-    return <EmptyState message="No more events today" />;
+    return <LocalDateQuickLook now={now} />;
   }
 
   return (
@@ -151,6 +162,30 @@ function CalendarQuickLook({ data, now }: { data: CalendarData; now: Date }) {
   );
 }
 
+function LocalDateQuickLook({ now }: { now: Date }) {
+  const tomorrow = addDays(now, 1);
+  const weekDays = getWeekDays(now);
+
+  return (
+    <div className="mt-4 grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-3">
+      <section className="grid min-h-0 content-center overflow-hidden rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] px-4 py-4">
+        <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Today</p>
+        <p className="mt-2 text-[48px] font-bold leading-none text-blue-600">{formatShortDate(now)}</p>
+        <p className="mt-3 truncate text-[26px] font-semibold leading-tight text-slate-950">{formatLongDayName(now)}</p>
+        <p className="mt-2 truncate text-base font-semibold text-slate-500">{`Tomorrow: ${formatShortDate(tomorrow)} ${formatDayName(tomorrow)}`}</p>
+      </section>
+      <div className="grid grid-cols-7 gap-1.5">
+        {weekDays.map((day) => (
+          <section key={day.toISOString()} className={isSameDay(day, now) ? "min-w-0 rounded-lg bg-blue-100 px-2 py-2 text-center" : "min-w-0 rounded-lg bg-slate-100 px-2 py-2 text-center"}>
+            <p className="truncate text-xs font-bold uppercase tracking-[0.08em] text-slate-500">{formatDayName(day)}</p>
+            <p className="mt-1 text-lg font-bold leading-none text-slate-900">{formatDayNumber(day)}</p>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CalendarDetail({
   data,
   now,
@@ -171,7 +206,7 @@ function CalendarDetail({
     <div className="widget-detail-root calendar-detail-root mt-3 grid min-h-0 flex-1 grid-rows-[52px_minmax(0,1fr)] gap-3">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Today and schedule</p>
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Today and week</p>
           <p className="mt-1 truncate text-base font-semibold text-slate-500">{formatMonthTitle(now)}</p>
         </div>
         <div className="inline-flex min-h-11 rounded-full border border-[color:var(--panel-stroke)] bg-[var(--control-bg)] p-1" aria-label="Calendar view mode">
@@ -228,7 +263,7 @@ function CalendarWeekView({
               </div>
             </div>
           ) : (
-            <EmptyState message="No upcoming events" />
+            <TodayDatePanel now={now} />
           )}
         </section>
         <section className="widget-detail-secondary calendar-detail-summary grid min-h-0 grid-cols-3 gap-2 rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] p-3">
@@ -242,6 +277,26 @@ function CalendarWeekView({
           <WeekDayColumn key={day.toISOString()} date={day} events={getEventsForDay(data.items, day)} today={isSameDay(day, now)} />
         ))}
       </section>
+    </div>
+  );
+}
+
+function TodayDatePanel({ now }: { now: Date }) {
+  const tomorrow = addDays(now, 1);
+
+  return (
+    <div className="grid grid-cols-[132px_minmax(0,1fr)] items-center gap-4">
+      <div className="grid min-h-[118px] place-items-center rounded-lg bg-blue-100 text-center text-blue-700">
+        <div>
+          <strong className="block text-[34px] leading-none">{formatDayNumber(now)}</strong>
+          <span className="mt-2 block text-sm font-bold">{formatDayName(now)}</span>
+        </div>
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Today</p>
+        <h3 className="mt-2 truncate text-[30px] font-bold leading-tight text-slate-950">{formatShortDate(now)}</h3>
+        <p className="mt-2 truncate text-base font-semibold text-slate-500">{`Tomorrow: ${formatShortDate(tomorrow)} ${formatDayName(tomorrow)}`}</p>
+      </div>
     </div>
   );
 }

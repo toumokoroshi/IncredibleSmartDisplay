@@ -26,6 +26,19 @@ describe("createCalendarService", () => {
     expect(result.items.every((item) => typeof item.startsAt === "string")).toBe(true);
   });
 
+  it("returns local date calendar data without fetching personal events", async () => {
+    const result = await createCalendarService().fetch({
+      daysAhead: 7,
+      maxTodayEvents: 0,
+      maxTomorrowEvents: 0,
+      provider: "localDate",
+      showAllDayEvents: false,
+    });
+
+    expect(fetch).not.toHaveBeenCalled();
+    expect(result).toEqual({ items: [] });
+  });
+
   it("fetches and validates static JSON calendar data", async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       json: async () => ({

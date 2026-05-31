@@ -662,3 +662,38 @@ Rules:
 - Worker error messages must be safe for UI and logs. They must not include API keys, tokens, private URLs, webhook URLs, or provider-specific throttling internals.
 - `trafficService` may filter, sort, apply local display overrides, and validate the payload, but must not branch on Worker-internal API provider names.
 - Contract tests should mock `fetch`; they must cover normalized success, malformed payload rejection, and structured Worker error normalization without real external API calls.
+
+## Addendum 25. Calendar phased privacy rollout
+
+Calendar private data must be introduced in phases. Phase 1 does not access any private calendar source.
+
+Phase 1:
+
+- Calendar uses the explicit `localDate` provider.
+- `localDate` performs no network request and returns an empty `CalendarData` event list.
+- Calendar quick-look and detail views must still show useful local date, weekday, tomorrow, and week information when `items` is empty.
+- Empty event data is a normal Calendar state in Phase 1, not an `EmptyState` for the widget.
+- `dashboard.config.ts` must use `provider: "localDate"` for the primary Calendar widget.
+- Google Calendar API, private iCal URLs, OAuth tokens, Cloudflare Worker real calendar fetches, event titles, event locations, and calendar names are out of scope for Phase 1.
+
+Phase 2:
+
+- A Worker mock endpoint may be introduced to validate `workerJson`, CORS, deploy, and structured error behavior.
+- Worker mock payloads must be public-safe and may only contain dummy events or minimized busy blocks.
+- Private Google Calendar access is still out of scope.
+
+Phase 3:
+
+- Public-safe calendar-like data may be introduced through `staticJson` or `workerJson`, for example holidays, manually managed public-safe JSON, or minimized busy blocks.
+- Private event titles, locations, and calendar names remain out of scope.
+
+Phase 4:
+
+- Private Google Calendar access may be considered only after the deployment and access-control model is proven suitable for unattended kiosk operation.
+- Acceptable candidates include stable authenticated hosting with Fully Kiosk validation, home IP allowlisting with DDNS, or another access-control model that does not expose private calendar data through a public Worker URL.
+- Worker secrets must hold OAuth credentials and calendar identifiers. Frontend code and config must not contain private iCal URLs, OAuth secrets, API keys, refresh tokens, or tokenized URLs.
+
+Phase 5:
+
+- Detailed event fields such as title, location, calendar name, multiple calendars, and richer week/month views may be enabled only after the privacy and kiosk-operation risks are explicitly accepted.
+- A minimized display mode that replaces private details with `予定あり` or an equivalent busy label should remain available.

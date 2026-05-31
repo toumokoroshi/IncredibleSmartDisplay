@@ -104,6 +104,10 @@ async function fetchWorkerJsonCalendar(settings: Extract<CalendarSettings, { pro
 export function createCalendarService(): WidgetService<CalendarSettings, CalendarData> {
   return {
     async fetch(settings) {
+      if (settings.provider === "localDate") {
+        return { items: [] };
+      }
+
       if (settings.provider === "staticJson") {
         return fetchStaticJsonCalendar(settings);
       }
