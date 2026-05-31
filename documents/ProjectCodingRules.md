@@ -38,6 +38,8 @@ These rules are project-level instructions for IncredibleSmartDisplay. Keep fixe
 - A failure in one widget must not break the full dashboard.
 - Do not mix mock and real implementations implicitly. Make the provider explicit.
 - Do not let intermediate implementation names become long-term architecture boundaries. If a helper, hook, or service starts as `mock`, `staticJson`, or another narrow provider, keep the reusable transport, validation, cache, command, and layout responsibilities behind provider-neutral interfaces or thin provider wrappers.
+- Depend on stable contracts before concrete providers: `WidgetData`, `WidgetService`, `WidgetDefinition`, settings schemas, query policy, and cache policy. Treat `mock`, `localDate`, `staticJson`, `workerJson`, and vendor-specific integrations as replaceable adapters.
+- A provider migration should usually change service adapters, config, and contract tests. It should not require Dashboard layout or Widget component rewrites unless the user-facing product behavior changes.
 - Keep widget-specific capabilities in `WidgetDefinition` when possible, such as cache TTL, empty-state rules, detail support, or display-mode mapping. Shared hooks and layouts should not grow widget-type switch statements for behavior that belongs to a widget definition.
 - When a temporary MVP path becomes a real extension point, update the implementation and this documentation together so future widgets follow the stable boundary rather than the temporary shape.
 
