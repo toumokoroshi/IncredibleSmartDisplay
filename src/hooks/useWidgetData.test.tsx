@@ -5,7 +5,7 @@ import { z } from "zod";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DashboardProvider } from "../contexts/DashboardContext";
-import type { AnyWidgetDefinition, WidgetConfig, WidgetService } from "../types/widget";
+import type { AnyWidgetDefinition, WidgetCachePolicy, WidgetConfig, WidgetService } from "../types/widget";
 import { WIDGET_CACHE_SCHEMA_VERSION, type WidgetCacheRecord } from "../utils/cache";
 import { useWidgetData } from "./useWidgetData";
 
@@ -24,7 +24,7 @@ const config: WidgetConfig<TestSettings> & HookConfig = {
   type: "news",
 };
 
-function createDefinition(fetch: WidgetService<TestSettings, TestData>["fetch"]): AnyWidgetDefinition {
+function createDefinition(fetch: WidgetService<TestSettings, TestData>["fetch"], cachePolicy: WidgetCachePolicy = "publicPersistent"): AnyWidgetDefinition {
   return {
     component: () => null,
     createService: () => ({ fetch }),
@@ -34,6 +34,7 @@ function createDefinition(fetch: WidgetService<TestSettings, TestData>["fetch"])
     isEmpty: (data: TestData) => data.items.length === 0,
     settingsSchema: z.object({ provider: z.literal("mock") }),
     type: "news",
+    getCachePolicy: () => cachePolicy,
     validateData: (data: unknown): data is TestData =>
       data !== null &&
       typeof data === "object" &&
@@ -150,6 +151,29 @@ describe("useWidgetData", () => {
     await waitFor(() => expect(result.current.status).toBe("stale"));
 
     expect(result.current.data).toEqual({ items: ["cached"] });
+  });
+
+  it("does not read or write localStorage cache for private widgets", async () => {
+    writeCache({});
+    const definition = createDefinition(async () => ({ items: ["fresh-private"] }), "privateNoStore");
+    const { result } = renderUseWidgetData({ definition });
+
+    await waitFor(() => expect(result.current.status).toBe("success"));
+
+    expect(result.current.data).toEqual({ items: ["fresh-private"] });
+    expect(localStorage.getItem("widget-cache:test-widget")).toContain("cached");
+  });
+
+  it("does not use stale private data after a fetch error", async () => {
+    writeCache({});
+    const definition = createDefinition(async () => {
+      throw nonRetryableError("reauthentication required");
+    }, "privateNoStore");
+    const { result } = renderUseWidgetData({ definition });
+
+    await waitFor(() => expect(result.current.status).toBe("error"));
+
+    expect(result.current.data).toBeUndefined();
   });
 
   it("ignores cache data that fails widget data validation", async () => {

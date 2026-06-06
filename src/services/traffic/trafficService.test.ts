@@ -131,10 +131,11 @@ describe("traffic service", () => {
       url: "https://traffic-worker.example.test/traffic",
     });
 
-    expect(fetch).toHaveBeenCalledWith("https://traffic-worker.example.test/traffic", {
-      cache: "no-store",
-      method: "GET",
-    });
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(fetch).toHaveBeenCalledWith("https://traffic-worker.example.test/traffic", expect.any(Object));
+    expect(init.cache).toBe("no-store");
+    expect(init.method).toBe("GET");
+    expect((init.headers as Headers).get("X-Requested-With")).toBe("XMLHttpRequest");
     expect(data).toEqual({
       generatedAt: "2026-05-30T03:30:00.000Z",
       lines: [

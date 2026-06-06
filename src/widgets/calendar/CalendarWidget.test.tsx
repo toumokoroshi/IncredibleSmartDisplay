@@ -50,4 +50,11 @@ describe("CalendarWidget", () => {
     expect(screen.getByText("Tomorrow: Jun 1 Mon")).toBeInTheDocument();
     expect(screen.queryByText("No upcoming events")).not.toBeInTheDocument();
   });
+
+  it("shows reauthentication inside the dashboard for private access errors", () => {
+    render(<CalendarWidget config={calendarConfig} error={{ code: "AUTH_ERROR", message: "Reauthentication required", retryable: false }} isEmpty={false} status="error" />);
+
+    expect(screen.getByText("Reauthentication required")).toBeInTheDocument();
+    expect(screen.getByText("Private data is unavailable until access is restored.")).toBeInTheDocument();
+  });
 });

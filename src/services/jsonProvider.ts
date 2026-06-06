@@ -75,16 +75,20 @@ async function readStructuredError(response: Response) {
   }
 }
 
-function createHttpError(status: number, message: string) {
-  if (status === 401 || status === 403) {
-    return createJsonProviderError("AUTH_ERROR", message, false);
+function createHttpError(status: number, failureMessagePrefix: string) {
+  if (status === 401) {
+    return createJsonProviderError("AUTH_ERROR", "Reauthentication required", false);
+  }
+
+  if (status === 403) {
+    return createJsonProviderError("AUTH_ERROR", "Access denied", false);
   }
 
   if (status === 429) {
-    return createJsonProviderError("API_RATE_LIMIT", message, true);
+    return createJsonProviderError("API_RATE_LIMIT", `${failureMessagePrefix}: ${status}`, true);
   }
 
-  return createJsonProviderError("NETWORK_ERROR", message, true);
+  return createJsonProviderError("NETWORK_ERROR", `${failureMessagePrefix}: ${status}`, true);
 }
 
 function normalizeFetchError(error: unknown) {
@@ -116,7 +120,7 @@ export async function fetchJsonProvider<TData>({
       throw createJsonProviderError(structuredError.code, structuredError.message, structuredError.retryable);
     }
 
-    throw createHttpError(response.status, `${failureMessagePrefix}: ${response.status}`);
+    throw createHttpError(response.status, failureMessagePrefix);
   }
 
   let payload: unknown;
@@ -147,12 +151,18 @@ export async function fetchWorkerJson<TData>({
   init,
   ...options
 }: WorkerJsonFetchOptions<TData>): Promise<TData> {
+  const headers = new Headers(init?.headers);
+  if (!headers.has("X-Requested-With")) {
+    headers.set("X-Requested-With", "XMLHttpRequest");
+  }
+
   return fetchJsonProvider({
     ...options,
     init: {
       cache: "no-store",
       method: "GET",
       ...init,
+      headers,
     },
   });
 }

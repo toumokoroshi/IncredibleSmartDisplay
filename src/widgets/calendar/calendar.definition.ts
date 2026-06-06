@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createCalendarService } from "../../services/calendar/calendarService";
 import { CalendarWidget } from "./CalendarWidget";
-import type { CalendarData } from "./types";
+import type { CalendarData, CalendarSettings } from "./types";
 
 const calendarBaseSettingsSchema = z.object({
   daysAhead: z.number().int().nonnegative(),
@@ -24,6 +24,7 @@ export const calendarSettingsSchema = z.discriminatedUnion("provider", [
     url: z.string().min(1),
   }),
   calendarBaseSettingsSchema.extend({
+    privateData: z.boolean().optional(),
     provider: z.literal("workerJson"),
     url: z.string().min(1),
   }),
@@ -56,5 +57,6 @@ export const calendarDefinition = {
   cacheTtlHours: 24,
   validateData: (data: unknown): data is CalendarData => calendarDataSchema.safeParse(data).success,
   isEmpty: () => false,
+  getCachePolicy: (settings: CalendarSettings) => (settings.provider === "workerJson" && settings.privateData === true ? "privateNoStore" : "publicPersistent"),
   detailDisplayMode: "calendar",
 } as const;

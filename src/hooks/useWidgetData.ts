@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useDashboardContext } from "../contexts/DashboardContext";
-import type { AnyWidgetDefinition, WidgetError, WidgetErrorCode, WidgetStatus } from "../types/widget";
+import type { AnyWidgetDefinition, WidgetCachePolicy, WidgetError, WidgetErrorCode, WidgetStatus } from "../types/widget";
 import { readWidgetCache, writeWidgetCache } from "../utils/cache";
 import { widgetQueryPolicy } from "../utils/queryPolicy";
 import { getWidgetQueryKey } from "../utils/widgetQuery";
@@ -19,12 +19,21 @@ function isWidgetErrorCode(value: unknown): value is WidgetErrorCode {
   return value === "NETWORK_ERROR" || value === "CORS_ERROR" || value === "API_RATE_LIMIT" || value === "AUTH_ERROR" || value === "DATA_EMPTY" || value === "DATA_INVALID" || value === "TIMEOUT" || value === "UNKNOWN_ERROR";
 }
 
+function getCachePolicy(definition: AnyWidgetDefinition | undefined, settings: unknown): WidgetCachePolicy {
+  if (definition?.getCachePolicy === undefined || settings === undefined) {
+    return "publicPersistent";
+  }
+
+  return definition.getCachePolicy(settings);
+}
+
 export function useWidgetData(
   config: { id: string; type: string; refreshIntervalSec: number; settings?: unknown; settingsError?: string; unknownType?: boolean },
   definition?: AnyWidgetDefinition,
 ) {
   const { reportWidgetState } = useDashboardContext();
-  const cacheRecord = readWidgetCache<unknown>(config.id);
+  const cachePolicy = getCachePolicy(definition, config.settings);
+  const cacheRecord = cachePolicy === "publicPersistent" ? readWidgetCache<unknown>(config.id) : null;
   const cache = cacheRecord !== null && definition?.validateData(cacheRecord.data) === true ? cacheRecord : null;
 
   const query = useQuery<any, WidgetError>({
@@ -35,7 +44,9 @@ export function useWidgetData(
       }
       const service = definition.createService();
       const result = await service.fetch(config.settings);
-      writeWidgetCache(config.id, result, definition.cacheTtlHours);
+      if (cachePolicy === "publicPersistent") {
+        writeWidgetCache(config.id, result, definition.cacheTtlHours);
+      }
       return result;
     },
     enabled: definition?.createService !== undefined && config.settingsError === undefined && config.unknownType === undefined,
@@ -43,7 +54,7 @@ export function useWidgetData(
     ...widgetQueryPolicy,
   });
 
-  const data = query.data ?? cache?.data;
+  const data = query.isError && cachePolicy === "privateNoStore" ? undefined : query.data ?? cache?.data;
   const isEmpty = data !== undefined && definition?.isEmpty(data) === true;
 
   const status: WidgetStatus = resolveWidgetStatus({

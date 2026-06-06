@@ -14,6 +14,11 @@ describe("createCalendarService", () => {
   });
 
   it("returns filtered mock calendar data", async () => {
+    vi.useRealTimers();
+    const mockFixtureDate = new Date();
+    vi.useFakeTimers();
+    vi.setSystemTime(mockFixtureDate);
+
     const result = await createCalendarService().fetch({
       daysAhead: 2,
       maxTodayEvents: 4,
@@ -90,10 +95,11 @@ describe("createCalendarService", () => {
       url: "https://example.test/calendar",
     });
 
-    expect(fetch).toHaveBeenCalledWith("https://example.test/calendar", {
-      cache: "no-store",
-      method: "GET",
-    });
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(fetch).toHaveBeenCalledWith("https://example.test/calendar", expect.any(Object));
+    expect(init.cache).toBe("no-store");
+    expect(init.method).toBe("GET");
+    expect((init.headers as Headers).get("X-Requested-With")).toBe("XMLHttpRequest");
     expect(result.items.map((item) => item.id)).toEqual(["today-1", "tomorrow-1"]);
   });
 

@@ -64,10 +64,12 @@ describe("jsonProvider", () => {
       validate: isTestData,
     });
 
-    expect(fetch).toHaveBeenCalledWith("https://worker.example.test/calendar", {
-      cache: "no-store",
-      headers: { "x-provider": "calendar" },
-      method: "GET",
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(init.cache).toBe("no-store");
+    expect(init.method).toBe("GET");
+    expect(Object.fromEntries((init.headers as Headers).entries())).toEqual({
+      "x-provider": "calendar",
+      "x-requested-with": "XMLHttpRequest",
     });
   });
 
@@ -127,6 +129,29 @@ describe("jsonProvider", () => {
       code: "NETWORK_ERROR",
       message: "Failed worker JSON: 503",
       retryable: true,
+    });
+  });
+
+  it("normalizes access failures without exposing login page content", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce({
+      json: async () => {
+        throw new Error("Unexpected token < in JSON");
+      },
+      ok: false,
+      status: 401,
+    } as unknown as Response);
+
+    await expect(
+      fetchWorkerJson({
+        failureMessagePrefix: "Failed worker JSON",
+        invalidMessage: "Invalid worker JSON",
+        url: "https://worker.example.test/calendar",
+        validate: isTestData,
+      }),
+    ).rejects.toMatchObject({
+      code: "AUTH_ERROR",
+      message: "Reauthentication required",
+      retryable: false,
     });
   });
 });

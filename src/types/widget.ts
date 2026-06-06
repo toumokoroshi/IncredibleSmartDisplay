@@ -32,6 +32,8 @@ export type WidgetError = {
   retryable?: boolean;
 };
 
+export type WidgetCachePolicy = "publicPersistent" | "privateNoStore";
+
 export type WidgetConfig<TSettings = unknown> = {
   id: WidgetId;
   type: string;
@@ -75,6 +77,7 @@ export type WidgetDefinition<TSettings = unknown, TData = unknown> = {
   cacheTtlHours: number;
   validateData: (data: unknown) => data is TData;
   isEmpty: (data: TData) => boolean;
+  getCachePolicy?: (settings: TSettings) => WidgetCachePolicy;
   detailDisplayMode?: DisplayMode;
 };
 

@@ -81,6 +81,18 @@ GitHub Pages で配信される frontend はアクセス制限のない公開静
 - RSS や交通 API の provider 固有 payload を Widget へ直接渡す。
 - Secrets を `VITE_` に置いて「環境変数だから安全」と扱う。
 
+将来の認証付き private data 配信候補:
+
+- Cloudflare Pages / Workers / Access を使う場合も、frontend bundle は公開可能なものとして扱う。
+- OAuth credential、refresh token、calendar identifier、位置情報 API key などは Worker / Pages Function の secret boundary に置く。
+- Fully Kiosk Browser の無人運用では、Cloudflare Access の browser session cookie 維持だけに依存しない。
+- 現時点の有力候補は、外部アクセスは Cloudflare Access login、家庭内 kiosk は自宅グローバル IPv4 `/32` allowlist / bypass とする方式。
+- Dynamic home IPv4 は server-side updater で Cloudflare IP list を更新する。Cloudflare API token を frontend、public JSON、`VITE_`、tablet-local config に置かない。
+- IPv6 は端末ごとの source address や prefix 変更で allowlist 運用が広くなりやすいため、kiosk traffic はまず IPv4 に寄せて検証する。
+- Kiosk を IPv4 に寄せる方法は、router の kiosk 専用 IPv4-only SSID を第一候補とし、難しい場合は kiosk 用 separate domain / separate zone の Cloudflare 設定を検討する。
+- Home IP bypass は kiosk tablet 個体の認証ではなく、自宅グローバル IP 配下を trust する accepted risk として扱う。Private response は最小化し、詳細 calendar fields は別 decision にする。
+- 初期 private Calendar は [api-calendar-worker-contract.md](/c:/WORKSPACE/IncredibleSmartDisplay/documents/api-calendar-worker-contract.md) の busy block contract に従う。導入前確認は [kiosk-private-access-checklist.md](/c:/WORKSPACE/IncredibleSmartDisplay/documents/kiosk-private-access-checklist.md) を使う。
+
 ## データ提供元の方針
 
 Provider は明示的に設定する。`mock` と real data を暗黙に混ぜない。

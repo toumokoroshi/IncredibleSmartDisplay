@@ -20,6 +20,7 @@ export type StaticJsonCalendarSettings = CalendarBaseSettings & {
 };
 
 export type WorkerJsonCalendarSettings = CalendarBaseSettings & {
+  privateData?: boolean;
   provider: "workerJson";
   url: string;
 };

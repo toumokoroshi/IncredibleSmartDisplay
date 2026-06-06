@@ -64,7 +64,11 @@ describe("createStockService", () => {
       url: "https://worker.example.test/stocks",
     });
 
-    expect(fetch).toHaveBeenCalledWith("https://worker.example.test/stocks", { cache: "no-store", method: "GET" });
+    const [, init] = vi.mocked(fetch).mock.calls[0] as [string, RequestInit];
+    expect(fetch).toHaveBeenCalledWith("https://worker.example.test/stocks", expect.any(Object));
+    expect(init.cache).toBe("no-store");
+    expect(init.method).toBe("GET");
+    expect((init.headers as Headers).get("X-Requested-With")).toBe("XMLHttpRequest");
     expect(result.items[0]?.symbol).toBe("^GSPC");
   });
 

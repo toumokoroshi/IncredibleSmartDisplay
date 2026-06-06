@@ -50,7 +50,7 @@ Calendar private data は以下の phase で導入判断する。
 Private Google Calendar access は次のいずれかの access-control model が実機で成立した場合のみ検討する。
 
 - Stable authenticated hosting。
-- Home IP allowlisting with DDNS。
+- Home IP allowlisting with DDNS and kiosk-safe IPv4 operation。
 - Cloudflare Access などの認証付き gateway。
 - 家庭内 network からのみ到達できる local service。
 - その他、公開 URL が private calendar data を返さない構成。
@@ -279,7 +279,88 @@ Required coverage focus:
 - DisplayMode change without unintended refetch.
 - Layout probe class contract.
 
-## 13. Documentation maintenance
+## 13. Authenticated kiosk hosting candidate
+
+Private Google Calendar、位置情報、家庭内 API など個人情報を含む data source を扱う場合、Cloudflare Pages / Workers / Access は候補にできる。
+ただし、Fully Kiosk Browser の無人運用では browser cookie の長期維持を前提にしない。Cloudflare Access の browser session だけに依存する構成は、session expiration、IdP 再認証、Android WebView cookie 消失、Google login の WebView 制限で停止する可能性がある。
+
+### Recommended access model
+
+現時点の推奨候補は、外部利用者には Cloudflare Access login を要求し、家庭内 kiosk には自宅回線の source IP 条件で bypass する構成。
+
+```text
+Kiosk tablet on home Wi-Fi
+  -> home router global IPv4
+  -> Cloudflare Access Bypass policy
+  -> Cloudflare Pages / Worker
+  -> normalized WidgetData
+
+External browser
+  -> Cloudflare Access Allow policy
+  -> Cloudflare Pages / Worker
+  -> normalized WidgetData
+```
+
+Rules:
+
+- Access policy の bypass 条件は原則として自宅グローバル IPv4 の `/32` を使う。
+- Dynamic IPv4 の場合は Cloudflare Zero Trust IP list などを API で自動更新する。Cloudflare API token は家庭内 server、router、NAS など server-side boundary に置き、frontend、public JSON、`VITE_`、screenshot、logs には置かない。
+- Bypass は identity check と Access request logging を回避するため、自宅グローバル IP 配下の端末が private dashboard に到達できる risk を accepted risk として扱う。
+- Worker / Pages Function は secret を保持してよいが、response は WidgetData contract に正規化し、error は structured public-safe error にする。
+- Private calendar は最初は busy block または `予定あり` 程度の minimized data を返す。Event title、location、calendar name は別 decision として扱う。
+- `localStorage` cache は private WidgetData に使わない。必要な場合は no-store、短 TTL、memory-only など private 専用 policy を定義する。
+- Cloudflare Access service token を Fully Kiosk、frontend code、public config、tablet-local file に保存する設計は原則採用しない。採用する場合は端末上の長寿命 secret として明示的な risk acceptance と documentation update が必要。
+
+### Initial private calendar contract
+
+Private Calendar の初期表示は busy block のみとする。予定の多い/少ないの集計表示、event title、location、calendarName は扱わない。
+
+Rules:
+
+- Worker response は [api-calendar-worker-contract.md](/c:/WORKSPACE/IncredibleSmartDisplay/documents/api-calendar-worker-contract.md) に従う。
+- `title` は固定表示ラベル `予定あり` のみ。
+- `location` と `calendarName` は response に含めない。
+- Busy block も private data と扱い、`localStorage` cache に保存しない。
+- Private fetch 失敗時は stale private data を表示しない。
+- 通常 `dashboard.config.ts` は `localDate` のままにし、Cloudflare Access と home IP bypass が検証されるまで private provider を本番有効化しない。
+- Kiosk readiness は [kiosk-private-access-checklist.md](/c:/WORKSPACE/IncredibleSmartDisplay/documents/kiosk-private-access-checklist.md) で確認する。
+
+### IPv4 / IPv6 decision
+
+Home IP bypass では IPv4 と IPv6 の違いを明示的に扱う。
+
+- IPv4 は通常、自宅 router の global IPv4 1 個を `/32` として allowlist できる。
+- IPv6 は端末ごとに global IPv6 address を持つことがあり、Cloudflare から見る source IP が端末ごとに異なる。
+- IPv6 address は privacy extension などで変わることがあるため、tablet の単一 `/128` を長期 allowlist する方針は安定しない可能性が高い。
+- IPv6 を許可する場合は自宅 LAN prefix の `/64` または ISP delegated prefix の `/56` などを allowlist する可能性があるが、その範囲内の複数端末を trust することになる。
+- Kiosk 無人運用では、まず kiosk traffic を IPv4 に寄せ、自宅 IPv4 `/32` bypass で検証する。
+
+### Kiosk IPv4 operation options
+
+方針 A: kiosk 用 hostname / Cloudflare-side control。
+
+- Cloudflare 側で完結させたい場合に検討する。
+- Cloudflare IPv6 Compatibility は zone-level setting として扱い、同一 zone 内の特定 hostname だけ IPv4-only にできる前提を置かない。
+- 同一 zone 全体の IPv6 を off にするか、kiosk 用に別 domain / separate zone を用意して IPv6 off とする。
+- Cloudflare Pages custom domain は Pages dashboard で関連付ける。DNS CNAME だけを直接追加する運用を前提にしない。
+- 通常利用 hostname と kiosk hostname を分ける場合でも、private data response の最小化と Worker-side validation は維持する。
+
+方針 B: kiosk 専用 SSID / router-side IPv4-only network。
+
+- Router が SSID ごとの IPv6 disable、VLAN、guest network isolation を提供する場合の第一候補。
+- `Home` SSID は IPv4 + IPv6 の通常運用を維持し、`Kiosk` SSID だけ IPv4-only にできる。
+- 可能なら kiosk SSID は LAN client isolation を有効にし、internet egress のみ許可する。
+- Cloudflare Access から見る source IPv4 は同じ自宅回線配下の端末で共有されるため、この方針だけでは kiosk tablet だけを厳密には識別しない。
+
+Decision guide:
+
+- Router が kiosk 専用 SSID で IPv4-only と client isolation を安定提供できるなら、方針 B を優先する。
+- Router が対応しない、または家庭内 network を複雑にしたくない場合は、方針 A の separate domain / separate zone を検討する。
+- 同一 zone の特定 subdomain だけ IPv4-only にできる前提で設計しない。
+- どちらの方針でも、最終的な security boundary は `home global IPv4 is trusted` であり、kiosk tablet 個体の厳密認証ではない。
+- 実装前に tablet 実機で `test-ipv6.com`、target hostname の DNS `A` / `AAAA`、Cloudflare Access logs の source IP を確認する。
+
+## 14. Documentation maintenance
 
 When implementation decisions change, update documents in the same change.
 
