@@ -29,6 +29,40 @@
   --item-bg: #f8fafc;
   --item-stroke: rgba(15, 23, 42, 0.07);
   --item-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+
+  /* Widget identity colors: which card this is. Kept out of the red/amber/emerald
+     family so a widget's own color never reads as a status signal (see Traffic,
+     which uses that family for line status badges). */
+  --identity-weather-border: #5b8def;
+  --identity-weather-icon: #1a73e8;
+  --identity-weather-icon-bg: #e8f0fe;
+  --identity-weather-icon-border: #d2e3fc;
+
+  --identity-calendar-border: #7c6fe0;
+  --identity-calendar-icon: #5b4fc4;
+  --identity-calendar-icon-bg: #eeecfd;
+  --identity-calendar-icon-border: #ddd8fb;
+
+  --identity-news-border: #2f9e8f;
+  --identity-news-icon: #12766a;
+  --identity-news-icon-bg: #e1f5f2;
+  --identity-news-icon-border: #c9ebe6;
+
+  --identity-traffic-border: #64748b;
+  --identity-traffic-icon: #475569;
+  --identity-traffic-icon-bg: #eef2f7;
+  --identity-traffic-icon-border: #e2e8f0;
+
+  --identity-stocks-border: #b45f7a;
+  --identity-stocks-icon: #9d3f5c;
+  --identity-stocks-icon-bg: #fbe9ee;
+  --identity-stocks-icon-border: #f3d3dd;
+
+  --identity-petphoto-border: #ec7fa3;
+  --identity-petphoto-icon: #be185d;
+  --identity-petphoto-icon-bg: #fce7f3;
+  --identity-petphoto-icon-border: #f9d0e3;
+
   color: #0f172a;
   background: var(--app-bg);
   font-family: "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans", "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
@@ -307,51 +341,63 @@ body {
 
 .widget-weather .widget-card {
   padding: 2rem;
-  border-top: 5px solid #5b8def;
+  border-top: 5px solid var(--identity-weather-border);
 }
 
 .widget-calendar .widget-card {
-  border-top: 5px solid #5bb974;
+  border-top: 5px solid var(--identity-calendar-border);
 }
 
 .widget-news .widget-card {
-  border-top: 5px solid #e6a700;
+  border-top: 5px solid var(--identity-news-border);
 }
 
 .widget-stocks .widget-card {
-  border-top: 5px solid rgba(66, 133, 244, 0.28);
+  border-top: 5px solid var(--identity-stocks-border);
 }
 
 .widget-traffic .widget-card {
-  border-top: 5px solid #e57368;
+  border-top: 5px solid var(--identity-traffic-border);
+}
+
+.widget-petPhoto .widget-card {
+  border-top: 5px solid var(--identity-petphoto-border);
 }
 
 .widget-weather .widget-heading-icon {
-  color: #1a73e8;
-  background: #e8f0fe;
-  border-color: #d2e3fc;
+  color: var(--identity-weather-icon);
+  background: var(--identity-weather-icon-bg);
+  border-color: var(--identity-weather-icon-border);
 }
 
 .widget-calendar .widget-heading-icon {
-  color: #188038;
-  background: #e6f4ea;
-  border-color: #ceead6;
+  color: var(--identity-calendar-icon);
+  background: var(--identity-calendar-icon-bg);
+  border-color: var(--identity-calendar-icon-border);
 }
 
 .widget-news .widget-heading-icon {
-  color: #b06000;
-  background: #fef7e0;
-  border-color: #feefc3;
+  color: var(--identity-news-icon);
+  background: var(--identity-news-icon-bg);
+  border-color: var(--identity-news-icon-border);
 }
 
 .widget-stocks .widget-heading-icon {
-  background: #4285f4;
+  color: var(--identity-stocks-icon);
+  background: var(--identity-stocks-icon-bg);
+  border-color: var(--identity-stocks-icon-border);
 }
 
 .widget-traffic .widget-heading-icon {
-  color: #c5221f;
-  background: #fce8e6;
-  border-color: #fad2cf;
+  color: var(--identity-traffic-icon);
+  background: var(--identity-traffic-icon-bg);
+  border-color: var(--identity-traffic-icon-border);
+}
+
+.widget-petPhoto .widget-heading-icon {
+  color: var(--identity-petphoto-icon);
+  background: var(--identity-petphoto-icon-bg);
+  border-color: var(--identity-petphoto-icon-border);
 }
 
 .widget-traffic .traffic-card-compact {
