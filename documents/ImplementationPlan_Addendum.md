@@ -278,10 +278,22 @@ Pass criteria:
 
 Use `collectLayoutProbeResults` from `src/utils/layoutProbe.ts` when browser automation is available.
 
-## 11. Weather layout changes
+## 11. Widget layout comparison previews
 
 Weather widget layout changes require a comparison/debug HTML preview in `documents/` before applying the app change.
 The preview should show the target 3:2 viewport and the expected quick-look or detail layout variants.
+This before/after HTML preview practice extends to other widgets' quick-look/detail layout changes (not only Weather) whenever a change reshapes spacing or adds/removes content blocks, since it lets the user sign off on the visual direction before code changes land.
+
+### Measure real dimensions before mocking flexible-space layouts
+
+A static comparison HTML can be wrong even after the user approves it, if its assumed dimensions don't match the live app. This happened once: a Calendar quick-look mock assumed an 780px card height and used a 5-row month grid; the real card was only 456px tall (358px flex body), leaving about 115px for that grid row, which made the real implementation's grid cells collapse to ~10px and overlap illegibly. The mock still "looked right" in isolation because it was never checked against a measured value.
+
+Rules:
+
+- Before building a comparison HTML for a layout change, distinguish whether the change is (a) restyling content inside an already fixed-size box (e.g. swapping a color, capping an item count) or (b) adding/resizing content inside a `flex: 1` / CSS grid `fr` region where the available space depends on sibling elements.
+- For (a), an approximate mock is fine; the exact pixel dimensions rarely change the outcome.
+- For (b), measure the real widget card and its existing sibling elements in the running dev server first (e.g. `getBoundingClientRect()` via Playwright at the target kiosk viewport `1524 x 1016`), and hardcode those measured values into the mock's CSS instead of guessing a round number.
+- After the user approves a comparison HTML for a case (b) change and the app change is implemented, always re-screenshot the real app at the target viewport to confirm the approved design actually fits, and adjust the implementation (not just the mock) if it doesn't.
 
 ## 12. Test strategy
 
