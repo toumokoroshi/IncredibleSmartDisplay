@@ -7,3 +7,5 @@ temp-scaffold/
 private-pet-photos/
 .claude/settings.local.json
 .mcp.json
+.playwright-mcp/*.yml
+.playwright-mcp/*.log
