@@ -45,16 +45,25 @@ function formatTime(value: string) {
   }).format(new Date(value));
 }
 
+const NEWS_QUICKLOOK_ITEM_COUNT = 2;
+
 function NewsQuickLook({ data, maxItems }: { data: NewsData; maxItems: number }) {
+  const visibleCount = Math.min(maxItems, NEWS_QUICKLOOK_ITEM_COUNT);
+  const items = data.items.slice(0, visibleCount);
+  const remaining = Math.min(data.items.length, maxItems) - items.length;
+
   return (
-    <ul className="mt-4 space-y-3">
-      {data.items.slice(0, maxItems).map((item) => (
-        <li key={item.id} className="widget-list-item rounded-lg border border-white/10 bg-white/5 px-4 py-3">
-          <p className="line-clamp-2 text-[25px] font-semibold leading-tight text-white">{item.title}</p>
-          <NewsMetaLine publishedAt={item.publishedAt} source={item.source} />
-        </li>
-      ))}
-    </ul>
+    <div className="mt-4 grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-2">
+      <ul className="grid min-h-0 content-start gap-3 overflow-hidden">
+        {items.map((item) => (
+          <li key={item.id} className="widget-list-item rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+            <p className="line-clamp-2 text-[25px] font-semibold leading-tight text-white">{item.title}</p>
+            <NewsMetaLine publishedAt={item.publishedAt} source={item.source} />
+          </li>
+        ))}
+      </ul>
+      {remaining > 0 ? <p className="text-center text-sm font-bold text-blue-600">{`タップして残り${remaining}件を見る →`}</p> : null}
+    </div>
   );
 }
 
