@@ -5,3 +5,5 @@ coverage/
 vite-dev*.log
 temp-scaffold/
 private-pet-photos/
+.claude/settings.local.json
+.mcp.json
