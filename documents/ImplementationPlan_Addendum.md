@@ -186,6 +186,16 @@ Rules:
 - `workerJson` へ移行する場合も success payload は `TrafficData`。
 - Frontend は provider-specific status code や provider payload を受け取らない。
 
+### Manual data staleness detection
+
+`data-sources/traffic.manual.json` は人手更新前提のため、構文的に正しいまま内容だけ古くなっても generator と deploy は正常終了してしまう。「壊れていない」と「新しい」を区別して検知する。
+
+Rules:
+
+- `scripts/generate-traffic-json.mjs` は全 `lines[].updatedAt` のうち最も古いものを閾値(目安 30 日)と比較する。閾値を超えた場合、deploy は失敗させず warning のみ出す。deploy を失敗させると前回成功 artifact がさらに古いまま残り続け逆効果になるため。
+- Per-line `updatedAt` だけでは「人間が実際に中身を見直したか」までは保証できない。ファイル全体に対する `confirmedAt` のような人手更新フィールドを設け、これが閾値を超えた場合も同様に warning を出す運用を検討する。
+- Warning は当面 GitHub Actions のログ出力に留め、Header UI への反映は過剰反応を避けるため見送る。
+
 ## 7. Artifact-only refresh
 
 News と Traffic の scheduled refresh は、当面 Pages artifact 生成時に JSON を生成する方式を優先する。
@@ -198,6 +208,16 @@ Rules:
 - Each run は fresh checkout から始まるため、News と Traffic は同じ run で毎回生成する。
 - Generator 失敗または contract test 失敗時は deploy を失敗させる。
 - 前回成功した Pages artifact が表示継続することを運用上の fallback とする。
+
+### Failure visibility
+
+前回成功 artifact の表示継続は、失敗が起きても kiosk 画面上は何も変わらないことを意味する。そのため人間が失敗に気づく手段を別途明記する。
+
+Rules:
+
+- 新しい通知インフラ(Slack/Discord webhook など)は作らない。GitHub の標準機能である workflow failure の email 通知に依存する。運用側で repository の notification 設定が有効になっていることを前提とする。
+- 通知が来た際の一次対応は、generator のログを確認し、外部 feed 側の変更や manual data の記法ミスを疑うことから始める。
+- 連続失敗が続く場合、原因が外部要因(feed 仕様変更など)か内部要因(manual json の記法ミス)かをまず切り分ける。
 
 ## 8. Cache and personal data
 
@@ -335,6 +355,34 @@ Home IP bypass では IPv4 と IPv6 の違いを明示的に扱う。
 - IPv6 を許可する場合は自宅 LAN prefix の `/64` または ISP delegated prefix の `/56` などを allowlist する可能性があるが、その範囲内の複数端末を trust することになる。
 - Kiosk 無人運用では、まず kiosk traffic を IPv4 に寄せ、自宅 IPv4 `/32` bypass で検証する。
 
+### CGNAT precondition check
+
+自宅 IPv4 `/32` allowlist は、その IPv4 が自宅回線専有であることが前提。CGNAT (Carrier-Grade NAT) 配下では同じ IPv4 を他契約者と共有するため、`/32` allowlist が意図しない他者を通す、または安定した単一 IPv4 自体を得られない可能性がある。Phase 4 (private calendar 有効化) に進む前に、必ず以下を確認する。
+
+- Router 管理画面で WAN 側 IPv4 を確認し、`100.64.0.0/10` (RFC 6598 の CGNAT 予約レンジ) に該当しないか確認する。該当する場合は CGNAT 配下と判断する。
+- 契約 ISP のプラン種別を確認する。IPoE 系 (v6プラス、transix、OCN バーチャルコネクトなど DS-Lite/MAP-E 方式) は IPv4 部分が CGNAT 共有である前提で扱う。PPPoE (IPv4 単独契約) は専有 IPv4 の可能性が高いが、契約内容で個別確認する。
+- Cloudflare Access のアクセスログに記録される source IP と、Router 管理画面上の WAN IP が一致するか照合する。
+
+Decision:
+
+- CGNAT でないと確認できた場合のみ、`/32` allowlist による home IP bypass (Phase 4) に進んでよい。
+- CGNAT 配下と判明した場合、IP allowlist にはよらず、kiosk tablet と home 側との間に WireGuard または Tailscale などのトンネルを構成し、端末単位の trust に切り替える方式を優先候補とする。IP ではなく端末証明書/鍵ベースの trust になるため CGNAT の影響を受けない。
+- ISP の固定 IPv4 オプション契約への切り替えも代替候補として残すが、追加費用が発生するため優先度は下げる。
+
+### Home IP transition window
+
+自宅回線の WAN IPv4 は DHCP 更新やルーター再起動で変わることがある。IP 変更から server-side updater が Cloudflare allowlist を更新し終えるまでの間、次の 2 つの window が生じる。
+
+- 新 IP がまだ allowlist に追加されていない window: kiosk が一時的に private data にアクセスできなくなる。可用性の問題に留まり、セキュリティ上のリスクではない。既存方針(private fetch 失敗時は stale private data を表示しない)と矛盾しないため、fail closed で構わない。
+- 旧 IP がまだ allowlist に残っている window: 自宅が旧 IP を手放した後、その IP が別契約者に再割当てされた場合、その別契約者が一時的に private dashboard へ到達できてしまう可能性がある。これは可用性ではなくセキュリティ上の露出であり、優先して縮小すべき window。
+
+Rules:
+
+- Updater は新 IP の追加と旧 IP の削除を同一実行内で行い、「削除」を「追加」より低優先度にしない。
+- Updater の実行間隔(検知から allowlist 反映までの許容時間)を明示的な数値で運用する。目安は 15 分以内。
+- Updater が連続して失敗した場合に気づける手段(ログ確認や通知)を用意する。無人で数日気づかれない状態を避ける。
+- この window は「home IP bypass 自体を accepted risk として扱う」という既存方針の一部として扱うが、境界時間を明示しないまま放置しない。
+
 ### Kiosk IPv4 operation options
 
 方針 A: kiosk 用 hostname / Cloudflare-side control。
@@ -360,7 +408,25 @@ Decision guide:
 - どちらの方針でも、最終的な security boundary は `home global IPv4 is trusted` であり、kiosk tablet 個体の厳密認証ではない。
 - 実装前に tablet 実機で `test-ipv6.com`、target hostname の DNS `A` / `AAAA`、Cloudflare Access logs の source IP を確認する。
 
-## 14. Documentation maintenance
+## 14. Kiosk app-shell refresh
+
+Fully Kiosk Browser は同一タブを常時表示し続けるため、GitHub Pages へ新しい build を deploy しても、起動中の SPA はメモリ上の旧 JS/HTML を使い続け、`dashboard.config.ts` や schemaVersion の変更が反映されない。
+
+Rules:
+
+- App 側にバージョン検知や自動更新の仕組み(version.json polling など)は実装しない。deploy 頻度が低い個人運用では過剰な複雑化になるため。
+- 代わりに Fully Kiosk Browser のネイティブ機能 (Scheduled reload / restart) で、1 日 1 回のフルリロードを運用設定する。
+- リロード時刻は視聴の妨げにならない深夜帯とし、日付跨ぎの再取得ロジック (23:59-00:00 の Calendar / Weather 再取得) を避けた時間、目安として `04:00 JST` を推奨する。
+- 将来 deploy 頻度が上がり日次リロードでは更新反映が遅すぎると判断した場合のみ、軽量な version.json polling によるアプリ内リロード検知を追加検討する。それまでは実装しない。
+
+Reload そのものがキャッシュ済みの古い資産を再表示するだけでは意味がないため、ブラウザ/CDN キャッシュ層も合わせて扱う。
+
+- Fully Kiosk Browser の Scheduled reload は、通常のページ内 reload ではなく、ブラウザキャッシュを無視する hard reload (cache-clear を伴う reload、または reload 前に app cache / WebView cache をクリアする設定) を使う。
+- GitHub Pages の配信は `index.html` を短い cache lifetime で返す前提を置かず、hard reload によって cache 有無に関わらず最新の `index.html` を確実に取得できる状態を維持する。
+- Vite の hashed asset (`*.[hash].js` など) は長期 cache されてよい。`index.html` が新しい hash を指す限り、hard reload で自動的に新しい asset に切り替わる。
+- Hard reload を運用しても、GitHub Pages 側 CDN のエッジキャッシュ TTL が残っている間は最新 build を取得できない可能性がある。deploy 直後すぐには反映されないことを許容し、日次リロードのタイミングで十分反映されていることを前提にする。
+
+## 15. Documentation maintenance
 
 When implementation decisions change, update documents in the same change.
 
