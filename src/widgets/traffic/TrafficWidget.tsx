@@ -64,9 +64,9 @@ function getSummary(lines: TrafficLineData[]) {
   const hasSuspended = counts.suspended > 0;
   const hasUnknown = counts.unknown > 0 && counts.delayed === 0 && counts.suspended === 0;
   return {
-    primaryLabel: `${hasSuspended ? "見合わせ" : hasUnknown ? "確認" : "遅延"} ${affected}/${lines.length}`,
+    primaryLabel: `${hasSuspended ? "見合わせ" : hasUnknown ? "未確認" : "遅延"} ${affected}/${lines.length}`,
     secondaryLabel: `通常 ${normal}/${lines.length}`,
-    className: hasSuspended ? "text-red-700" : hasUnknown ? "text-amber-700" : "text-amber-700",
+    className: hasSuspended ? "text-red-700" : hasUnknown ? "text-slate-600" : "text-amber-700",
   };
 }
 
@@ -156,11 +156,19 @@ function getSeverityClasses(severity: ReturnType<typeof getTrafficSeverity>) {
     };
   }
 
-  if (severity === "delayed" || severity === "unknown") {
+  if (severity === "delayed") {
     return {
       action: "border-amber-600/20 text-slate-950 before:w-[9px] before:bg-amber-600",
       headline: "text-amber-700",
       metric: "text-amber-700",
+    };
+  }
+
+  if (severity === "unknown") {
+    return {
+      action: "border-slate-400/30 text-slate-950 before:w-[9px] before:bg-slate-400",
+      headline: "text-slate-600",
+      metric: "text-slate-600",
     };
   }
 
@@ -276,7 +284,7 @@ function TrafficDetail({
         </div>
         <div className="grid min-w-0 grid-cols-4 gap-2.5">
           <TrafficMetric label="影響" value={`${counts.affected}/${counts.total}`} valueClass={counts.affected > 0 ? severityClasses.metric : "text-emerald-700"} />
-          <TrafficMetric label={severity === "unknown" ? "未確認" : "見合わせ"} value={`${severity === "unknown" ? counts.unknown : counts.suspended}/${counts.total}`} valueClass={counts.suspended > 0 ? "text-red-700" : severity === "unknown" ? "text-amber-700" : "text-slate-950"} />
+          <TrafficMetric label={severity === "unknown" ? "未確認" : "見合わせ"} value={`${severity === "unknown" ? counts.unknown : counts.suspended}/${counts.total}`} valueClass={counts.suspended > 0 ? "text-red-700" : severity === "unknown" ? "text-slate-600" : "text-slate-950"} />
           <TrafficMetric label="通常" value={`${counts.normal}/${counts.total}`} valueClass="text-emerald-700" />
           <TrafficMetric label="更新" value={formatTime(updatedAt)} />
         </div>
