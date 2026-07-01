@@ -162,16 +162,23 @@ function CalendarQuickLook({ data, now }: { data: CalendarData; now: Date }) {
   );
 }
 
+function getDaysInMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+}
+
 function LocalDateQuickLook({ now }: { now: Date }) {
   const tomorrow = addDays(now, 1);
   const weekDays = getWeekDays(now);
+  const daysInMonth = getDaysInMonth(now);
+  const dayOfMonth = now.getDate();
+  const daysLeft = daysInMonth - dayOfMonth;
 
   return (
-    <div className="mt-4 grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-3">
-      <section className="grid min-h-0 content-center overflow-hidden rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] px-4 py-4">
+    <div className="mt-4 grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
+      <section className="grid content-start overflow-hidden rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] px-4 py-4">
         <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Today</p>
-        <p className="mt-2 text-[48px] font-bold leading-none text-blue-600">{formatShortDate(now)}</p>
-        <p className="mt-3 truncate text-[26px] font-semibold leading-tight text-slate-950">{formatLongDayName(now)}</p>
+        <p className="mt-2 text-[36px] font-bold leading-none text-blue-600">{formatShortDate(now)}</p>
+        <p className="mt-2 truncate text-[22px] font-semibold leading-tight text-slate-950">{formatLongDayName(now)}</p>
         <p className="mt-2 truncate text-base font-semibold text-slate-500">{`Tomorrow: ${formatShortDate(tomorrow)} ${formatDayName(tomorrow)}`}</p>
       </section>
       <div className="grid grid-cols-7 gap-1.5">
@@ -182,6 +189,16 @@ function LocalDateQuickLook({ now }: { now: Date }) {
           </section>
         ))}
       </div>
+      <section className="calendar-quicklook-month grid min-h-0 content-center gap-2 overflow-hidden rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] p-3">
+        <div className="flex items-center justify-between gap-3">
+          <p className="truncate text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{formatMonthTitle(now)}</p>
+          <p className="shrink-0 text-xs font-bold text-slate-500">{`Day ${dayOfMonth} / ${daysInMonth}`}</p>
+        </div>
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+          <div className="h-full rounded-full bg-blue-600" style={{ width: `${(dayOfMonth / daysInMonth) * 100}%` }} />
+        </div>
+        <p className="truncate text-sm font-semibold text-slate-500">{daysLeft > 0 ? `${daysLeft} days left this month` : "Last day of the month"}</p>
+      </section>
     </div>
   );
 }

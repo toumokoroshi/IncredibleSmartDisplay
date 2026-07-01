@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>Calendar quick-look: 余白過多 比較 (Before / After)</title>
+<style>
+  :root {
+    --app-bg: #f6f8fb;
+    --panel-bg: #ffffff;
+    --panel-stroke: rgba(15, 23, 42, 0.08);
+    --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+    --item-bg: #f8fafc;
+    --item-stroke: rgba(15, 23, 42, 0.07);
+    --radius-card: 1.7rem;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px;
+    background: var(--app-bg);
+    color: #0f172a;
+    font-family: "Google Sans", "Noto Sans JP", "Roboto", sans-serif;
+  }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  p.lead { margin: 0 0 28px; color: #475569; font-size: 14px; max-width: 900px; }
+  .row {
+    display: grid;
+    grid-template-columns: 358px 358px;
+    gap: 28px;
+  }
+  .col-label {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .col-label.before { color: #b91c1c; }
+  .col-label.after { color: #15803d; }
+  .card {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-stroke);
+    border-radius: var(--radius-card);
+    box-shadow: var(--panel-shadow);
+    padding: 20px;
+    height: 780px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .heading { display: flex; align-items: center; gap: 10px; }
+  .heading-icon {
+    width: 30px; height: 30px; border-radius: 999px;
+    background: #4285f4; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; margin: 0; }
+
+  /* BEFORE: today panel stretches to fill the flexible row and centers content, leaving dead space */
+  .before-body {
+    margin-top: 16px;
+    flex: 1;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 12px;
+    min-height: 0;
+  }
+  .today-panel {
+    border: 1px solid var(--item-stroke);
+    background: var(--item-bg);
+    border-radius: 12px;
+    padding: 16px;
+    display: grid;
+    align-content: center;
+  }
+  .today-label { font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #64748b; margin: 0; }
+  .today-date { font-size: 40px; font-weight: 700; color: #2563eb; margin: 8px 0 0; line-height: 1; }
+  .today-day { font-size: 22px; font-weight: 600; color: #0f172a; margin: 10px 0 0; }
+  .today-tomorrow { font-size: 14px; font-weight: 600; color: #64748b; margin: 8px 0 0; }
+
+  .week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .week-cell { border-radius: 10px; background: #f1f5f9; text-align: center; padding: 8px 4px; }
+  .week-cell.today { background: #dbeafe; }
+  .week-cell .dow { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+  .week-cell .num { font-size: 16px; font-weight: 700; color: #0f172a; margin-top: 2px; }
+
+  .empty-note {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 300px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #dc2626;
+    border: 1px dashed #fca5a5;
+    border-radius: 8px;
+    padding: 8px;
+    background: #fef2f2;
+  }
+
+  /* AFTER: compact today panel + week strip + month glance fills remaining space */
+  .after-body {
+    margin-top: 16px;
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 12px;
+    min-height: 0;
+  }
+  .today-panel.compact { align-content: start; padding: 14px 16px; }
+  .today-panel.compact .today-date { font-size: 32px; }
+  .month-glance {
+    border: 1px solid var(--item-stroke);
+    background: var(--item-bg);
+    border-radius: 12px;
+    padding: 12px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 8px;
+    min-height: 0;
+  }
+  .month-glance-title { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #64748b; margin: 0; }
+  .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: 1fr; gap: 4px; min-height: 0; }
+  .month-cell {
+    border-radius: 6px;
+    background: #ffffff;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+  }
+  .month-cell.today { background: #2563eb; color: #fff; font-weight: 800; }
+  .month-cell.muted { color: #cbd5e1; }
+
+  .note {
+    margin-top: 18px;
+    max-width: 900px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #78350f;
+  }
+</style>
+</head>
+<body>
+  <h1>Calendar quick-look: 余白過多の比較</h1>
+  <p class="lead">
+    Phase 1 (<code>localDate</code>) では予定が無いため <code>LocalDateQuickLook</code> は Today パネルと週 strip のみで、
+    Today パネルが <code>grid-rows-[minmax(0,1fr)_auto]</code> の可変行いっぱいに伸びて中央寄せされ、上下に大きな空白ができる。
+    改善案では Today パネルを上詰めにし、残りスペースに「今月の一覧(dot grid)」を追加して、private data なしでも
+    月の情報を一目で伝える(ImplementationPlan.md の「月の情報も表示し、役に立つ画面にする」方針に合わせる)。
+  </p>
+
+  <div class="row">
+    <div>
+      <div class="col-label before">Before (現行)</div>
+      <div class="card">
+        <div class="heading">
+          <span class="heading-icon">📅</span>
+          <p class="title">Calendar</p>
+        </div>
+        <div class="before-body">
+          <div class="today-panel">
+            <p class="today-label">Today</p>
+            <p class="today-date">Jul 1</p>
+            <p class="today-day">Wednesday</p>
+            <p class="today-tomorrow">Tomorrow: Jul 2 Thu</p>
+          </div>
+          <div class="week-strip">
+            <div class="week-cell"><div class="dow">Sun</div><div class="num">28</div></div>
+            <div class="week-cell"><div class="dow">Mon</div><div class="num">29</div></div>
+            <div class="week-cell"><div class="dow">Tue</div><div class="num">30</div></div>
+            <div class="week-cell today"><div class="dow">Wed</div><div class="num">1</div></div>
+            <div class="week-cell"><div class="dow">Thu</div><div class="num">2</div></div>
+            <div class="week-cell"><div class="dow">Fri</div><div class="num">3</div></div>
+            <div class="week-cell"><div class="dow">Sat</div><div class="num">4</div></div>
+          </div>
+        </div>
+        <div class="empty-note">この領域が空白のまま(月の情報が無い)</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="col-label after">After (改善案)</div>
+      <div class="card">
+        <div class="heading">
+          <span class="heading-icon">📅</span>
+          <p class="title">Calendar</p>
+        </div>
+        <div class="after-body">
+          <div class="today-panel compact">
+            <p class="today-label">Today</p>
+            <p class="today-date">Jul 1</p>
+            <p class="today-day">Wednesday</p>
+            <p class="today-tomorrow">Tomorrow: Jul 2 Thu</p>
+          </div>
+          <div class="week-strip">
+            <div class="week-cell"><div class="dow">Sun</div><div class="num">28</div></div>
+            <div class="week-cell"><div class="dow">Mon</div><div class="num">29</div></div>
+            <div class="week-cell"><div class="dow">Tue</div><div class="num">30</div></div>
+            <div class="week-cell today"><div class="dow">Wed</div><div class="num">1</div></div>
+            <div class="week-cell"><div class="dow">Thu</div><div class="num">2</div></div>
+            <div class="week-cell"><div class="dow">Fri</div><div class="num">3</div></div>
+            <div class="week-cell"><div class="dow">Sat</div><div class="num">4</div></div>
+          </div>
+          <div class="month-glance">
+            <p class="month-glance-title">July at a glance</p>
+            <div class="month-grid" id="month-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>変更点案:</strong> <code>LocalDateQuickLook</code> の grid を <code>grid-rows-[auto_auto_minmax(0,1fr)]</code> に変更し、
+    Today パネルを <code>content-center</code> から <code>content-start</code> へ、週 strip の下に月のミニグリッド(今日をハイライト)を追加する。
+    private data 無しで「月の情報」も一目で示せるようになり、ImplementationPlan.md の Calendar 方針(今日・曜日・明日・週・月を役立つ画面にする)により近づく。
+  </div>
+
+  <script>
+    const grid = document.getElementById("month-grid");
+    const year = 2026, month = 6; // July (0-indexed)
+    const first = new Date(year, month, 1);
+    const mondayOffset = (first.getDay() + 6) % 7;
+    const start = new Date(year, month, 1 - mondayOffset);
+    for (let i = 0; i < 35; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const cell = document.createElement("div");
+      const isToday = d.getDate() === 1 && d.getMonth() === month;
+      const muted = d.getMonth() !== month;
+      cell.className = "month-cell" + (isToday ? " today" : "") + (muted ? " muted" : "");
+      cell.textContent = d.getDate();
+      grid.appendChild(cell);
+    }
+  </script>
+</body>
+</html>
