@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>言語表記統一 方針とプレビュー (Before / After)</title>
+<style>
+  :root {
+    --app-bg: #f6f8fb;
+    --panel-bg: #ffffff;
+    --panel-stroke: rgba(15, 23, 42, 0.08);
+    --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+    --radius-card: 1.7rem;
+    --item-bg: #f8fafc;
+    --item-stroke: rgba(15, 23, 42, 0.07);
+  }
+  * { box-sizing: border-box; min-width: 0; }
+  body {
+    margin: 0;
+    padding: 32px;
+    background: var(--app-bg);
+    color: #0f172a;
+    font-family: "Google Sans", "Noto Sans JP", "Roboto", sans-serif;
+    max-width: 1536px;
+  }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  h2 { font-size: 17px; margin: 40px 0 4px; }
+  h3 { font-size: 14px; margin: 22px 0 8px; color: #334155; }
+  p.lead { margin: 0 0 20px; color: #475569; font-size: 13px; max-width: 1000px; line-height: 1.7; }
+  .policy {
+    background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px;
+    padding: 16px 20px; font-size: 13px; color: #3730a3; line-height: 1.8; max-width: 1000px;
+  }
+  .policy b { color: #1e1b4b; }
+  table { border-collapse: collapse; width: 100%; margin-bottom: 8px; font-size: 12.5px; }
+  th, td { border: 1px solid #e2e8f0; padding: 7px 10px; text-align: left; vertical-align: top; }
+  th { background: #f1f5f9; font-weight: 700; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+  td.before { color: #b91c1c; }
+  td.after { color: #15803d; font-weight: 600; }
+  td.note { color: #92400e; font-size: 12px; }
+  .flag { display: inline-block; margin-left: 4px; padding: 1px 6px; border-radius: 999px; background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 700; }
+
+  /* mockups */
+  .mock-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 14px 0 24px; }
+  .mock-label { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+  .mock-label.before { color: #b91c1c; }
+  .mock-label.after { color: #15803d; }
+  .mock-frame { border: 1px solid var(--panel-stroke); border-radius: var(--radius-card); background: var(--panel-bg); box-shadow: var(--panel-shadow); padding: 18px 20px; }
+
+  .header-mock { display: flex; justify-content: space-between; align-items: flex-start; }
+  .clock { font-size: 34px; font-weight: 600; line-height: 1; }
+  .datestr { margin-top: 6px; font-size: 12px; color: #64748b; font-weight: 600; }
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .pill { border: 1px solid var(--panel-stroke); border-radius: 999px; padding: 5px 12px; font-size: 12px; font-weight: 700; color: #334155; background: #f8fafc; }
+
+  .cal-hero { background: var(--item-bg); border: 1px solid var(--item-stroke); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+  .cal-hero .k { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #64748b; font-weight: 700; }
+  .cal-hero .v { font-size: 24px; font-weight: 700; color: #1d4ed8; margin: 4px 0; }
+  .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-week > div { background: #f1f5f9; border-radius: 8px; text-align: center; padding: 6px 2px; }
+  .cal-week .d { font-size: 10px; color: #64748b; font-weight: 700; }
+  .cal-week .n { font-size: 13px; font-weight: 700; margin-top: 2px; }
+
+  .traffic-head { display: flex; justify-content: space-between; align-items: center; background: var(--item-bg); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; }
+  .traffic-head h4 { margin: 0; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #64748b; }
+  .traffic-cols { display: grid; grid-template-columns: 1fr 70px 60px 90px; gap: 6px; font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase; padding: 4px 12px; }
+
+  .footer-note {
+    margin-top: 40px; max-width: 1000px; background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 12px; padding: 14px 18px; font-size: 12.5px; color: #78350f; line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+  <h1>言語表記の統一 — 方針とプレビュー</h1>
+  <p class="lead">
+    <code>src/config/dashboard.config.ts</code> は <code>locale: "ja-JP"</code> を宣言しており、天気の状態文言・交通機関のステータス・ニュースの見出し枠は
+    実際に日本語化されている。一方で Calendar 全体、ヘッダーの一部、Traffic の英語セクション見出し・テーブルヘッダー、PetPhoto のキャプションなどは
+    英語のまま残っており、<code>locale</code> 設定と矛盾している。スキャフォールド時の未翻訳と判断し、下記方針で統一する。
+  </p>
+
+  <div class="policy">
+    <b>方針:</b> UI側の固定文言(セクション見出し・ラベル・ステータス・日付書式)はすべて日本語に統一する。<br />
+    <b>例外:</b> ニュース記事本文(Hacker News等の外部フィードの見出し・本文)は元言語のまま維持する。外部ソースの引用であり、翻訳すると原文の正確性が失われるため。既存の「日本語の見出し枠 + 英語記事」という構造(主要ニュース/ニュース クイックルック等)はそのまま踏襲する。<br />
+    <b>日付書式:</b> <code>Intl.DateTimeFormat("en-US", ...)</code> を <code>"ja-JP"</code> に統一。曜日は列幅が狭い箇所(週表示のカラム見出しなど)では漢字1文字(日/月/火/水/木/金/土)にする — 英語3文字略記より横幅が詰まり、直近直したクリッピング系のバグを再発させにくい。
+  </div>
+
+  <h2>1. Header</h2>
+  <table>
+    <tr><th>箇所</th><th>Before</th><th>After</th><th>備考</th></tr>
+    <tr><td><code>utils/date.ts formatHeaderDateLabel</code></td><td class="before">Thu, Jul 2</td><td class="after">7月2日(木)</td><td class="note">en-US → ja-JP</td></tr>
+    <tr><td><code>HeaderBar.tsx:21</code> syncLabel</td><td class="before">Updated 21:23 / Waiting</td><td class="after">更新 21:23 / 更新待ち</td><td></td></tr>
+    <tr><td><code>HeaderBar.tsx:50</code></td><td class="before">Online / Offline</td><td class="after">オンライン / オフライン</td><td></td></tr>
+    <tr><td><code>HeaderBar.tsx:51</code></td><td class="before">Syncing {n}</td><td class="after">同期中 {n}</td><td></td></tr>
+    <tr><td><code>HeaderBar.tsx:52</code></td><td class="before">Issues {n}</td><td class="after">エラー {n}</td><td></td></tr>
+    <tr><td><code>HeaderBar.tsx:53</code></td><td class="before">Stale {n}</td><td class="after">更新遅延 {n}</td><td></td></tr>
+    <tr><td><code>HeaderBar.tsx:36,45</code> aria-label</td><td class="before">Home / Refresh</td><td class="after">ホーム / 更新</td><td class="note">スクリーンリーダー向け、視覚上は非表示</td></tr>
+  </table>
+
+  <div class="mock-row">
+    <div>
+      <div class="mock-label before">Before</div>
+      <div class="mock-frame">
+        <div class="header-mock">
+          <div>
+            <div class="clock">21:23</div>
+            <div class="datestr">Thu, Jul 2 · Tokyo</div>
+          </div>
+          <div class="pills">
+            <div class="pill">Updated 21:23</div>
+            <div class="pill">Online</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="mock-label after">After</div>
+      <div class="mock-frame">
+        <div class="header-mock">
+          <div>
+            <div class="clock">21:23</div>
+            <div class="datestr">7月2日(木) · Tokyo</div>
+          </div>
+          <div class="pills">
+            <div class="pill">更新 21:23</div>
+            <div class="pill">オンライン</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>2. Weather</h2>
+  <table>
+    <tr><th>箇所</th><th>Before</th><th>After</th><th>備考</th></tr>
+    <tr><td>NOW ラベル</td><td class="before">NOW</td><td class="after">現在</td><td></td></tr>
+    <tr><td>TODAY / TOMORROW ラベル</td><td class="before">TODAY / TOMORROW</td><td class="after">今日 / 明日</td><td></td></tr>
+    <tr><td>指標チップ</td><td class="before">Hum / Wind / Feel / Rain</td><td class="after">湿度 / 風 / 体感 / 降水</td><td></td></tr>
+    <tr><td>Next hours 見出し</td><td class="before">Next hours / Rain / Temp</td><td class="after">次の時間帯 / 降水・気温</td><td></td></tr>
+    <tr><td>Hourly Detail 見出し</td><td class="before">Hourly Detail</td><td class="after">時間別詳細</td><td></td></tr>
+    <tr><td>Note バッジ</td><td class="before">Note</td><td class="after">メモ</td><td></td></tr>
+  </table>
+
+  <h2>3. Calendar <span class="flag">変更量 最大</span></h2>
+  <table>
+    <tr><th>箇所</th><th>Before</th><th>After</th><th>備考</th></tr>
+    <tr><td>曜日(短)<code>formatDayName</code></td><td class="before">Sun Mon Tue Wed Thu Fri Sat</td><td class="after">日 月 火 水 木 金 土</td><td class="note">列幅の詰まった週表示・月表示で使用。漢字1文字の方が収まりが良い</td></tr>
+    <tr><td>曜日(長)<code>formatLongDayName</code></td><td class="before">Thursday</td><td class="after">木曜日</td><td></td></tr>
+    <tr><td>日付(短)<code>formatShortDate</code></td><td class="before">Jul 2</td><td class="after">7月2日</td><td></td></tr>
+    <tr><td>月見出し<code>formatMonthTitle</code></td><td class="before">July 2026</td><td class="after">2026年7月</td><td></td></tr>
+    <tr><td>予定なしの時間表示</td><td class="before">All day</td><td class="after">終日</td><td></td></tr>
+    <tr><td>相対時間 <code>formatRelativeStart</code></td><td class="before">in 5 min / in 2h / in 2h 15m</td><td class="after">あと5分 / あと2時間 / あと2時間15分</td><td></td></tr>
+    <tr><td>全日予定の相対表示</td><td class="before">Today</td><td class="after">本日</td><td></td></tr>
+    <tr><td>クイックルック見出し</td><td class="before">Next event</td><td class="after">次の予定</td><td></td></tr>
+    <tr><td>ローカル日付時の見出し</td><td class="before">Today</td><td class="after">今日</td><td></td></tr>
+    <tr><td>翌日表示</td><td class="before">Tomorrow: Jul 3 Fri</td><td class="after">明日: 7月3日(金)</td><td></td></tr>
+    <tr><td>月内カウンタ</td><td class="before">Day 2 / 31</td><td class="after">2日目 / 31日</td><td></td></tr>
+    <tr><td>残り日数</td><td class="before">29 days left this month / Last day of the month</td><td class="after">今月はあと29日 / 今月最終日</td><td></td></tr>
+    <tr><td>ビュー切替タブ</td><td class="before">Week / Month</td><td class="after">週 / 月</td><td></td></tr>
+    <tr><td>週表示見出し</td><td class="before">Today and week</td><td class="after">今日と今週</td><td></td></tr>
+    <tr><td>集計カード</td><td class="before">Today / events</td><td class="after">今日 / 件の予定</td><td></td></tr>
+    <tr><td>集計カード</td><td class="before">Free until / next fixed time</td><td class="after">次の予定まで / 次の確定予定</td><td class="note">意味合いを要確認 <span class="flag">要確認</span></td></tr>
+    <tr><td>集計カード</td><td class="before">This week / visible items</td><td class="after">今週 / 表示中の件数</td><td></td></tr>
+    <tr><td>月表示 曜日ヘッダー</td><td class="before">Mon Tue Wed Thu Fri Sat Sun</td><td class="after">月 火 水 木 金 土 日</td><td></td></tr>
+    <tr><td>月表示 注記</td><td class="before">Selected day highlighted</td><td class="after">選択日をハイライト表示</td><td></td></tr>
+    <tr><td>選択日パネル</td><td class="before">Selected day / Today</td><td class="after">選択した日 / 今日</td><td></td></tr>
+    <tr><td>予定なし</td><td class="before">No upcoming events</td><td class="after">今後の予定はありません</td><td></td></tr>
+    <tr><td>次の予定プレフィックス</td><td class="before">Next {time}</td><td class="after">次は {time}</td><td></td></tr>
+    <tr><td>カレンダー名フォールバック</td><td class="before">Calendar</td><td class="after">カレンダー</td><td></td></tr>
+    <tr><td>週の1日あたりの残数</td><td class="before">+{n} more</td><td class="after">他{n}件</td><td></td></tr>
+    <tr><td>月セルの件数</td><td class="before">{n} events</td><td class="after">{n}件</td><td></td></tr>
+    <tr><td>ARIA ラベル</td><td class="before">Calendar view mode</td><td class="after">カレンダー表示切替</td><td></td></tr>
+  </table>
+
+  <div class="mock-row">
+    <div>
+      <div class="mock-label before">Before(週表示ヘッダー)</div>
+      <div class="mock-frame">
+        <div class="cal-hero">
+          <div class="k">Today</div>
+          <div class="v">Jul 2</div>
+          <div style="font-size:12px;color:#64748b;font-weight:600;">Tomorrow: Jul 3 Fri</div>
+        </div>
+        <div class="cal-week">
+          <div><div class="d">Sun</div><div class="n">28</div></div>
+          <div><div class="d">Mon</div><div class="n">29</div></div>
+          <div><div class="d">Tue</div><div class="n">30</div></div>
+          <div><div class="d">Wed</div><div class="n">1</div></div>
+          <div style="background:#dbeafe;"><div class="d">Thu</div><div class="n">2</div></div>
+          <div><div class="d">Fri</div><div class="n">3</div></div>
+          <div><div class="d">Sat</div><div class="n">4</div></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="mock-label after">After(週表示ヘッダー)</div>
+      <div class="mock-frame">
+        <div class="cal-hero">
+          <div class="k">今日</div>
+          <div class="v">7月2日</div>
+          <div style="font-size:12px;color:#64748b;font-weight:600;">明日: 7月3日(金)</div>
+        </div>
+        <div class="cal-week">
+          <div><div class="d">日</div><div class="n">28</div></div>
+          <div><div class="d">月</div><div class="n">29</div></div>
+          <div><div class="d">火</div><div class="n">30</div></div>
+          <div><div class="d">水</div><div class="n">1</div></div>
+          <div style="background:#dbeafe;"><div class="d">木</div><div class="n">2</div></div>
+          <div><div class="d">金</div><div class="n">3</div></div>
+          <div><div class="d">土</div><div class="n">4</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="lead" style="margin-top:-8px;">漢字1文字の曜日は英語3文字略記より視覚的に詰まって見えるため、週7列のような狭いグリッドでの収まりは現状より悪化しない見込み(むしろ改善方向)。</p>
+
+  <h2>4. Traffic</h2>
+  <table>
+    <tr><th>箇所</th><th>Before</th><th>After</th><th>備考</th></tr>
+    <tr><td>詳細見出し</td><td class="before">Current status</td><td class="after">現在の状況</td><td></td></tr>
+    <tr><td>詳細見出し</td><td class="before">Important Impact</td><td class="after">重要な影響</td><td></td></tr>
+    <tr><td>詳細見出し</td><td class="before">Registered Lines</td><td class="after">登録路線</td><td class="note">クイックルック側は既に「路線」表記。detail側だけ英語で不一致だった</td></tr>
+    <tr><td>詳細テーブルヘッダー</td><td class="before">Line / Status / Updated / Area</td><td class="after">路線 / 状態 / 更新 / エリア</td><td class="note">同じ列がクイックルックでは既に「路線/更新/状態」表記</td></tr>
+    <tr><td>路線数</td><td class="before">{n} lines</td><td class="after">{n}路線</td><td></td></tr>
+    <tr><td>正常ステータスの短縮表記</td><td class="before">OK</td><td class="after">OK のまま</td><td class="note">影響ゼロ時の巨大表示。日本語1〜2文字より国際的に通じる記号のため維持を提案 <span class="flag">要確認</span></td></tr>
+  </table>
+
+  <div class="mock-row">
+    <div>
+      <div class="mock-label before">Before(詳細の見出し3つ)</div>
+      <div class="mock-frame">
+        <div class="traffic-head"><h4>Current status</h4></div>
+        <div class="traffic-head"><h4>Important Impact</h4></div>
+        <div class="traffic-head"><h4>Registered Lines</h4><span style="font-size:11px;color:#64748b;">8 lines</span></div>
+        <div class="traffic-cols"><span>Line</span><span>Status</span><span>Updated</span><span>Area</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="mock-label after">After(詳細の見出し3つ)</div>
+      <div class="mock-frame">
+        <div class="traffic-head"><h4>現在の状況</h4></div>
+        <div class="traffic-head"><h4>重要な影響</h4></div>
+        <div class="traffic-head"><h4>登録路線</h4><span style="font-size:11px;color:#64748b;">8路線</span></div>
+        <div class="traffic-cols"><span>路線</span><span>状態</span><span>更新</span><span>エリア</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>5. PetPhoto</h2>
+  <table>
+    <tr><th>箇所</th><th>Before</th><th>After</th><th>備考</th></tr>
+    <tr><td>キャプション</td><td class="before">{n} photos / AM-PM pick</td><td class="after">{n}枚 / 朝・夕のセレクト</td><td class="note">「AM-PM pick」の意図(1日2回、朝と夕方に1枚ずつ選ぶ、という理解で訳した)を確認してください <span class="flag">要確認</span></td></tr>
+  </table>
+
+  <h2>6. 共通ユーティリティ (<code>src/utils/date.ts</code>)</h2>
+  <table>
+    <tr><th>関数</th><th>Before</th><th>After</th><th>備考</th></tr>
+    <tr><td><code>formatHeaderDateLabel</code></td><td class="before">en-US, "Thu, Jul 2"</td><td class="after">ja-JP, "7月2日(木)"</td><td></td></tr>
+    <tr><td><code>formatDistanceToNowLabel</code></td><td class="before">Just now / {n} min ago / {n} hr ago</td><td class="after">たった今 / {n}分前 / {n}時間前</td><td class="note">News の出典行で使用中(「Hacker News / 791 hr ago」→「Hacker News / 791時間前」)。記事タイトル自体は英語のまま</td></tr>
+  </table>
+
+  <div class="footer-note">
+    <b>確認したいこと(<span class="flag">要確認</span>マーク):</b><br />
+    1. Calendar の「Free until / next fixed time」は実装上「次の固定予定の時刻」を表示しているようですが、意味が伝わる日本語訳が難しく、上記の「次の予定まで / 次の確定予定」で問題ないか確認したいです。<br />
+    2. Traffic の正常ステータス「OK」は巨大文字で表示される特別扱いのマーカーなので、日本語化せず維持する案です。<br />
+    3. PetPhoto の「AM-PM pick」は仕様上の意味を把握しきれていないため、直訳ではなく意味ベースで訳しています。<br /><br />
+    上記3点とテーブル全体の訳語に問題なければ、この方針で <code>HeaderBar.tsx</code> / <code>WeatherWidget.tsx</code> / <code>CalendarWidget.tsx</code> / <code>TrafficWidget.tsx</code> / <code>PetPhotoWidget.tsx</code> / <code>utils/date.ts</code> を widget ごとに分けて実装します(ニュース記事本文は対象外)。
+  </div>
+</body>
+</html>

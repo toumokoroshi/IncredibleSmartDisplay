@@ -87,15 +87,15 @@ describe("dashboard integration", () => {
     render(<App />);
 
     expect(await screen.findByText(/Tokyo/)).toBeInTheDocument();
-    expect(screen.getByText("Online")).toBeInTheDocument();
+    expect(screen.getByText("オンライン")).toBeInTheDocument();
     expect(screen.queryByText("Last Sync")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Weather detail" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Traffic detail" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
-    expect(await screen.findByRole("button", { name: "Home" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "ホーム" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Home" }));
+    fireEvent.click(screen.getByRole("button", { name: "ホーム" }));
     expect(screen.getByRole("button", { name: "Weather detail" })).toBeInTheDocument();
   }, 10000);
 
@@ -109,8 +109,8 @@ describe("dashboard integration", () => {
     expect(trafficFetchCount).toBe(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
-    await screen.findByRole("button", { name: "Home" });
-    fireEvent.click(screen.getByRole("button", { name: "Home" }));
+    await screen.findByRole("button", { name: "ホーム" });
+    fireEvent.click(screen.getByRole("button", { name: "ホーム" }));
     await screen.findByRole("button", { name: "Traffic detail" });
 
     expect(trafficFetchCount).toBe(1);
@@ -135,15 +135,15 @@ describe("dashboard integration", () => {
     expect(trafficFetchCount).toBe(1);
 
     fireEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
-    await screen.findByRole("button", { name: "Home" });
-    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    await screen.findByRole("button", { name: "ホーム" });
+    fireEvent.click(screen.getByRole("button", { name: "更新" }));
 
     await waitFor(() => expect(trafficFetchCount).toBe(2));
     expect(newsFetchCount).toBe(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Home" }));
+    fireEvent.click(screen.getByRole("button", { name: "ホーム" }));
     await screen.findByRole("button", { name: "Traffic detail" });
-    fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    fireEvent.click(screen.getByRole("button", { name: "更新" }));
 
     await waitFor(() => expect(trafficFetchCount).toBe(3));
     await waitFor(() => expect(newsFetchCount).toBe(2));

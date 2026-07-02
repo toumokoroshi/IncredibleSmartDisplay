@@ -18,7 +18,7 @@ export function HeaderBar({
   status: HeaderStatus;
 }) {
   const now = new Date();
-  const syncLabel = status.lastSyncedAt ? `Updated ${formatTimeLabel(new Date(status.lastSyncedAt))}` : "Waiting";
+  const syncLabel = status.lastSyncedAt ? `更新 ${formatTimeLabel(new Date(status.lastSyncedAt))}` : "更新待ち";
 
   return (
     <header className="dashboard-header col-span-2 rounded-[var(--radius-card)] border border-[color:var(--panel-stroke)] bg-[var(--header-bg)] px-6 py-3 shadow-[var(--panel-shadow)]">
@@ -33,7 +33,7 @@ export function HeaderBar({
               type="button"
               className="home-command min-h-11 rounded-[calc(var(--radius-card)-10px)] border border-[color:var(--panel-stroke)] bg-[var(--control-bg)] px-4 py-2 text-sm font-semibold text-slate-900"
               onClick={onHomeClick}
-              aria-label="Home"
+              aria-label="ホーム"
             >
               <House aria-hidden="true" className="inline-block align-[-0.2em]" size={20} strokeWidth={1.8} />
             </button>
@@ -42,15 +42,15 @@ export function HeaderBar({
             type="button"
             className="home-command min-h-11 rounded-[calc(var(--radius-card)-10px)] border border-[color:var(--panel-stroke)] bg-[var(--control-bg)] px-4 py-2 text-sm font-semibold text-slate-900"
             onClick={onRefreshClick}
-            aria-label="Refresh"
+            aria-label="更新"
           >
             <RefreshCw aria-hidden="true" className="inline-block align-[-0.2em]" size={20} strokeWidth={1.8} />
           </button>
           <QuietStatusPill>{syncLabel}</QuietStatusPill>
-          <QuietStatusPill tone={status.online ? "ok" : "warn"}>{status.online ? "Online" : "Offline"}</QuietStatusPill>
-          {status.refreshingCount > 0 ? <QuietStatusPill>Syncing {status.refreshingCount}</QuietStatusPill> : null}
-          {status.errorCount > 0 ? <QuietStatusPill tone="warn">Issues {status.errorCount}</QuietStatusPill> : null}
-          {status.staleCount > 0 ? <QuietStatusPill tone="warn">Stale {status.staleCount}</QuietStatusPill> : null}
+          <QuietStatusPill tone={status.online ? "ok" : "warn"}>{status.online ? "オンライン" : "オフライン"}</QuietStatusPill>
+          {status.refreshingCount > 0 ? <QuietStatusPill>同期中 {status.refreshingCount}</QuietStatusPill> : null}
+          {status.errorCount > 0 ? <QuietStatusPill tone="warn">エラー {status.errorCount}</QuietStatusPill> : null}
+          {status.staleCount > 0 ? <QuietStatusPill tone="warn">更新遅延 {status.staleCount}</QuietStatusPill> : null}
         </div>
       </div>
     </header>
