@@ -292,7 +292,7 @@ function mapDailyForecast(payload: ValidOpenMeteoResponse, currentHumidity?: num
   const sunset = payload.daily.sunset;
 
   return times.slice(0, 2).map((date, index) => ({
-    label: index === 0 ? "Today" : "Tomorrow",
+    label: index === 0 ? "今日" : "明日",
     date,
     condition: mapWeatherCodeToDisplayCondition(conditionCodes[index] ?? 2, true),
     highTempC: highTemps[index],

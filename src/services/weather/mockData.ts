@@ -66,7 +66,7 @@ export const mockWeatherData: WeatherData = {
   todayMaxWindSpeedKph: 14,
   dailyForecast: [
     {
-      label: "Today",
+      label: "今日",
       date: "2026-05-12",
       condition: overcastDay,
       highTempC: 27,
@@ -82,7 +82,7 @@ export const mockWeatherData: WeatherData = {
       sunset: "2026-05-12T18:42:00+09:00",
     },
     {
-      label: "Tomorrow",
+      label: "明日",
       date: "2026-05-13",
       condition: clearDay,
       highTempC: 28,

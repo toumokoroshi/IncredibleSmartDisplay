@@ -87,7 +87,7 @@ function WeatherDetailNow({ data }: { data: WeatherData }) {
   return (
     <div className="weather-detail-now grid h-full min-h-0 grid-cols-[minmax(0,1fr)_16rem] grid-rows-[minmax(0,1fr)_auto] items-center gap-x-5 gap-y-3 overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] px-7 py-5">
       <div className="min-w-0">
-        <p className="text-[1.0625rem] uppercase tracking-[0.18em] text-slate-500">Now</p>
+        <p className="text-[1.0625rem] uppercase tracking-[0.18em] text-slate-500">現在</p>
         <p className="mt-2 text-[1.75rem] font-semibold text-slate-300">{data.locationName}</p>
         <p className="mt-3 text-[5.75rem] font-semibold leading-none text-white">{formatTemp(data.currentTempC)}</p>
         <p className="mt-2.5 text-[2rem] font-semibold leading-tight text-slate-300">{formatConditionLabel(condition)}</p>
@@ -96,10 +96,10 @@ function WeatherDetailNow({ data }: { data: WeatherData }) {
         <WeatherConditionIcon condition={condition} size={256} />
       </div>
       <div className="col-span-2 grid min-w-0 grid-cols-4 gap-3">
-        <DetailWeatherStat icon={<Droplets size={16} />} label="Hum" value={formatPercent(data.humidityPercent)} />
-        <DetailWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={16} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} />
-        <DetailWeatherStat icon={<span className="text-base leading-none">{"\u2197"}</span>} label="Feel" value={formatTemp(data.apparentTempC)} />
-        <DetailWeatherStat icon={<Umbrella size={16} />} label="Rain" value={formatPercent(data.precipitationProbabilityPercent)} />
+        <DetailWeatherStat icon={<Droplets size={16} />} label="湿度" value={formatPercent(data.humidityPercent)} />
+        <DetailWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={16} />} label="風" value={formatMetersPerSecond(data.windSpeedKph)} />
+        <DetailWeatherStat icon={<span className="text-base leading-none">{"\u2197"}</span>} label="体感" value={formatTemp(data.apparentTempC)} />
+        <DetailWeatherStat icon={<Umbrella size={16} />} label="降水" value={formatPercent(data.precipitationProbabilityPercent)} />
       </div>
     </div>
   );
@@ -125,7 +125,7 @@ function NowWeatherSummary({
   return (
     <div className={`${compact ? "flex justify-between" : "grid"} h-full min-h-0 items-center gap-5 overflow-hidden`} style={compact ? undefined : { gridTemplateColumns: `minmax(0, 1fr) ${iconSize}px` }}>
       <div className="min-w-0">
-        <p className={`${compact ? "text-xs" : "text-sm"} uppercase tracking-[0.18em] text-slate-500`}>Now</p>
+        <p className={`${compact ? "text-xs" : "text-sm"} uppercase tracking-[0.18em] text-slate-500`}>現在</p>
         <p className={`${compact ? "mt-0 text-lg" : "mt-1 text-[1.625rem]"} text-slate-300`}>{data.locationName}</p>
         <div className={`${compact ? "mt-2 flex items-end gap-5" : "mt-1.5"}`}>
           <p className={`font-semibold leading-none text-white ${tempClassName}`}>{formatTemp(data.currentTempC)}</p>
@@ -135,11 +135,11 @@ function NowWeatherSummary({
         </div>
         <p className={`${compact ? "mt-1 text-lg" : "mt-1.5 text-[1.375rem]"} text-slate-300`}>{formatConditionLabel(condition)}</p>
         <div className={`${compact ? "mt-2 flex flex-wrap gap-x-4 gap-y-1" : "mt-2 grid max-w-[21.25rem] grid-cols-[repeat(2,minmax(132px,1fr))] gap-2"}`}>
-          {!compact ? <InlineWeatherStat chip icon={<Droplets size={15} />} label="Hum" value={formatPercent(data.humidityPercent)} /> : null}
-          {!compact ? <InlineWeatherStat chip icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} /> : null}
-          {compact ? <InlineWeatherStat icon={<Droplets size={15} />} label="Hum" value={formatPercent(data.humidityPercent)} /> : null}
-          {compact ? <InlineWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(data.windSpeedKph)} /> : null}
-          {showApparent ? <InlineWeatherStat icon={<span className="text-sm leading-none">{"\u2197"}</span>} label="Feel" value={formatTemp(data.apparentTempC)} /> : null}
+          {!compact ? <InlineWeatherStat chip icon={<Droplets size={15} />} label="湿度" value={formatPercent(data.humidityPercent)} /> : null}
+          {!compact ? <InlineWeatherStat chip icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="風" value={formatMetersPerSecond(data.windSpeedKph)} /> : null}
+          {compact ? <InlineWeatherStat icon={<Droplets size={15} />} label="湿度" value={formatPercent(data.humidityPercent)} /> : null}
+          {compact ? <InlineWeatherStat icon={<WindDirectionIcon degrees={data.windDirectionDeg} size={15} />} label="風" value={formatMetersPerSecond(data.windSpeedKph)} /> : null}
+          {showApparent ? <InlineWeatherStat icon={<span className="text-sm leading-none">{"\u2197"}</span>} label="体感" value={formatTemp(data.apparentTempC)} /> : null}
         </div>
         <WeatherModifierBadges modifiers={condition.modifiers} />
       </div>
@@ -179,7 +179,7 @@ function DailyWeatherSummary({
         <div className="min-w-0">
           <div className={`${compact ? "flex min-w-0 items-baseline gap-3" : "grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3"}`}>
             <div className="min-w-0">
-              <p className={`${compact ? "text-xs" : "text-sm"} shrink-0 uppercase tracking-[0.18em] text-slate-500`}>{summary?.label ?? "Today"}</p>
+              <p className={`${compact ? "text-xs" : "text-sm"} shrink-0 uppercase tracking-[0.18em] text-slate-500`}>{summary?.label ?? "今日"}</p>
               <p className={`${compact ? "text-base" : "text-[1.375rem]"} truncate font-semibold leading-tight text-slate-100`}>{formatConditionLabel(condition)}</p>
             </div>
             {!compact ? (
@@ -197,10 +197,10 @@ function DailyWeatherSummary({
           </p> : null}
           {summaryText ? <p className={`${compact ? "mt-1 truncate text-sm" : detail ? "mt-1 truncate text-sm" : "mt-1 text-base"} font-semibold leading-tight text-slate-500`}>{summaryText}</p> : null}
           <div className={`${compact ? "mt-2 flex flex-wrap gap-1.5" : detail ? "mt-2 grid grid-cols-3 gap-2" : "mt-2 grid grid-cols-3 gap-2.5"}`}>
-            <QuickStatChip compact={compact} dense={detail} icon={<Umbrella size={15} />} label="Rain" value={formatPercent(summary?.precipitationProbabilityPercent)} />
-            <QuickStatChip compact={compact} dense={detail} icon={<WindDirectionIcon degrees={summary?.windDirectionDeg} size={15} />} label="Wind" value={formatMetersPerSecond(summary?.maxWindSpeedKph)} />
-            <QuickStatChip compact={compact} dense={detail} icon={<Droplets size={15} />} label="Hum" value={formatPercent(summary?.humidityPercent)} />
-            {showApparent ? <QuickStatChip compact={compact} dense={detail} icon={<span className="text-sm leading-none">{"\u2197"}</span>} label="Feel" value={`${formatTemp(summary?.apparentHighTempC)} / ${formatTemp(summary?.apparentLowTempC)}`} /> : null}
+            <QuickStatChip compact={compact} dense={detail} icon={<Umbrella size={15} />} label="降水" value={formatPercent(summary?.precipitationProbabilityPercent)} />
+            <QuickStatChip compact={compact} dense={detail} icon={<WindDirectionIcon degrees={summary?.windDirectionDeg} size={15} />} label="風" value={formatMetersPerSecond(summary?.maxWindSpeedKph)} />
+            <QuickStatChip compact={compact} dense={detail} icon={<Droplets size={15} />} label="湿度" value={formatPercent(summary?.humidityPercent)} />
+            {showApparent ? <QuickStatChip compact={compact} dense={detail} icon={<span className="text-sm leading-none">{"\u2197"}</span>} label="体感" value={`${formatTemp(summary?.apparentHighTempC)} / ${formatTemp(summary?.apparentLowTempC)}`} /> : null}
           </div>
           {detail && note ? <WeatherNote className="mt-2" text={note} /> : null}
         </div>
@@ -311,8 +311,8 @@ function NextHoursStrip({ hourly, iconSize = 34 }: { hourly: WeatherHourlyPoint[
   return (
     <div className="weather-metric h-full min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2">
       <div className="flex items-center justify-between">
-        <p className="text-base uppercase tracking-[0.18em] text-slate-500">Next hours</p>
-        <p className="text-base font-medium text-slate-500">Rain / Temp</p>
+        <p className="text-base uppercase tracking-[0.18em] text-slate-500">次の時間帯</p>
+        <p className="text-base font-medium text-slate-500">降水・気温</p>
       </div>
       <div className="mt-1.5 grid grid-cols-6 gap-2">
         {points.map((point) => {
@@ -337,7 +337,7 @@ function NextHoursStrip({ hourly, iconSize = 34 }: { hourly: WeatherHourlyPoint[
 function WeatherNote({ className = "", text }: { className?: string; text: string }) {
   return (
     <p className={`weather-detail-note grid min-h-9 grid-cols-[auto_minmax(0,1fr)] items-center gap-2 overflow-hidden rounded-lg border border-blue-500/20 border-l-4 border-l-blue-400 bg-blue-50 px-2.5 py-1.5 text-sm font-semibold leading-tight text-slate-100 ${className}`}>
-      <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-bold text-blue-600">Note</span>
+      <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-bold text-blue-600">メモ</span>
       <span className="min-w-0 truncate">{text}</span>
     </p>
   );
@@ -364,7 +364,7 @@ function HourlyForecastTable({ daily, hourly, large = false, note = "" }: { dail
     <div className={`${large && note ? "grid-rows-[3.375rem_minmax(0,1fr)]" : "grid-rows-[minmax(0,1fr)]"} grid h-full min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-2`}>
       {large && note ? (
         <div className="mb-1.5 flex min-h-0 items-center justify-between gap-4 overflow-hidden">
-          <p className="text-base uppercase tracking-[0.18em] text-slate-500">Hourly Detail</p>
+          <p className="text-base uppercase tracking-[0.18em] text-slate-500">時間別詳細</p>
           <WeatherNote className="mt-0 min-h-10 max-w-[58%] text-[1.0625rem]" text={note} />
         </div>
       ) : null}
