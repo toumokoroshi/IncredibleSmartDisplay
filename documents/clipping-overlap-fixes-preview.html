@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>クリッピング/オーバーラップ修正案 比較 (Before / After)</title>
+<style>
+  :root {
+    --app-bg: #f6f8fb;
+    --panel-bg: #ffffff;
+    --panel-stroke: rgba(15, 23, 42, 0.08);
+    --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+    --radius-card: 1.7rem;
+    --item-bg: #f8fafc;
+    --item-stroke: rgba(15, 23, 42, 0.07);
+  }
+  * { box-sizing: border-box; min-width: 0; }
+  body {
+    margin: 0;
+    padding: 32px;
+    background: var(--app-bg);
+    color: #0f172a;
+    font-family: "Google Sans", "Noto Sans JP", "Roboto", sans-serif;
+    max-width: 1536px;
+  }
+  .measured, .note, .lead { overflow-wrap: break-word; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  h2 { font-size: 17px; margin: 0 0 4px; }
+  p.lead { margin: 0 0 20px; color: #475569; font-size: 13px; max-width: 980px; line-height: 1.6; }
+  section.issue { margin-bottom: 56px; }
+  .measured {
+    display: block;
+    margin: 0 0 18px;
+    padding: 8px 14px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #3730a3;
+    font-weight: 600;
+    max-width: 980px;
+    line-height: 1.6;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .col-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .col-label.before { color: #b91c1c; }
+  .col-label.after { color: #15803d; }
+  .col-label.alt { color: #b45309; }
+
+  .viewport-frame {
+    border: 2px dashed #94a3b8;
+    border-radius: calc(var(--radius-card) + 2px);
+    overflow: hidden;
+    position: relative;
+    background: var(--app-bg);
+  }
+  .frame-label {
+    position: absolute;
+    top: -20px;
+    left: 2px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #64748b;
+  }
+  .card {
+    background: var(--panel-bg);
+    border: none;
+    box-shadow: none;
+    height: 100%;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+  }
+  .heading { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .heading-icon {
+    width: 30px; height: 30px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; color: #fff;
+  }
+  .title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.18em; color: #94a3b8; margin: 0; font-weight: 600; }
+
+  .clip-flag {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 40px;
+    background: linear-gradient(180deg, rgba(254,242,242,0), rgba(254,242,242,0.95));
+    display: flex; align-items: flex-end; justify-content: center;
+    color: #b91c1c; font-size: 11px; font-weight: 800; padding-bottom: 4px;
+  }
+  .ok-flag {
+    position: absolute; top: 4px; right: 8px;
+    color: #15803d; font-size: 11px; font-weight: 800;
+    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 999px; padding: 2px 8px;
+  }
+
+  .note {
+    margin-top: 16px;
+    max-width: 980px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #78350f;
+    line-height: 1.6;
+  }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 4px; font-size: 0.92em; }
+
+  /* --- Issue 1: sticky hourly column --- */
+  .hourly-mock {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 64px;
+    height: 190px;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 1px solid var(--item-stroke);
+    background: rgba(255,255,255,0.6);
+    position: relative;
+  }
+  .hourly-col {
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    text-align: center;
+    font-size: 12px;
+    color: #475569;
+    border-right: 1px solid #eef2f7;
+    align-content: center;
+    gap: 6px;
+    padding: 6px 0;
+  }
+  .hourly-col.data { background: #eaf1fc; font-weight: 700; color: #1e3a8a; }
+  .sticky-label {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    font-weight: 700;
+    color: #64748b;
+  }
+  .sticky-label.ghost { background: rgba(255,255,255,0.95); }
+  .sticky-label.opaque { background: #ffffff; }
+
+  /* --- Issue 2: weather quicklook --- */
+  .wq-grid-before {
+    display: grid;
+    grid-template-rows: 258px 202px 206px;
+    gap: 12px;
+    height: 100%;
+  }
+  .wq-grid-after {
+    display: grid;
+    grid-template-rows: 236fr 185fr 189fr;
+    gap: 12px;
+    height: 100%;
+  }
+  .wq-row {
+    border-radius: 10px;
+    border: 1px solid var(--item-stroke);
+    background: var(--item-bg);
+    padding: 10px 14px;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .wq-now { display: grid; grid-template-columns: 1fr 90px; align-items: center; height: 100%; }
+  .wq-now .temp { font-size: 30px; font-weight: 700; }
+  .wq-icon-circle {
+    border-radius: 999px; background: #eaf1fc;
+    display: flex; align-items: center; justify-content: center;
+    color: #1a73e8; font-size: 30px;
+  }
+  .wq-daily { display: grid; grid-template-columns: 84px 1fr; gap: 10px; align-items: center; height: 100%; }
+  .wq-hours { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; height: 100%; align-content: center; }
+  .wq-hour-cell { text-align: center; font-size: 11px; color: #475569; }
+  .wq-hour-cell .ico { font-size: 16px; }
+  .wq-hour-cell .missing { color: #cbd5e1; }
+
+  /* --- Issue 3: news quicklook --- */
+  .news-item {
+    border: 1px solid var(--item-stroke);
+    background: var(--item-bg);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  .news-item p.item-title {
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #0f172a;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .news-item p.item-title.clamp2 { -webkit-line-clamp: 2; font-size: 25px; }
+  .news-item p.item-title.clamp1 { -webkit-line-clamp: 1; font-size: 25px; }
+  .news-item p.item-title.small2 { -webkit-line-clamp: 2; font-size: 19px; }
+  .news-item p.item-meta { margin: 8px 0 0; font-size: 16px; font-weight: 600; color: #94a3b8; }
+  .news-item p.item-meta.small { font-size: 13px; margin-top: 4px; }
+  .more-hint { margin-top: 10px; text-align: center; font-size: 13px; font-weight: 700; color: #2563eb; }
+</style>
+</head>
+<body>
+  <h1>クリッピング/オーバーラップ修正案 (3件)</h1>
+  <p class="lead">
+    実機相当のビューポート (1524×1016 CSS px) で計測した実寸を使い、現状 (Before) と修正案 (After) を並べています。
+    枠線 (点線) はそのWidgetに割り当てられた実際の高さの境界で、それを超える描画は現状 <code>overflow: hidden</code> により
+    無音でクリップされています。
+  </p>
+
+  <!-- Issue 1 -->
+  <section class="issue">
+    <h2>1. 天気 詳細 — Hourly Detail の固定列に、スクロール中の背景データが透けて重なる</h2>
+    <p class="measured">実装箇所: <code>src/widgets/weather/WeatherWidget.tsx:374</code> — 固定列に <code>bg-white/95</code>（不透明度95%）を使用</p>
+    <div class="row">
+      <div>
+        <div class="col-label before">Before（現状: bg-white/95）</div>
+        <div class="viewport-frame" style="height: 220px;">
+          <span class="frame-label">Hourly Detail テーブル</span>
+          <div class="hourly-mock">
+            <div class="hourly-col data">
+              <div>18時</div><div>☀️</div><div>23℃</div><div>4%</div>
+            </div>
+            <div class="hourly-col data">
+              <div>19時</div><div>🌙</div><div>23℃</div><div>4%</div>
+            </div>
+            <div class="hourly-col sticky-label ghost">
+              <div>時刻</div><div>天気</div><div>気温</div><div>降水</div>
+            </div>
+            <div class="hourly-col data">
+              <div>22時</div><div>🌧️</div><div>22℃</div><div>1%</div>
+            </div>
+            <div class="hourly-col data">
+              <div>23時</div><div>🌧️</div><div>22℃</div><div>3%</div>
+            </div>
+          </div>
+        </div>
+        <div class="note">背景が5%透けるため、横スクロールした際に列見出し「時刻/天気/気温/降水」の文字の上に、裏を通過中の実データ（時刻や数値）がうっすら二重表示される。</div>
+      </div>
+      <div>
+        <div class="col-label after">After（修正案: bg-white 不透明）</div>
+        <div class="viewport-frame" style="height: 220px;">
+          <span class="frame-label">Hourly Detail テーブル</span>
+          <div class="hourly-mock">
+            <div class="hourly-col data">
+              <div>18時</div><div>☀️</div><div>23℃</div><div>4%</div>
+            </div>
+            <div class="hourly-col data">
+              <div>19時</div><div>🌙</div><div>23℃</div><div>4%</div>
+            </div>
+            <div class="hourly-col sticky-label opaque">
+              <div>時刻</div><div>天気</div><div>気温</div><div>降水</div>
+            </div>
+            <div class="hourly-col data">
+              <div>22時</div><div>🌧️</div><div>22℃</div><div>1%</div>
+            </div>
+            <div class="hourly-col data">
+              <div>23時</div><div>🌧️</div><div>22℃</div><div>3%</div>
+            </div>
+          </div>
+          <span class="ok-flag">重なりなし</span>
+        </div>
+        <div class="note">列見出しの背景を完全不透明にするだけの1行修正 (<code>bg-white/95</code> → <code>bg-white</code>)。列見出しは元々スクロール追従用の固定列なので、下を透過させる意図はなかったはず。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Issue 2 -->
+  <section class="issue">
+    <h2>2. 天気 クイックルック — 「Next hours」の下端が見切れる</h2>
+    <p class="measured">実測 (1524×1016): カード内部でこの3行グリッドに使える高さ = <b>約634px</b>。
+      現状のコード (<code>WeatherWidget.tsx:53</code>) は固定 <code>258px + 202px + 206px + gap24px = 690px</code> を要求しており、
+      <b>約56px (8%) 分が毎回オーバーフローしてクリップされている</b>。</p>
+    <div class="row">
+      <div>
+        <div class="col-label before">Before（固定px行 = 690px要求 / 634pxしかない）</div>
+        <div class="viewport-frame" style="height: 320px;">
+          <span class="frame-label">Weather カード内 クイックルック領域 (実寸縮小表示)</span>
+          <div class="wq-grid-before" style="transform: scale(0.463); transform-origin: top left; width: 215.7%;">
+            <div class="wq-row wq-now">
+              <div>
+                <div style="font-size:13px;color:#64748b;">NOW</div>
+                <div class="temp">22°C</div>
+                <div style="font-size:15px;color:#64748b;">晴れ</div>
+              </div>
+              <div class="wq-icon-circle">☀️</div>
+            </div>
+            <div class="wq-row wq-daily">
+              <div class="wq-icon-circle" style="width:72px;height:72px;">🌧️</div>
+              <div>
+                <div style="font-size:13px;color:#64748b;">TODAY 23℃/21℃</div>
+                <div style="font-size:20px;font-weight:700;">大雨</div>
+              </div>
+            </div>
+            <div class="wq-row wq-hours">
+              <div class="wq-hour-cell"><div>00時</div><div class="ico">🌧️</div><div>23℃</div><div>76%</div></div>
+              <div class="wq-hour-cell"><div>01時</div><div class="ico">🌧️</div><div>23℃</div><div>83%</div></div>
+              <div class="wq-hour-cell"><div>02時</div><div class="ico">🌧️</div><div>22℃</div><div>86%</div></div>
+              <div class="wq-hour-cell"><div>03時</div><div class="ico">🌧️</div><div>22℃</div><div>88%</div></div>
+              <div class="wq-hour-cell"><div>04時</div><div class="ico">🌧️</div><div>22℃</div><div>92%</div></div>
+              <div class="wq-hour-cell"><div>05時</div><div class="ico">🌧️</div><div>22℃</div><div>97%</div></div>
+            </div>
+          </div>
+          <div class="clip-flag">↓ Next hoursの温度・降水%行が見切れる</div>
+        </div>
+      </div>
+      <div>
+        <div class="col-label after">After（3行を fr 比率化 = 常に634pxちょうどに収まる）</div>
+        <div class="viewport-frame" style="height: 320px;">
+          <span class="frame-label">Weather カード内 クイックルック領域 (実寸縮小表示)</span>
+          <div class="wq-grid-after" style="transform: scale(0.463); transform-origin: top left; width: 215.7%;">
+            <div class="wq-row wq-now">
+              <div>
+                <div style="font-size:12px;color:#64748b;">NOW</div>
+                <div class="temp" style="font-size:27px;">22°C</div>
+                <div style="font-size:14px;color:#64748b;">晴れ</div>
+              </div>
+              <div class="wq-icon-circle" style="width:80px;height:80px;font-size:26px;">☀️</div>
+            </div>
+            <div class="wq-row wq-daily">
+              <div class="wq-icon-circle" style="width:64px;height:64px;">🌧️</div>
+              <div>
+                <div style="font-size:12px;color:#64748b;">TODAY 23℃/21℃</div>
+                <div style="font-size:18px;font-weight:700;">大雨</div>
+              </div>
+            </div>
+            <div class="wq-row wq-hours">
+              <div class="wq-hour-cell"><div>00時</div><div class="ico">🌧️</div><div>23℃</div><div>76%</div></div>
+              <div class="wq-hour-cell"><div>01時</div><div class="ico">🌧️</div><div>23℃</div><div>83%</div></div>
+              <div class="wq-hour-cell"><div>02時</div><div class="ico">🌧️</div><div>22℃</div><div>86%</div></div>
+              <div class="wq-hour-cell"><div>03時</div><div class="ico">🌧️</div><div>22℃</div><div>88%</div></div>
+              <div class="wq-hour-cell"><div>04時</div><div class="ico">🌧️</div><div>22℃</div><div>92%</div></div>
+              <div class="wq-hour-cell"><div>05時</div><div class="ico">🌧️</div><div>22℃</div><div>97%</div></div>
+            </div>
+          </div>
+          <span class="ok-flag">全行表示</span>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>変更点案:</strong> <code>WeatherQuickLook</code> の <code>gridTemplateRows: "258px 202px 206px"</code> を
+      <code>"236fr 185fr 189fr"</code>（現在の比率を保ったまま fr 化）に変更し、常にコンテナの実高さちょうどに収まるようにする。
+      あわせて各行内のアイコンサイズ (<code>iconSize=264/177/99</code>) を同じ比率 (約91.6%) で
+      <code>242/162/91</code> 程度に縮小し、行の中でアイコンだけが飛び出さないようにする。
+      実際のカード高さはヘッダーの折返しやStaleBadge表示の有無で多少前後するため、fr化により
+      「常にその時点の実高さに追従する」設計にする点が、固定pxをただ縮小するより頑丈。
+    </div>
+  </section>
+
+  <!-- Issue 3 -->
+  <section class="issue">
+    <h2>3. ニュース クイックルック — 2件目のカードが下端で見切れる</h2>
+    <p class="measured">実測 (1524×1016): 2件分のリストに使える高さ = <b>約201px</b>。
+      現状 (25px・2行clamp・py-3) の1件の自然な高さは <b>約120px</b>。2件+gapで<b>252px</b>必要 = <b>51px (25%) 不足</b>。
+      結果、1件目は全体表示、2件目はタイトル1行目の途中で切れ、メタ行(出典/経過時間)は完全に非表示になる。</p>
+    <div class="row three">
+      <div>
+        <div class="col-label before">Before（現状: 25px・2件）</div>
+        <div class="viewport-frame" style="height: 201px;">
+          <span class="frame-label">News カード内 リスト領域</span>
+          <div style="display:grid; gap:12px; padding:2px;">
+            <div class="news-item">
+              <p class="item-title clamp2">Adding Linux support back for the BASIC (free) version of Vivado</p>
+              <p class="item-meta">Hacker News / 791 hr ago</p>
+            </div>
+            <div class="news-item">
+              <p class="item-title clamp2">Corporate America Is Starting to Ration AI as Cost Skyrockets</p>
+              <p class="item-meta">Hacker News / 792 hr ago</p>
+            </div>
+          </div>
+          <div class="clip-flag">↓ 2件目の見出し2行目・出典が見切れる</div>
+        </div>
+      </div>
+      <div>
+        <div class="col-label after">After案A（1件に削減・文字サイズ維持）</div>
+        <div class="viewport-frame" style="height: 201px;">
+          <span class="frame-label">News カード内 リスト領域</span>
+          <div style="display:grid; gap:12px; padding:2px;">
+            <div class="news-item">
+              <p class="item-title clamp2">Adding Linux support back for the BASIC (free) version of Vivado</p>
+              <p class="item-meta">Hacker News / 791 hr ago</p>
+            </div>
+          </div>
+          <p class="more-hint">タップして残り4件を見る →</p>
+          <span class="ok-flag">余白あり</span>
+        </div>
+      </div>
+      <div>
+        <div class="col-label alt">After案B（2件維持・文字/余白を圧縮）</div>
+        <div class="viewport-frame" style="height: 201px;">
+          <span class="frame-label">News カード内 リスト領域</span>
+          <div style="display:grid; gap:8px; padding:2px;">
+            <div class="news-item" style="padding:8px 14px;">
+              <p class="item-title small2">Adding Linux support back for the BASIC (free) version of Vivado</p>
+              <p class="item-meta small">Hacker News / 791 hr ago</p>
+            </div>
+            <div class="news-item" style="padding:8px 14px;">
+              <p class="item-title small2">Corporate America Is Starting to Ration AI as Cost Skyrockets</p>
+              <p class="item-meta small">Hacker News / 792 hr ago</p>
+            </div>
+          </div>
+          <span class="ok-flag">ぎりぎり収まる</span>
+        </div>
+      </div>
+    </div>
+    <div class="note">
+      <strong>案A vs 案B:</strong> 案Aは文字サイズ25pxを維持したまま1件表示(<code>NEWS_QUICKLOOK_ITEM_COUNT = 1</code>に変更)。
+      キオスク用途で離れて見ても読みやすい大きな文字を保てるが、一目で見える見出し数が2→1に減る。
+      案Bは見出しを19px・余白も詰めて2件を201px枠にぎりぎり収める案だが、文字が現状比24%縮小し、
+      将来ここの文字サイズを少しでも上げると再びクリップが再発するリスク付き（fragileな数合わせ）。
+      <strong>案Aを推奨。</strong>理由: 詳細画面をタップ一つで見られる導線が既にあるため、ホームは「読める大きさで1件」を優先する方が、
+      小さい文字で2件詰め込むより視認性の観点で分が良い。
+    </div>
+  </section>
+
+  <div class="note" style="max-width: 980px;">
+    <strong>この3件について:</strong> 1と2は明確なバグ（意図しない透過・意図しない食い違い）として同一方針で修正します。
+    3は「1件 vs 2件」の見た目トレードオフを含むため、案Aで進めてよいか一言ください（他の指定がなければ案Aで実装します）。
+  </div>
+</body>
+</html>

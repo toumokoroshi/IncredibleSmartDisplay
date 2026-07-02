@@ -50,10 +50,10 @@ export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, sta
 
 function WeatherQuickLook({ data }: { data: WeatherData }) {
   return (
-    <div className="mt-4 grid min-h-0 flex-1 content-between gap-3 overflow-hidden" style={{ gridTemplateRows: "258px 202px 206px" }}>
-      <NowWeatherSummary data={data} iconSize={264} tempClassName="text-[3.75rem]" />
+    <div className="mt-4 grid min-h-0 flex-1 content-between gap-3 overflow-hidden" style={{ gridTemplateRows: "236fr 185fr 189fr" }}>
+      <NowWeatherSummary data={data} iconSize={242} tempClassName="text-[3.75rem]" />
       <DailyWeatherSummary judgementHourly={data.hourlyForecast} showSummary summary={getDailySummaries(data)[0]} />
-      <NextHoursStrip hourly={data.hourlyForecast ?? []} iconSize={99} />
+      <NextHoursStrip hourly={data.hourlyForecast ?? []} iconSize={91} />
     </div>
   );
 }
@@ -174,7 +174,7 @@ function DailyWeatherSummary({
     <div className={`${detail ? "widget-detail-card weather-detail-daily px-3 py-2.5" : compact ? "px-3 py-2" : "px-4 py-2.5"} weather-metric h-full min-h-0 overflow-hidden rounded-lg border border-white/10 bg-white/[0.04]`}>
       <div className={`grid h-full min-h-0 items-center ${compact ? "grid-cols-[auto_1fr] gap-2" : detail ? "grid-cols-[96px_minmax(0,1fr)] gap-3" : "grid-cols-[132px_minmax(0,1fr)] gap-3.5"}`}>
         <div className="-ml-2">
-          <WeatherConditionIcon condition={condition} size={compact ? 82 : detail ? 96 : 177} />
+          <WeatherConditionIcon condition={condition} size={compact ? 82 : detail ? 96 : 162} />
         </div>
         <div className="min-w-0">
           <div className={`${compact ? "flex min-w-0 items-baseline gap-3" : "grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-3"}`}>
@@ -371,7 +371,7 @@ function HourlyForecastTable({ daily, hourly, large = false, note = "" }: { dail
       {points.length > 0 ? (
         <div ref={scrollRef} className={`weather-hourly-scroll min-h-0 overflow-x-auto overflow-y-hidden ${large ? "pb-2" : "pb-8"}`}>
           <div className={`${large ? "auto-cols-[5.8rem]" : "auto-cols-[4.5rem]"} grid min-w-max grid-flow-col items-stretch`}>
-            <div className={`${large ? "w-[4.5rem] grid-rows-[2rem_3.55rem_1.9rem_1.9rem_1.9rem_2.45rem] text-[0.95rem]" : "w-[3.5rem] grid-rows-[1.45rem_1.55rem_1.55rem_1.55rem_1.55rem_3.6rem] text-sm"} sticky left-0 z-10 grid bg-white/95 font-semibold text-slate-500`}>
+            <div className={`${large ? "w-[4.5rem] grid-rows-[2rem_3.55rem_1.9rem_1.9rem_1.9rem_2.45rem] text-[0.95rem]" : "w-[3.5rem] grid-rows-[1.45rem_1.55rem_1.55rem_1.55rem_1.55rem_3.6rem] text-sm"} sticky left-0 z-10 grid bg-white font-semibold text-slate-500`}>
               <HourlyLabel>{"\u6642\u523b"}</HourlyLabel>
               <HourlyLabel>{"\u5929\u6c17"}</HourlyLabel>
               <HourlyLabel>{"\u6c17\u6e29"}</HourlyLabel>
