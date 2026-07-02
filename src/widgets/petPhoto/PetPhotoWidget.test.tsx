@@ -32,7 +32,7 @@ describe("PetPhotoWidget", () => {
     const { container } = render(<PetPhotoWidget config={config} data={data} isEmpty={false} isHighlighted={false} status="success" />);
 
     expect(screen.getByText("今日のぐり")).toBeInTheDocument();
-    expect(screen.getByText("42 photos / AM-PM pick")).toBeInTheDocument();
+    expect(screen.getByText("42枚")).toBeInTheDocument();
     expect(container.querySelector("img")).toHaveAttribute("src", "/pets/photo-1.jpg");
   });
 
