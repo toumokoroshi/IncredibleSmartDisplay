@@ -35,20 +35,20 @@ describe("CalendarWidget", () => {
   it("renders local date information when no calendar events are available", () => {
     render(<CalendarWidget config={calendarConfig} data={{ items: [] }} isEmpty={false} status="success" />);
 
-    expect(screen.getByText("Today")).toBeInTheDocument();
-    expect(screen.getByText("May 31")).toBeInTheDocument();
-    expect(screen.getByText("Sunday")).toBeInTheDocument();
-    expect(screen.getByText("Tomorrow: Jun 1 Mon")).toBeInTheDocument();
+    expect(screen.getByText("今日")).toBeInTheDocument();
+    expect(screen.getByText("5月31日")).toBeInTheDocument();
+    expect(screen.getByText("日曜日")).toBeInTheDocument();
+    expect(screen.getByText("明日: 6月1日(月)")).toBeInTheDocument();
     expect(screen.queryByText("No data available.")).not.toBeInTheDocument();
   });
 
   it("keeps the highlighted detail layout useful without private calendar data", () => {
     render(<CalendarWidget config={calendarConfig} data={{ items: [] }} isEmpty={false} isHighlighted status="success" />);
 
-    expect(screen.getByText("Today and week")).toBeInTheDocument();
-    expect(screen.getByText("May 31")).toBeInTheDocument();
-    expect(screen.getByText("Tomorrow: Jun 1 Mon")).toBeInTheDocument();
-    expect(screen.queryByText("No upcoming events")).not.toBeInTheDocument();
+    expect(screen.getByText("今日と今週")).toBeInTheDocument();
+    expect(screen.getByText("5月31日")).toBeInTheDocument();
+    expect(screen.getByText("明日: 6月1日(月)")).toBeInTheDocument();
+    expect(screen.queryByText("今後の予定はありません")).not.toBeInTheDocument();
   });
 
   it("shows reauthentication inside the dashboard for private access errors", () => {

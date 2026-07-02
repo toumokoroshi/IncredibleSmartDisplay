@@ -5,7 +5,7 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
-import { formatTimeLabel } from "../../utils/date";
+import { formatShortWeekdayLabel, formatTimeLabel } from "../../utils/date";
 import type { WidgetProps } from "../../types/widget";
 import type { CalendarData, CalendarSettings } from "./types";
 
@@ -29,45 +29,45 @@ function isSameDay(left: Date, right: Date) {
 }
 
 function formatDayName(date: Date) {
-  return new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(date);
+  return formatShortWeekdayLabel(date);
 }
 
 function formatLongDayName(date: Date) {
-  return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+  return `${formatShortWeekdayLabel(date)}曜日`;
 }
 
 function formatDayNumber(date: Date) {
-  return new Intl.DateTimeFormat("en-US", { day: "numeric" }).format(date);
+  return String(date.getDate());
 }
 
 function formatShortDate(date: Date) {
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date);
+  return `${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
 function formatMonthTitle(date: Date) {
-  return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(date);
+  return new Intl.DateTimeFormat("ja-JP", { month: "long", year: "numeric" }).format(date);
 }
 
 function formatEventTime(event: CalendarEvent) {
   if (event.isAllDay) {
-    return "All day";
+    return "終日";
   }
   return formatTimeLabel(new Date(event.startsAt));
 }
 
 function formatRelativeStart(event: CalendarEvent, now: Date) {
   if (event.isAllDay) {
-    return "Today";
+    return "本日";
   }
 
   const minutes = Math.max(0, Math.round((new Date(event.startsAt).getTime() - now.getTime()) / 60000));
   if (minutes < 60) {
-    return `in ${minutes} min`;
+    return `あと${minutes}分`;
   }
 
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  return remainingMinutes === 0 ? `in ${hours}h` : `in ${hours}h ${remainingMinutes}m`;
+  return remainingMinutes === 0 ? `あと${hours}時間` : `あと${hours}時間${remainingMinutes}分`;
 }
 
 function getEventsForDay(items: CalendarEvent[], date: Date) {
@@ -143,7 +143,7 @@ function CalendarQuickLook({ data, now }: { data: CalendarData; now: Date }) {
   return (
     <div className="mt-4 grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_auto] gap-3">
       <section className="grid min-h-0 content-center overflow-hidden rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] px-4 py-4">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Next event</p>
+        <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">次の予定</p>
         <p className="mt-2 text-[42px] font-bold leading-none text-blue-600">{formatEventTime(nextEvent)}</p>
         <p className="mt-3 line-clamp-2 text-[25px] font-semibold leading-tight text-slate-950">{nextEvent.title}</p>
         <p className="mt-2 truncate text-base font-semibold text-slate-500">{`${formatRelativeStart(nextEvent, now)}${nextEvent.calendarName ? ` ・ ${nextEvent.calendarName}` : ""}`}</p>
@@ -176,10 +176,10 @@ function LocalDateQuickLook({ now }: { now: Date }) {
   return (
     <div className="mt-4 grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)] gap-3">
       <section className="grid content-start overflow-hidden rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] px-4 py-4">
-        <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Today</p>
+        <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">今日</p>
         <p className="mt-2 text-[36px] font-bold leading-none text-blue-600">{formatShortDate(now)}</p>
         <p className="mt-2 truncate text-[22px] font-semibold leading-tight text-slate-950">{formatLongDayName(now)}</p>
-        <p className="mt-2 truncate text-base font-semibold text-slate-500">{`Tomorrow: ${formatShortDate(tomorrow)} ${formatDayName(tomorrow)}`}</p>
+        <p className="mt-2 truncate text-base font-semibold text-slate-500">{`明日: ${formatShortDate(tomorrow)}(${formatDayName(tomorrow)})`}</p>
       </section>
       <div className="grid grid-cols-7 gap-1.5">
         {weekDays.map((day) => (
@@ -192,12 +192,12 @@ function LocalDateQuickLook({ now }: { now: Date }) {
       <section className="calendar-quicklook-month grid min-h-0 content-center gap-2 overflow-hidden rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] p-3">
         <div className="flex items-center justify-between gap-3">
           <p className="truncate text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{formatMonthTitle(now)}</p>
-          <p className="shrink-0 text-xs font-bold text-slate-500">{`Day ${dayOfMonth} / ${daysInMonth}`}</p>
+          <p className="shrink-0 text-xs font-bold text-slate-500">{`${dayOfMonth}日目 / ${daysInMonth}日`}</p>
         </div>
         <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
           <div className="h-full rounded-full bg-blue-600" style={{ width: `${(dayOfMonth / daysInMonth) * 100}%` }} />
         </div>
-        <p className="truncate text-sm font-semibold text-slate-500">{daysLeft > 0 ? `${daysLeft} days left this month` : "Last day of the month"}</p>
+        <p className="truncate text-sm font-semibold text-slate-500">{daysLeft > 0 ? `今月はあと${daysLeft}日` : "今月最終日"}</p>
       </section>
     </div>
   );
@@ -223,23 +223,23 @@ function CalendarDetail({
     <div className="widget-detail-root calendar-detail-root mt-3 grid min-h-0 flex-1 grid-rows-[52px_minmax(0,1fr)] gap-3">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Today and week</p>
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">今日と今週</p>
           <p className="mt-1 truncate text-base font-semibold text-slate-500">{formatMonthTitle(now)}</p>
         </div>
-        <div className="inline-flex min-h-11 rounded-full border border-[color:var(--panel-stroke)] bg-[var(--control-bg)] p-1" aria-label="Calendar view mode">
+        <div className="inline-flex min-h-11 rounded-full border border-[color:var(--panel-stroke)] bg-[var(--control-bg)] p-1" aria-label="カレンダー表示切替">
           <button
             type="button"
             className={viewMode === "week" ? "rounded-full bg-white px-4 text-sm font-bold text-blue-700 shadow-sm" : "rounded-full px-4 text-sm font-bold text-slate-500"}
             onClick={() => onViewModeChange("week")}
           >
-            Week
+            週
           </button>
           <button
             type="button"
             className={viewMode === "month" ? "rounded-full bg-white px-4 text-sm font-bold text-blue-700 shadow-sm" : "rounded-full px-4 text-sm font-bold text-slate-500"}
             onClick={() => onViewModeChange("month")}
           >
-            Month
+            月
           </button>
         </div>
       </div>
@@ -274,9 +274,9 @@ function CalendarWeekView({
                 </div>
               </div>
               <div className="min-w-0">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Next event</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">次の予定</p>
                 <h3 className="mt-2 truncate text-[30px] font-bold leading-tight text-slate-950">{nextEvent.title}</h3>
-                <p className="mt-2 truncate text-base font-semibold text-slate-500">{nextEvent.calendarName ?? "Calendar"}</p>
+                <p className="mt-2 truncate text-base font-semibold text-slate-500">{nextEvent.calendarName ?? "カレンダー"}</p>
               </div>
             </div>
           ) : (
@@ -284,9 +284,9 @@ function CalendarWeekView({
           )}
         </section>
         <section className="widget-detail-secondary calendar-detail-summary grid min-h-0 grid-cols-3 gap-2 rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] p-3">
-          <Metric label="Today" value={String(todayEvents.length)} note="events" />
-          <Metric label="Free until" value={nextEvent ? formatEventTime(nextEvent) : "--"} note="next fixed time" />
-          <Metric label="This week" value={String(data.items.length)} note="visible items" />
+          <Metric label="今日" value={String(todayEvents.length)} note="件の予定" />
+          <Metric label="次の予定まで" value={nextEvent ? formatEventTime(nextEvent) : "--"} note="次の確定予定" />
+          <Metric label="今週" value={String(data.items.length)} note="表示中の件数" />
         </section>
       </div>
       <section className="widget-detail-list calendar-detail-week grid min-h-0 grid-cols-7 gap-2 overflow-hidden">
@@ -310,9 +310,9 @@ function TodayDatePanel({ now }: { now: Date }) {
         </div>
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Today</p>
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">今日</p>
         <h3 className="mt-2 truncate text-[30px] font-bold leading-tight text-slate-950">{formatShortDate(now)}</h3>
-        <p className="mt-2 truncate text-base font-semibold text-slate-500">{`Tomorrow: ${formatShortDate(tomorrow)} ${formatDayName(tomorrow)}`}</p>
+        <p className="mt-2 truncate text-base font-semibold text-slate-500">{`明日: ${formatShortDate(tomorrow)}(${formatDayName(tomorrow)})`}</p>
       </div>
     </div>
   );
@@ -327,10 +327,10 @@ function CalendarMonthView({ data, nextEvent, now }: { data: CalendarData; nextE
       <section className="widget-detail-list calendar-detail-month grid min-h-0 grid-rows-[32px_minmax(0,1fr)] gap-2 rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] p-3">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">{formatMonthTitle(now)}</p>
-          <p className="text-sm font-semibold text-slate-500">Selected day highlighted</p>
+          <p className="text-sm font-semibold text-slate-500">選択日をハイライト表示</p>
         </div>
         <div className="grid min-h-0 grid-cols-7 grid-rows-[24px_repeat(5,minmax(0,1fr))] gap-1.5">
-          {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((label) => (
+          {["月", "火", "水", "木", "金", "土", "日"].map((label) => (
             <p key={label} className="text-center text-[11px] font-bold uppercase tracking-[0.08em] text-slate-500">
               {label}
             </p>
@@ -342,13 +342,13 @@ function CalendarMonthView({ data, nextEvent, now }: { data: CalendarData; nextE
       </section>
       <aside className="widget-detail-secondary calendar-detail-selected-day grid min-h-0 grid-rows-[32px_126px_minmax(0,1fr)] gap-2 rounded-lg border border-[color:var(--item-stroke)] bg-[var(--item-bg)] p-3">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">Selected day</p>
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">選択した日</p>
           <p className="text-sm font-semibold text-slate-500">{formatDayName(now)}</p>
         </div>
         <section className="grid content-center rounded-lg bg-blue-100 p-4">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">Today</p>
-          <p className="mt-2 text-[32px] font-bold leading-none text-slate-950">{new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(now)}</p>
-          <p className="mt-2 truncate text-sm font-semibold text-slate-600">{nextEvent ? `Next ${formatEventTime(nextEvent)}` : "No upcoming events"}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">今日</p>
+          <p className="mt-2 text-[32px] font-bold leading-none text-slate-950">{formatShortDate(now)}</p>
+          <p className="mt-2 truncate text-sm font-semibold text-slate-600">{nextEvent ? `次は ${formatEventTime(nextEvent)}` : "今後の予定はありません"}</p>
         </section>
         <div className="grid min-h-0 content-start gap-2 overflow-hidden">
           {selectedDayEvents.slice(0, 5).map((event) => (
@@ -384,7 +384,7 @@ function WeekDayColumn({ date, events, today }: { date: Date; events: CalendarEv
         {events.slice(0, 3).map((event) => (
           <EventChip key={event.id} event={event} />
         ))}
-        {events.length > 3 ? <p className="rounded-full bg-slate-100 px-2 py-1 text-center text-xs font-bold text-slate-500">{`+${events.length - 3} more`}</p> : null}
+        {events.length > 3 ? <p className="rounded-full bg-slate-100 px-2 py-1 text-center text-xs font-bold text-slate-500">{`他${events.length - 3}件`}</p> : null}
       </div>
     </article>
   );
@@ -410,7 +410,7 @@ function MonthDayCell({ date, events, muted, today }: { date: Date; events: Cale
           <span key={event.id} className={event.calendarName === "Family" ? "h-2 w-2 rounded-full bg-amber-500" : event.calendarName === "Home" ? "h-2 w-2 rounded-full bg-green-600" : "h-2 w-2 rounded-full bg-blue-600"} />
         ))}
       </div>
-      {events.length > 0 ? <p className="mt-1 truncate text-[11px] font-semibold text-slate-500">{events.length} events</p> : null}
+      {events.length > 0 ? <p className="mt-1 truncate text-[11px] font-semibold text-slate-500">{events.length}件</p> : null}
     </section>
   );
 }
