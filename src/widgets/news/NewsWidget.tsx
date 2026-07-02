@@ -45,7 +45,7 @@ function formatTime(value: string) {
   }).format(new Date(value));
 }
 
-const NEWS_QUICKLOOK_ITEM_COUNT = 2;
+const NEWS_QUICKLOOK_ITEM_COUNT = 1;
 
 function NewsQuickLook({ data, maxItems }: { data: NewsData; maxItems: number }) {
   const visibleCount = Math.min(maxItems, NEWS_QUICKLOOK_ITEM_COUNT);
