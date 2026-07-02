@@ -276,7 +276,7 @@ function TrafficDetail({
     <div className="widget-detail-root traffic-detail-root mt-4 grid min-h-0 flex-1 grid-rows-[11.5rem_minmax(0,1fr)] gap-3 overflow-hidden">
       <section className="widget-detail-secondary traffic-detail-summary grid min-h-0 grid-cols-[minmax(0,1fr)_minmax(520px,0.88fr)] items-center gap-4 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 px-5 py-4">
         <div className="min-w-0">
-          <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-slate-500">Current status</p>
+          <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-slate-500">現在の状況</p>
           <p className={`mt-2 truncate text-[2.125rem] font-extrabold leading-tight ${severityClasses.headline}`}>{getDetailHeadline(counts)}</p>
           <p className={`mt-2 grid min-h-10 grid-cols-[auto_minmax(0,1fr)] items-center gap-2 overflow-hidden rounded-lg border bg-white px-3 py-2 text-[1.0625rem] font-bold leading-tight before:block before:h-full before:min-h-8 before:rounded-full before:content-[''] ${severityClasses.action}`}>
             <span className="truncate">{getActionSummary(counts)}</span>
@@ -293,7 +293,7 @@ function TrafficDetail({
       <div className="grid min-h-0 grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)] gap-3 overflow-hidden">
         <section className="widget-detail-primary traffic-detail-impact grid min-h-0 grid-rows-[2.5rem_minmax(0,1fr)] gap-2.5 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-base font-extrabold uppercase tracking-[0.18em] text-slate-500">Important Impact</h2>
+            <h2 className="text-base font-extrabold uppercase tracking-[0.18em] text-slate-500">重要な影響</h2>
             <p className="text-[0.95rem] font-bold text-slate-500">{severity === "suspended" ? "見合わせを最優先" : severity === "delayed" ? "遅延を優先表示" : severity === "unknown" ? "未確認を通常扱いしない" : "異常なし"}</p>
           </div>
           {affectedLines.length > 0 ? (
@@ -321,15 +321,15 @@ function TrafficDetail({
 
         <section className="widget-detail-list traffic-detail-lines grid min-h-0 grid-rows-[2.5rem_minmax(0,1fr)] gap-2.5 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-base font-extrabold uppercase tracking-[0.18em] text-slate-500">Registered Lines</h2>
-            <p className="text-[0.95rem] font-bold text-slate-500">{counts.total} lines</p>
+            <h2 className="text-base font-extrabold uppercase tracking-[0.18em] text-slate-500">登録路線</h2>
+            <p className="text-[0.95rem] font-bold text-slate-500">{counts.total}路線</p>
           </div>
           <div className="grid min-h-0 content-start overflow-hidden">
             <div className="grid min-h-[1.875rem] grid-cols-[minmax(0,1fr)_6.25rem_5.5rem_minmax(7.375rem,0.62fr)] items-center gap-2.5 border-b border-slate-200 text-[0.6875rem] font-extrabold uppercase tracking-[0.1em] text-slate-500">
-              <span>Line</span>
-              <span className="text-center">Status</span>
-              <span className="text-center">Updated</span>
-              <span className="text-right">Area</span>
+              <span>路線</span>
+              <span className="text-center">状態</span>
+              <span className="text-center">更新</span>
+              <span className="text-right">エリア</span>
             </div>
             {lines.map((line) => (
               <div key={line.id} className="grid min-h-[2.8125rem] grid-cols-[minmax(0,1fr)_6.25rem_5.5rem_minmax(7.375rem,0.62fr)] items-center gap-2.5 border-b border-slate-200 text-base">
