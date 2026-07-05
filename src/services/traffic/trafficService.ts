@@ -1,5 +1,6 @@
 import type { WidgetService } from "../../types/widget";
 import { fetchStaticJson, fetchWorkerJson } from "../jsonProvider";
+import { isIsoDateTimeString, optionalIsoDateTimeString, optionalString } from "../validationGuards";
 import { mockTrafficLines } from "./mockData";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "../../widgets/traffic";
 
@@ -73,18 +74,6 @@ function isTrafficLineData(value: unknown): value is TrafficLineData {
 
 function isTrafficStatus(value: unknown): value is TrafficLineData["status"] {
   return value === "normal" || value === "delayed" || value === "partiallyDelayed" || value === "suspended" || value === "unknown";
-}
-
-function optionalString(value: unknown) {
-  return value === undefined || typeof value === "string";
-}
-
-function optionalIsoDateTimeString(value: unknown) {
-  return value === undefined || isIsoDateTimeString(value);
-}
-
-function isIsoDateTimeString(value: unknown) {
-  return typeof value === "string" && Number.isNaN(Date.parse(value)) === false;
 }
 
 async function fetchStaticJsonTraffic(settings: Extract<TrafficSettings, { provider: "staticJson" }>) {

@@ -1,13 +1,10 @@
 import type { WidgetService } from "../../types/widget";
 import { fetchStaticJson, fetchWorkerJson } from "../jsonProvider";
+import { optionalString } from "../validationGuards";
 import { mockStocksData } from "./mockData";
 import type { StocksData, StocksSettings } from "../../widgets/stocks";
 
 type StockItem = StocksData["items"][number];
-
-function optionalString(value: unknown) {
-  return value === undefined || typeof value === "string";
-}
 
 function isStocksData(value: unknown): value is StocksData {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {

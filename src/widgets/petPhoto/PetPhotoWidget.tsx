@@ -4,7 +4,7 @@ import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { StaleBadge } from "../../components/StaleBadge";
+import { WidgetFrame } from "../../components/WidgetFrame";
 import type { WidgetProps } from "../../types/widget";
 import type { PetPhotoData, PetPhotoSettings } from "./types";
 
@@ -21,21 +21,17 @@ export function PetPhotoWidget({ config, data, error, isEmpty, isHighlighted, st
   }
 
   return (
-    <Card className="flex flex-col gap-3 p-4">
-      <div className="shrink-0 flex items-start justify-between gap-3">
-        <div className="widget-heading flex items-center gap-3">
-          <span className="widget-heading-icon">
-            <Heart aria-hidden="true" size={22} strokeWidth={1.9} />
-          </span>
-          <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
-        </div>
-        {status === "stale" ? <StaleBadge /> : null}
-      </div>
-      {status === "loading" ? <LoadingState /> : null}
-      {status === "error" ? <ErrorState error={error} /> : null}
-      {isEmpty ? <EmptyState /> : null}
-      {data?.photo && status !== "error" && status !== "loading" ? <PetPhotoQuickLook src={data.photo.src} totalPhotos={data.totalPhotos} /> : null}
-    </Card>
+    <WidgetFrame
+      cardClassName="flex flex-col gap-3 p-4"
+      error={error}
+      hasData={data?.photo !== undefined}
+      icon={<Heart aria-hidden="true" size={22} strokeWidth={1.9} />}
+      isEmpty={isEmpty}
+      status={status}
+      title={config.title}
+    >
+      {data?.photo ? <PetPhotoQuickLook src={data.photo.src} totalPhotos={data.totalPhotos} /> : null}
+    </WidgetFrame>
   );
 }
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { WeatherDailySummary, WeatherDisplayCondition, WeatherHourlyPoint } from "./types";
-import { getDailyJudgementSummary, getWeatherInsights } from "./weatherInsights";
+import { getDailyJudgementSummary, getDailyWeatherNote, getHourlyWeatherNote, getWeatherInsights } from "./weatherInsights";
 
 const condition: WeatherDisplayCondition = {
   isDaytime: true,
@@ -61,5 +61,58 @@ describe("weatherInsights", () => {
 
   it("returns an empty judgement without a summary", () => {
     expect(getDailyJudgementSummary()).toBe("");
+  });
+});
+
+describe("getDailyWeatherNote", () => {
+  it("returns an empty note without a summary", () => {
+    expect(getDailyWeatherNote(undefined, "today")).toBe("");
+  });
+
+  it("prioritizes strong UV over heat and rain for today", () => {
+    expect(getDailyWeatherNote({ label: "Today", precipitationProbabilityPercent: 80, uvIndexMax: 7 }, "today")).toBe("UVやや強め。外出時は日差し対策を。");
+  });
+
+  it("prioritizes heat over rain for today when UV is not high", () => {
+    expect(getDailyWeatherNote({ apparentHighTempC: 30, label: "Today", precipitationProbabilityPercent: 80 }, "today")).toBe("昼は暑く感じるため、水分補給を。");
+  });
+
+  it("falls back to a rain note for today when neither UV nor heat trigger", () => {
+    expect(getDailyWeatherNote({ label: "Today", precipitationProbabilityPercent: 80 }, "today")).toBe("雨具があると安心です。");
+  });
+
+  it("defaults to no-umbrella-needed for today with no signals", () => {
+    expect(getDailyWeatherNote({ label: "Today" }, "today")).toBe("雨具なしでも心配なし。");
+  });
+
+  it("prioritizes rain over the temperature gap for tomorrow", () => {
+    expect(getDailyWeatherNote({ highTempC: 30, label: "Tomorrow", lowTempC: 10, precipitationProbabilityPercent: 80 }, "tomorrow")).toBe("明日は雨具があると安心です。");
+  });
+
+  it("flags a large morning/evening temperature gap for tomorrow", () => {
+    expect(getDailyWeatherNote({ highTempC: 28, label: "Tomorrow", lowTempC: 15 }, "tomorrow")).toBe("朝夕の気温差に注意。");
+  });
+
+  it("defaults to no major change for tomorrow with no signals", () => {
+    expect(getDailyWeatherNote({ highTempC: 22, label: "Tomorrow", lowTempC: 18 }, "tomorrow")).toBe("大きな天気崩れなし。");
+  });
+});
+
+describe("getHourlyWeatherNote", () => {
+  it("prioritizes an upcoming rainy hour over wind", () => {
+    const hourly: WeatherHourlyPoint[] = [
+      { precipitationProbabilityPercent: 10, tempC: 20, time: "2026-05-20T10:00:00+09:00", windSpeedKph: 40 },
+      { precipitationProbabilityPercent: 60, tempC: 20, time: "2026-05-20T15:00:00+09:00" },
+    ];
+    expect(getHourlyWeatherNote(hourly)).toBe("15時時以降 雨の可能性");
+  });
+
+  it("reports a strong-wind hour when no rain is expected", () => {
+    const hourly: WeatherHourlyPoint[] = [{ tempC: 20, time: "2026-05-20T12:00:00+09:00", windSpeedKph: 30 }];
+    expect(getHourlyWeatherNote(hourly)).toBe("12時時ごろ 風が強め");
+  });
+
+  it("defaults to no notable change when neither rain nor wind trigger", () => {
+    expect(getHourlyWeatherNote([{ tempC: 20, time: "2026-05-20T12:00:00+09:00" }])).toBe("大きな時間帯変化なし");
   });
 });

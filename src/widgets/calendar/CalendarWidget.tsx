@@ -1,32 +1,14 @@
 import { useMemo, useState } from "react";
 
-import { Card } from "../../components/Card";
-import { ErrorState } from "../../components/ErrorState";
-import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
-import { StaleBadge } from "../../components/StaleBadge";
-import { formatShortWeekdayLabel, formatTimeLabel } from "../../utils/date";
+import { WidgetFrame } from "../../components/WidgetFrame";
+import { addDays, formatMonthTitle, formatShortWeekdayLabel, getDaysInMonth, isSameDay, startOfDay } from "../../utils/date";
+import { formatEventTime, formatRelativeStart, getEventsForDay, getMonthDays, getNextEvent, getWeekDays } from "./calendarEvents";
+import type { CalendarEvent } from "./calendarEvents";
 import type { WidgetProps } from "../../types/widget";
 import type { CalendarData, CalendarSettings } from "./types";
 
-type CalendarEvent = CalendarData["items"][number];
 type CalendarViewMode = "week" | "month";
-
-function startOfDay(date: Date) {
-  const nextDate = new Date(date);
-  nextDate.setHours(0, 0, 0, 0);
-  return nextDate;
-}
-
-function addDays(date: Date, days: number) {
-  const nextDate = new Date(date);
-  nextDate.setDate(nextDate.getDate() + days);
-  return nextDate;
-}
-
-function isSameDay(left: Date, right: Date) {
-  return startOfDay(left).getTime() === startOfDay(right).getTime();
-}
 
 function formatDayName(date: Date) {
   return formatShortWeekdayLabel(date);
@@ -44,87 +26,25 @@ function formatShortDate(date: Date) {
   return `${date.getMonth() + 1}月${date.getDate()}日`;
 }
 
-function formatMonthTitle(date: Date) {
-  return new Intl.DateTimeFormat("ja-JP", { month: "long", year: "numeric" }).format(date);
-}
-
-function formatEventTime(event: CalendarEvent) {
-  if (event.isAllDay) {
-    return "終日";
-  }
-  return formatTimeLabel(new Date(event.startsAt));
-}
-
-function formatRelativeStart(event: CalendarEvent, now: Date) {
-  if (event.isAllDay) {
-    return "本日";
-  }
-
-  const minutes = Math.max(0, Math.round((new Date(event.startsAt).getTime() - now.getTime()) / 60000));
-  if (minutes < 60) {
-    return `あと${minutes}分`;
-  }
-
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  return remainingMinutes === 0 ? `あと${hours}時間` : `あと${hours}時間${remainingMinutes}分`;
-}
-
-function getEventsForDay(items: CalendarEvent[], date: Date) {
-  return items.filter((item) => isSameDay(new Date(item.startsAt), date));
-}
-
-function getNextEvent(items: CalendarEvent[], now: Date) {
-  const upcomingTimedEvent = items
-    .filter((item) => !item.isAllDay && new Date(item.startsAt).getTime() >= now.getTime())
-    .sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime())[0];
-
-  if (upcomingTimedEvent) {
-    return upcomingTimedEvent;
-  }
-
-  return items
-    .filter((item) => item.isAllDay && isSameDay(new Date(item.startsAt), now))
-    .sort((left, right) => new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime())[0];
-}
-
-function getMonthDays(anchor: Date) {
-  const firstOfMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-  const mondayOffset = (firstOfMonth.getDay() + 6) % 7;
-  const firstVisibleDay = addDays(firstOfMonth, -mondayOffset);
-  return Array.from({ length: 35 }, (_, index) => addDays(firstVisibleDay, index));
-}
-
-function getWeekDays(anchor: Date) {
-  const firstVisibleDay = addDays(startOfDay(anchor), -anchor.getDay());
-  return Array.from({ length: 7 }, (_, index) => addDays(firstVisibleDay, index));
-}
-
 export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<CalendarSettings, CalendarData>) {
   const [viewMode, setViewMode] = useState<CalendarViewMode>("week");
   const now = useMemo(() => new Date(), []);
 
   return (
-    <Card className={`flex flex-col ${isHighlighted ? "ring-2 ring-cyan-400/60" : ""}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="widget-heading flex min-w-0 items-center gap-3">
-          <span className="widget-heading-icon">
-            <MaterialSymbolIcon name="calendar_month" />
-          </span>
-          <p className="truncate text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
-        </div>
-        {status === "stale" ? <StaleBadge /> : null}
-      </div>
-      {status === "loading" ? <LoadingState /> : null}
-      {status === "error" ? <ErrorState error={error} /> : null}
-      {data && status !== "error" && status !== "loading" && !isEmpty ? (
-        isHighlighted ? (
-          <CalendarDetail data={data} now={now} viewMode={viewMode} onViewModeChange={setViewMode} />
-        ) : (
-          <CalendarQuickLook data={data} now={now} />
-        )
-      ) : null}
-    </Card>
+    <WidgetFrame
+      cardClassName={`flex flex-col ${isHighlighted ? "ring-2 ring-cyan-400/60" : ""}`}
+      error={error}
+      hasData={data !== undefined}
+      headerRowClassName="flex items-start justify-between gap-3"
+      headingClassName="widget-heading flex min-w-0 items-center gap-3"
+      icon={<MaterialSymbolIcon name="calendar_month" />}
+      isEmpty={isEmpty}
+      status={status}
+      title={config.title}
+      titleClassName="truncate text-lg uppercase tracking-[0.2em] text-slate-400"
+    >
+      {data ? (isHighlighted ? <CalendarDetail data={data} now={now} viewMode={viewMode} onViewModeChange={setViewMode} /> : <CalendarQuickLook data={data} now={now} />) : null}
+    </WidgetFrame>
   );
 }
 
@@ -160,10 +80,6 @@ function CalendarQuickLook({ data, now }: { data: CalendarData; now: Date }) {
       ) : null}
     </div>
   );
-}
-
-function getDaysInMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 }
 
 function LocalDateQuickLook({ now }: { now: Date }) {

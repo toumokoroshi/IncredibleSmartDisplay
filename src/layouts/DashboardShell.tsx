@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { validateDashboardConfig } from "../config/validateConfig";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { HeaderBar } from "../components/HeaderBar";
@@ -9,18 +11,21 @@ import { useOnlineRefresh } from "../hooks/useOnlineRefresh";
 import { useWidgetData } from "../hooks/useWidgetData";
 import { widgetRegistry } from "../registry/widgetRegistry";
 import { dashboardConfig } from "../config/dashboard.config";
+import type { DisplayMode } from "../types/command";
 
-function getHighlightedType(displayMode: string) {
+function resolveHighlightedType(displayMode: DisplayMode) {
   if (displayMode === "home") {
     return null;
   }
-  return displayMode === "stocks" ? "stocks" : displayMode;
+
+  const entry = Object.entries(widgetRegistry).find(([, definition]) => definition.detailDisplayMode === displayMode);
+  return entry?.[0] ?? null;
 }
 
 export function DashboardShell() {
   const { displayMode, executeCommand, headerStatus, widgetStatuses } = useDashboardContext();
-  const { widgets } = validateDashboardConfig();
-  const highlightedType = getHighlightedType(displayMode);
+  const { widgets } = useMemo(() => validateDashboardConfig(), []);
+  const highlightedType = resolveHighlightedType(displayMode);
   const visibleWidgets = highlightedType === null ? widgets : widgets.filter((widget) => widget.type === highlightedType);
   useAutoReload(dashboardConfig.app.autoReload);
   useOnlineRefresh(widgets, widgetStatuses);

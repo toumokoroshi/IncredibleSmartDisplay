@@ -1,23 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useDashboardContext } from "../contexts/DashboardContext";
-import type { AnyWidgetDefinition, WidgetCachePolicy, WidgetError, WidgetErrorCode, WidgetStatus } from "../types/widget";
+import type { AnyWidgetDefinition, WidgetCachePolicy, WidgetError, WidgetStatus } from "../types/widget";
 import { readWidgetCache, writeWidgetCache } from "../utils/cache";
 import { widgetQueryPolicy } from "../utils/queryPolicy";
+import { normalizeError } from "../utils/widgetError";
 import { getWidgetQueryKey } from "../utils/widgetQuery";
 import { resolveWidgetStatus } from "../utils/widgetStatus";
-
-function normalizeError(error: unknown): WidgetError {
-  const message = error instanceof Error ? error.message : "Unknown error";
-  const candidate = error as Partial<WidgetError> | undefined;
-  const code = isWidgetErrorCode(candidate?.code) ? candidate.code : message === "TIMEOUT" ? "TIMEOUT" : message === "NETWORK_ERROR" ? "NETWORK_ERROR" : "UNKNOWN_ERROR";
-  return { code, message, retryable: candidate?.retryable ?? code !== "TIMEOUT" };
-}
-
-function isWidgetErrorCode(value: unknown): value is WidgetErrorCode {
-  return value === "NETWORK_ERROR" || value === "CORS_ERROR" || value === "API_RATE_LIMIT" || value === "AUTH_ERROR" || value === "DATA_EMPTY" || value === "DATA_INVALID" || value === "TIMEOUT" || value === "UNKNOWN_ERROR";
-}
 
 function getCachePolicy(definition: AnyWidgetDefinition | undefined, settings: unknown): WidgetCachePolicy {
   if (definition?.getCachePolicy === undefined || settings === undefined) {
@@ -33,10 +23,16 @@ export function useWidgetData(
 ) {
   const { reportWidgetState } = useDashboardContext();
   const cachePolicy = getCachePolicy(definition, config.settings);
-  const cacheRecord = cachePolicy === "publicPersistent" ? readWidgetCache<unknown>(config.id) : null;
-  const cache = cacheRecord !== null && definition?.validateData(cacheRecord.data) === true ? cacheRecord : null;
+  const cache = useMemo(() => {
+    if (cachePolicy !== "publicPersistent") {
+      return null;
+    }
 
-  const query = useQuery<any, WidgetError>({
+    const cacheRecord = readWidgetCache<unknown>(config.id);
+    return cacheRecord !== null && definition?.validateData(cacheRecord.data) === true ? cacheRecord : null;
+  }, [config.id, cachePolicy, definition]);
+
+  const query = useQuery<unknown, WidgetError>({
     queryKey: getWidgetQueryKey(config.id),
     queryFn: async () => {
       if (definition?.createService === undefined || config.settings === undefined) {

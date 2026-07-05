@@ -1,29 +1,23 @@
 import { ChartSpline } from "lucide-react";
 
-import { Card } from "../../components/Card";
-import { EmptyState } from "../../components/EmptyState";
-import { ErrorState } from "../../components/ErrorState";
-import { LoadingState } from "../../components/LoadingState";
-import { StaleBadge } from "../../components/StaleBadge";
+import { WidgetFrame } from "../../components/WidgetFrame";
 import type { WidgetProps } from "../../types/widget";
 import type { StocksData, StocksSettings } from "./types";
 
 export function StocksWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<StocksSettings, StocksData>) {
   return (
-    <Card className={isHighlighted ? "ring-2 ring-cyan-400/60" : ""}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="widget-heading flex items-center gap-3">
-          <span className="widget-heading-icon">
-            <ChartSpline size={20} strokeWidth={1.8} />
-          </span>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
-        </div>
-        {status === "stale" ? <StaleBadge /> : null}
-      </div>
-      {status === "loading" ? <LoadingState /> : null}
-      {status === "error" ? <ErrorState error={error} /> : null}
-      {isEmpty ? <EmptyState /> : null}
-      {data && status !== "error" && status !== "loading" && !isEmpty ? (
+    <WidgetFrame
+      cardClassName={isHighlighted ? "ring-2 ring-cyan-400/60" : ""}
+      error={error}
+      hasData={data !== undefined}
+      headerRowClassName="flex items-start justify-between gap-3"
+      icon={<ChartSpline size={20} strokeWidth={1.8} />}
+      isEmpty={isEmpty}
+      status={status}
+      title={config.title}
+      titleClassName="text-sm uppercase tracking-[0.2em] text-slate-400"
+    >
+      {data ? (
         <ul className={`${isHighlighted ? "widget-detail-root widget-detail-list stocks-detail-root stocks-detail-list " : ""}mt-4 space-y-3`}>
           {data.items.slice(0, 5).map((item) => (
             <li key={item.symbol} className="widget-list-item flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
@@ -41,6 +35,6 @@ export function StocksWidget({ config, data, error, isEmpty, isHighlighted, stat
           ))}
         </ul>
       ) : null}
-    </Card>
+    </WidgetFrame>
   );
 }

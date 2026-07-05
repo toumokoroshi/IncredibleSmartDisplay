@@ -1,199 +1,21 @@
-import { Card } from "../../components/Card";
-import { EmptyState } from "../../components/EmptyState";
-import { ErrorState } from "../../components/ErrorState";
-import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
+import { WidgetFrame } from "../../components/WidgetFrame";
+import { formatHourMinuteLabel as formatTime } from "../../utils/date";
+import {
+  getActionSummary,
+  getCounts,
+  getDetailHeadline,
+  getDetailStatusLabel,
+  getLineTextClass,
+  getSeverityClasses,
+  getStatusClass,
+  getStatusLabel,
+  getSummary,
+  getTrafficSeverity,
+} from "./trafficStatusDisplay";
 import type { WidgetProps } from "../../types/widget";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "./types";
-
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date(value));
-}
-
-function getStatusLabel(line: TrafficLineData) {
-  if (line.status === "delayed" && typeof line.delayMinutes === "number") {
-    return `+${line.delayMinutes}`;
-  }
-
-  if (line.status === "partiallyDelayed") {
-    return "一部";
-  }
-
-  if (line.status === "suspended") {
-    return "停止";
-  }
-
-  if (line.status === "normal") {
-    return "OK";
-  }
-
-  return "確認";
-}
-
-function getStatusClass(line: TrafficLineData) {
-  switch (line.status) {
-    case "normal":
-      return "bg-emerald-100 text-emerald-700";
-    case "delayed":
-      return "bg-amber-100 text-amber-700";
-    case "suspended":
-      return "bg-red-100 text-red-700";
-    case "partiallyDelayed":
-      return "bg-amber-100 text-amber-700";
-    default:
-      return "bg-slate-200 text-slate-600";
-  }
-}
-
-function getSummary(lines: TrafficLineData[]) {
-  const counts = getCounts(lines);
-  const affected = counts.affected;
-  const normal = counts.normal;
-  if (affected === 0) {
-    return {
-      primaryLabel: `通常 ${normal}/${lines.length}`,
-      secondaryLabel: `異常 ${affected}/${lines.length}`,
-      className: "text-emerald-700",
-    };
-  }
-  const hasSuspended = counts.suspended > 0;
-  const hasUnknown = counts.unknown > 0 && counts.delayed === 0 && counts.suspended === 0;
-  return {
-    primaryLabel: `${hasSuspended ? "見合わせ" : hasUnknown ? "未確認" : "遅延"} ${affected}/${lines.length}`,
-    secondaryLabel: `通常 ${normal}/${lines.length}`,
-    className: hasSuspended ? "text-red-700" : hasUnknown ? "text-slate-600" : "text-amber-700",
-  };
-}
-
-function getCounts(lines: TrafficLineData[]) {
-  const delayed = lines.filter((line) => line.status === "delayed" || line.status === "partiallyDelayed").length;
-  const suspended = lines.filter((line) => line.status === "suspended").length;
-  const unknown = lines.filter((line) => line.status === "unknown").length;
-  const affected = lines.filter((line) => line.status !== "normal").length;
-  const normal = lines.length - affected;
-  return { affected, delayed, normal, suspended, total: lines.length, unknown };
-}
-
-function getDetailStatusLabel(line: TrafficLineData) {
-  if (line.status === "delayed" && typeof line.delayMinutes === "number") {
-    return `遅延 +${line.delayMinutes}分`;
-  }
-  if (line.status === "partiallyDelayed") {
-    return "一部遅延";
-  }
-  if (line.status === "suspended") {
-    return "運転見合わせ";
-  }
-  if (line.status === "normal") {
-    return "通常";
-  }
-  return "要確認";
-}
-
-function getTrafficSeverity(counts: ReturnType<typeof getCounts>) {
-  if (counts.suspended > 0) {
-    return "suspended";
-  }
-
-  if (counts.delayed > 0) {
-    return "delayed";
-  }
-
-  if (counts.unknown > 0) {
-    return "unknown";
-  }
-
-  return "normal";
-}
-
-function getDetailHeadline(counts: ReturnType<typeof getCounts>) {
-  const severity = getTrafficSeverity(counts);
-
-  if (severity === "suspended") {
-    return `${counts.suspended}路線で運転見合わせ`;
-  }
-
-  if (severity === "delayed") {
-    return `${counts.affected}路線に影響。見合わせなし`;
-  }
-
-  if (severity === "unknown") {
-    return `${counts.unknown}路線が未確認。前回情報を表示`;
-  }
-
-  return "登録路線はすべて通常運行";
-}
-
-function getActionSummary(counts: ReturnType<typeof getCounts>) {
-  const severity = getTrafficSeverity(counts);
-
-  if (severity === "suspended") {
-    return "経路変更を確認してください。";
-  }
-
-  if (severity === "delayed") {
-    return "出発時刻に余裕を持ってください。";
-  }
-
-  if (severity === "unknown") {
-    return "データ鮮度に注意してください。";
-  }
-
-  return "通常どおり移動できます。";
-}
-
-function getSeverityClasses(severity: ReturnType<typeof getTrafficSeverity>) {
-  if (severity === "suspended") {
-    return {
-      action: "border-red-600/20 text-slate-950 before:w-[13px] before:bg-red-600",
-      headline: "text-red-700",
-      metric: "text-red-700",
-    };
-  }
-
-  if (severity === "delayed") {
-    return {
-      action: "border-amber-600/20 text-slate-950 before:w-[9px] before:bg-amber-600",
-      headline: "text-amber-700",
-      metric: "text-amber-700",
-    };
-  }
-
-  if (severity === "unknown") {
-    return {
-      action: "border-slate-400/30 text-slate-950 before:w-[9px] before:bg-slate-400",
-      headline: "text-slate-600",
-      metric: "text-slate-600",
-    };
-  }
-
-  return {
-    action: "border-emerald-700/20 text-slate-950 before:w-[5px] before:bg-emerald-700",
-    headline: "text-emerald-700",
-    metric: "text-emerald-700",
-  };
-}
-
-function getLineTextClass(line: TrafficLineData) {
-  if (line.status === "normal") {
-    return "text-emerald-700";
-  }
-
-  if (line.status === "suspended") {
-    return "text-red-700";
-  }
-
-  if (line.status === "unknown") {
-    return "text-slate-600";
-  }
-
-  return "text-amber-700";
-}
 
 export function TrafficWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<TrafficSettings, TrafficData>) {
   const maxItems = config.settings?.maxItems ?? 8;
@@ -202,58 +24,54 @@ export function TrafficWidget({ config, data, error, isEmpty, isHighlighted, sta
   const counts = getCounts(lines);
 
   return (
-    <Card className={`traffic-card-compact ${isHighlighted ? "traffic-detail-card ring-2 ring-cyan-400/60" : ""}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="widget-heading flex items-center gap-3">
-          <span className="widget-heading-icon">
-            <MaterialSymbolIcon name="train" />
-          </span>
-          <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
-        </div>
+    <WidgetFrame
+      cardClassName={`traffic-card-compact ${isHighlighted ? "traffic-detail-card ring-2 ring-cyan-400/60" : ""}`}
+      error={error}
+      hasData={data !== undefined}
+      headerExtra={
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
           {status === "stale" ? <StaleBadge /> : null}
           {data?.generatedAt || data?.updatedAt ? <span>{formatTime(data.generatedAt ?? data.updatedAt)}</span> : null}
         </div>
-      </div>
-
-      {status === "loading" ? <LoadingState /> : null}
-      {status === "error" ? <ErrorState error={error} /> : null}
-      {isEmpty ? <EmptyState /> : null}
-      {data && status !== "error" && status !== "loading" && !isEmpty && isHighlighted ? (
-        <TrafficDetail
-          counts={counts}
-          lines={lines}
-          updatedAt={data.updatedAt}
-        />
+      }
+      headerRowClassName="flex items-start justify-between gap-3"
+      icon={<MaterialSymbolIcon name="train" />}
+      isEmpty={isEmpty}
+      status={status}
+      title={config.title}
+    >
+      {data ? (
+        isHighlighted ? (
+          <TrafficDetail counts={counts} lines={lines} updatedAt={data.updatedAt} />
+        ) : (
+          <>
+            <div className="mt-2 flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
+              <strong className={`text-[34px] font-semibold leading-none ${summary.className}`}>{summary.primaryLabel}</strong>
+              <span className="text-[15px] font-bold text-slate-500">{summary.secondaryLabel}</span>
+            </div>
+            <div className="grid grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 pt-1 text-[11px] font-bold tracking-[0.08em] text-slate-500">
+              <span>路線</span>
+              <span className="text-center">更新</span>
+              <span className="text-center">状態</span>
+            </div>
+            <ul className="mt-1 grid min-h-0">
+              {lines.map((line) => (
+                <li
+                  key={line.id}
+                  className="grid min-h-[28px] grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 border-b border-slate-200 py-0.5"
+                >
+                  <p className="truncate text-[19px] font-medium leading-tight text-slate-950">{line.name}</p>
+                  <span className="text-center text-[13px] font-bold text-slate-500">{formatTime(line.updatedAt)}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-center text-[15px] font-extrabold leading-tight ${getStatusClass(line)}`}>
+                    {getStatusLabel(line)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
       ) : null}
-      {data && status !== "error" && status !== "loading" && !isEmpty && !isHighlighted ? (
-        <>
-          <div className="mt-2 flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
-            <strong className={`text-[34px] font-semibold leading-none ${summary.className}`}>{summary.primaryLabel}</strong>
-            <span className="text-[15px] font-bold text-slate-500">{summary.secondaryLabel}</span>
-          </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 pt-1 text-[11px] font-bold tracking-[0.08em] text-slate-500">
-            <span>路線</span>
-            <span className="text-center">更新</span>
-            <span className="text-center">状態</span>
-          </div>
-          <ul className="mt-1 grid min-h-0">
-            {lines.map((line) => (
-              <li
-                key={line.id}
-                className="grid min-h-[28px] grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 border-b border-slate-200 py-0.5"
-              >
-                <p className="truncate text-[19px] font-medium leading-tight text-slate-950">{line.name}</p>
-                <span className="text-center text-[13px] font-bold text-slate-500">{formatTime(line.updatedAt)}</span>
-                <span className={`rounded-full px-2 py-0.5 text-center text-[15px] font-extrabold leading-tight ${getStatusClass(line)}`}>
-                  {getStatusLabel(line)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : null}
-    </Card>
+    </WidgetFrame>
   );
 }
 

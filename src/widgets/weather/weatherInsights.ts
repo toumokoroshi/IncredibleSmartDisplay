@@ -9,6 +9,11 @@ const coldLowTempThresholdC = 10;
 const largeTempGapThresholdC = 10;
 const strongWindThresholdKph = 28;
 const strongUvThreshold = 6;
+const noteRainProbabilityThreshold = 50;
+const noteStrongWindThresholdKph = 28;
+const noteHotApparentTempThresholdC = 28;
+const noteStrongUvThreshold = 6;
+const noteLargeTempGapThresholdC = 10;
 
 export function getWeatherInsights(daily: WeatherDailySummary[], hourly: WeatherHourlyPoint[]): WeatherInsight[] {
   const today = daily[0];
@@ -96,4 +101,58 @@ export function getDailyJudgementSummary(summary?: WeatherDailySummary, hourly: 
   }
 
   return "\u96e8\u5177\u306a\u3057\u3067\u3082\u5fc3\u914d\u306a\u3057";
+}
+
+export function getDailyWeatherNote(summary: WeatherDailySummary | undefined, scope: "today" | "tomorrow") {
+  if (!summary) {
+    return "";
+  }
+
+  const precipitation = summary.precipitationProbabilityPercent ?? 0;
+  const apparentHigh = summary.apparentHighTempC ?? summary.highTempC;
+  const high = summary.highTempC;
+  const low = summary.lowTempC;
+  const tempGap = high !== undefined && low !== undefined ? high - low : 0;
+
+  if (scope === "today") {
+    if ((summary.uvIndexMax ?? 0) >= noteStrongUvThreshold) {
+      return "UV\u3084\u3084\u5f37\u3081\u3002\u5916\u51fa\u6642\u306f\u65e5\u5dee\u3057\u5bfe\u7b56\u3092\u3002";
+    }
+
+    if (apparentHigh !== undefined && apparentHigh >= noteHotApparentTempThresholdC) {
+      return "\u663c\u306f\u6691\u304f\u611f\u3058\u308b\u305f\u3081\u3001\u6c34\u5206\u88dc\u7d66\u3092\u3002";
+    }
+
+    if (precipitation >= noteRainProbabilityThreshold) {
+      return "\u96e8\u5177\u304c\u3042\u308b\u3068\u5b89\u5fc3\u3067\u3059\u3002";
+    }
+
+    return "\u96e8\u5177\u306a\u3057\u3067\u3082\u5fc3\u914d\u306a\u3057\u3002";
+  }
+
+  if (precipitation >= noteRainProbabilityThreshold) {
+    return "\u660e\u65e5\u306f\u96e8\u5177\u304c\u3042\u308b\u3068\u5b89\u5fc3\u3067\u3059\u3002";
+  }
+
+  if (tempGap >= noteLargeTempGapThresholdC) {
+    return "\u671d\u5915\u306e\u6c17\u6e29\u5dee\u306b\u6ce8\u610f\u3002";
+  }
+
+  return "\u5927\u304d\u306a\u5929\u6c17\u5d29\u308c\u306a\u3057\u3002";
+}
+
+export function getHourlyWeatherNote(hourly: WeatherHourlyPoint[]) {
+  const rainyPoint = hourly.find((point) => (point.precipitationProbabilityPercent ?? 0) >= noteRainProbabilityThreshold);
+
+  if (rainyPoint) {
+    return `${formatHourNumber(rainyPoint.time)}\u6642\u4ee5\u964d \u96e8\u306e\u53ef\u80fd\u6027`;
+  }
+
+  const windyPoint = hourly.find((point) => (point.windSpeedKph ?? 0) >= noteStrongWindThresholdKph);
+
+  if (windyPoint) {
+    return `${formatHourNumber(windyPoint.time)}\u6642\u3054\u308d \u98a8\u304c\u5f37\u3081`;
+  }
+
+  return "\u5927\u304d\u306a\u6642\u9593\u5e2f\u5909\u5316\u306a\u3057";
 }
