@@ -6,6 +6,9 @@ export default defineConfig({
   base: process.env.VITE_BASE_PATH ?? "/",
   plugins: [react(), tailwindcss()],
   test: {
+    env: {
+      TZ: "Asia/Tokyo",
+    },
     environment: "jsdom",
     globals: true,
     setupFiles: "./src/test/setup.ts",
