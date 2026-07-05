@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { WidgetFrame } from "../../components/WidgetFrame";
 import type { WidgetProps } from "../../types/widget";
+import { resolvePublicAssetPath } from "../../utils/publicAssetPath";
 import type { WeatherDailySummary, WeatherData, WeatherDisplayCondition, WeatherHourlyPoint, WeatherModifier, WeatherSettings, WeatherSunEventPoint, WeatherTimelinePoint } from "./types";
 import { formatConditionLabel, getDisplayCondition, getKindLabel, getMeteoconsIconName, getModifierLabel, unavailableCondition } from "./weatherConditionDisplay";
 import { getDailySummaries } from "./weatherDaily";
@@ -11,7 +12,7 @@ import { formatHour, formatMeters, formatMetersPerSecond, formatPercent, formatP
 import { getDailyJudgementSummary, getDailyWeatherNote, getHourlyWeatherNote } from "./weatherInsights";
 import { buildWeatherTimeline, getCurrentHourlyIndex, getDayMarkerIndexes, getTimelineKey } from "./weatherTimeline";
 
-const meteoconsBaseUrl = "https://unpkg.com/@meteocons/svg@0.1.0/flat";
+const meteoconsBaseUrl = resolvePublicAssetPath("icons/meteocons");
 
 export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<WeatherSettings, WeatherData>) {
   return (

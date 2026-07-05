@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { WidgetFrame } from "../../components/WidgetFrame";
+import { useNow } from "../../hooks/useNow";
 import { addDays, formatMonthTitle, formatShortWeekdayLabel, getDaysInMonth, isSameDay, startOfDay } from "../../utils/date";
 import { formatEventTime, formatRelativeStart, getEventsForDay, getMonthDays, getNextEvent, getWeekDays } from "./calendarEvents";
 import type { CalendarEvent } from "./calendarEvents";
@@ -28,7 +29,7 @@ function formatShortDate(date: Date) {
 
 export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<CalendarSettings, CalendarData>) {
   const [viewMode, setViewMode] = useState<CalendarViewMode>("week");
-  const now = useMemo(() => new Date(), []);
+  const now = useNow();
 
   return (
     <WidgetFrame

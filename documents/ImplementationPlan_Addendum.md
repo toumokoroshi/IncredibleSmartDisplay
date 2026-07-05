@@ -464,21 +464,19 @@ Avoid leaving obsolete guidance such as "Calendar/News/Traffic are mock" when th
 cleanup only. The following items would change runtime behavior and were deliberately left out of that refactor;
 they should be picked up as separate, explicitly-scoped changes.
 
-### Meteocons CDN dependency
+### Meteocons CDN dependency (resolved)
 
-`WeatherWidget.tsx` resolves weather icons from `https://unpkg.com/@meteocons/svg@0.1.0/flat` at runtime (see
-`meteoconsBaseUrl`). Unlike Material Symbols icons, these are not self-hosted under `public/icons/`. Before migrating
-off GitHub Pages to a LAN-only local server, or relying on the kiosk working while temporarily offline, self-host the
-meteocons SVGs under `public/icons/meteocons/` using the same approach as the Material Symbols icons, and point
-`meteoconsBaseUrl` at the local path via `resolvePublicAssetPath`.
+`WeatherWidget.tsx` used to resolve weather icons from `https://unpkg.com/@meteocons/svg@0.1.0/flat` at runtime. The
+meteocons SVGs (flat style, MIT-licensed, see `public/icons/meteocons/README.md`) are now self-hosted under
+`public/icons/meteocons/` using the same approach as the Material Symbols icons, and `meteoconsBaseUrl` resolves the
+local path via `resolvePublicAssetPath`. No runtime CDN dependency remains for weather icons.
 
-### Calendar "now" is fixed at mount time
+### Calendar "now" is fixed at mount time (resolved)
 
-`CalendarWidget.tsx` computes `now` with `useMemo(() => new Date(), [])`, so relative labels ("あと15分", "今日",
-day/week/month highlighting) freeze at whatever time the widget first mounted and never advance while the kiosk tab
-stays open. A `useNow` hook (polling `Date.now()` on an interval, e.g. once a minute) would keep these labels current
-without forcing a full widget remount. Not implemented here because it changes render behavior/timers, which is out
-of scope for a behavior-preserving refactor.
+`CalendarWidget.tsx` previously computed `now` with `useMemo(() => new Date(), [])`, so relative labels ("あと15分",
+"今日", day/week/month highlighting) froze at whatever time the widget first mounted. A `useNow` hook
+(`src/hooks/useNow.ts`) now polls `Date.now()` on a configurable interval (default once a minute) and `CalendarWidget`
+uses it instead, keeping these labels current without forcing a full widget remount.
 
 ### `index.html` leftover scaffold values
 
