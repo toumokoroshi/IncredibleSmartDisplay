@@ -1,10 +1,7 @@
 import { useMemo, useState } from "react";
 
-import { Card } from "../../components/Card";
-import { ErrorState } from "../../components/ErrorState";
-import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
-import { StaleBadge } from "../../components/StaleBadge";
+import { WidgetFrame } from "../../components/WidgetFrame";
 import { addDays, formatMonthTitle, formatShortWeekdayLabel, getDaysInMonth, isSameDay, startOfDay } from "../../utils/date";
 import { formatEventTime, formatRelativeStart, getEventsForDay, getMonthDays, getNextEvent, getWeekDays } from "./calendarEvents";
 import type { CalendarEvent } from "./calendarEvents";
@@ -34,26 +31,20 @@ export function CalendarWidget({ config, data, error, isEmpty, isHighlighted, st
   const now = useMemo(() => new Date(), []);
 
   return (
-    <Card className={`flex flex-col ${isHighlighted ? "ring-2 ring-cyan-400/60" : ""}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="widget-heading flex min-w-0 items-center gap-3">
-          <span className="widget-heading-icon">
-            <MaterialSymbolIcon name="calendar_month" />
-          </span>
-          <p className="truncate text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
-        </div>
-        {status === "stale" ? <StaleBadge /> : null}
-      </div>
-      {status === "loading" ? <LoadingState /> : null}
-      {status === "error" ? <ErrorState error={error} /> : null}
-      {data && status !== "error" && status !== "loading" && !isEmpty ? (
-        isHighlighted ? (
-          <CalendarDetail data={data} now={now} viewMode={viewMode} onViewModeChange={setViewMode} />
-        ) : (
-          <CalendarQuickLook data={data} now={now} />
-        )
-      ) : null}
-    </Card>
+    <WidgetFrame
+      cardClassName={`flex flex-col ${isHighlighted ? "ring-2 ring-cyan-400/60" : ""}`}
+      error={error}
+      hasData={data !== undefined}
+      headerRowClassName="flex items-start justify-between gap-3"
+      headingClassName="widget-heading flex min-w-0 items-center gap-3"
+      icon={<MaterialSymbolIcon name="calendar_month" />}
+      isEmpty={isEmpty}
+      status={status}
+      title={config.title}
+      titleClassName="truncate text-lg uppercase tracking-[0.2em] text-slate-400"
+    >
+      {data ? (isHighlighted ? <CalendarDetail data={data} now={now} viewMode={viewMode} onViewModeChange={setViewMode} /> : <CalendarQuickLook data={data} now={now} />) : null}
+    </WidgetFrame>
   );
 }
 

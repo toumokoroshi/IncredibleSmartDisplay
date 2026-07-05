@@ -1,9 +1,6 @@
-import { Card } from "../../components/Card";
-import { EmptyState } from "../../components/EmptyState";
-import { ErrorState } from "../../components/ErrorState";
-import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
+import { WidgetFrame } from "../../components/WidgetFrame";
 import { formatHourMinuteLabel as formatTime } from "../../utils/date";
 import {
   getActionSummary,
@@ -27,58 +24,54 @@ export function TrafficWidget({ config, data, error, isEmpty, isHighlighted, sta
   const counts = getCounts(lines);
 
   return (
-    <Card className={`traffic-card-compact ${isHighlighted ? "traffic-detail-card ring-2 ring-cyan-400/60" : ""}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div className="widget-heading flex items-center gap-3">
-          <span className="widget-heading-icon">
-            <MaterialSymbolIcon name="train" />
-          </span>
-          <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
-        </div>
+    <WidgetFrame
+      cardClassName={`traffic-card-compact ${isHighlighted ? "traffic-detail-card ring-2 ring-cyan-400/60" : ""}`}
+      error={error}
+      hasData={data !== undefined}
+      headerExtra={
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
           {status === "stale" ? <StaleBadge /> : null}
           {data?.generatedAt || data?.updatedAt ? <span>{formatTime(data.generatedAt ?? data.updatedAt)}</span> : null}
         </div>
-      </div>
-
-      {status === "loading" ? <LoadingState /> : null}
-      {status === "error" ? <ErrorState error={error} /> : null}
-      {isEmpty ? <EmptyState /> : null}
-      {data && status !== "error" && status !== "loading" && !isEmpty && isHighlighted ? (
-        <TrafficDetail
-          counts={counts}
-          lines={lines}
-          updatedAt={data.updatedAt}
-        />
+      }
+      headerRowClassName="flex items-start justify-between gap-3"
+      icon={<MaterialSymbolIcon name="train" />}
+      isEmpty={isEmpty}
+      status={status}
+      title={config.title}
+    >
+      {data ? (
+        isHighlighted ? (
+          <TrafficDetail counts={counts} lines={lines} updatedAt={data.updatedAt} />
+        ) : (
+          <>
+            <div className="mt-2 flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
+              <strong className={`text-[34px] font-semibold leading-none ${summary.className}`}>{summary.primaryLabel}</strong>
+              <span className="text-[15px] font-bold text-slate-500">{summary.secondaryLabel}</span>
+            </div>
+            <div className="grid grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 pt-1 text-[11px] font-bold tracking-[0.08em] text-slate-500">
+              <span>路線</span>
+              <span className="text-center">更新</span>
+              <span className="text-center">状態</span>
+            </div>
+            <ul className="mt-1 grid min-h-0">
+              {lines.map((line) => (
+                <li
+                  key={line.id}
+                  className="grid min-h-[28px] grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 border-b border-slate-200 py-0.5"
+                >
+                  <p className="truncate text-[19px] font-medium leading-tight text-slate-950">{line.name}</p>
+                  <span className="text-center text-[13px] font-bold text-slate-500">{formatTime(line.updatedAt)}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-center text-[15px] font-extrabold leading-tight ${getStatusClass(line)}`}>
+                    {getStatusLabel(line)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
       ) : null}
-      {data && status !== "error" && status !== "loading" && !isEmpty && !isHighlighted ? (
-        <>
-          <div className="mt-2 flex items-baseline justify-between gap-3 border-b border-slate-200 pb-2">
-            <strong className={`text-[34px] font-semibold leading-none ${summary.className}`}>{summary.primaryLabel}</strong>
-            <span className="text-[15px] font-bold text-slate-500">{summary.secondaryLabel}</span>
-          </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 pt-1 text-[11px] font-bold tracking-[0.08em] text-slate-500">
-            <span>路線</span>
-            <span className="text-center">更新</span>
-            <span className="text-center">状態</span>
-          </div>
-          <ul className="mt-1 grid min-h-0">
-            {lines.map((line) => (
-              <li
-                key={line.id}
-                className="grid min-h-[28px] grid-cols-[minmax(0,1fr)_48px_58px] items-center gap-2 border-b border-slate-200 py-0.5"
-              >
-                <p className="truncate text-[19px] font-medium leading-tight text-slate-950">{line.name}</p>
-                <span className="text-center text-[13px] font-bold text-slate-500">{formatTime(line.updatedAt)}</span>
-                <span className={`rounded-full px-2 py-0.5 text-center text-[15px] font-extrabold leading-tight ${getStatusClass(line)}`}>
-                  {getStatusLabel(line)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </>
-      ) : null}
-    </Card>
+    </WidgetFrame>
   );
 }
 

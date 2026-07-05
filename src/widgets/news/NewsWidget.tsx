@@ -1,39 +1,29 @@
-import { Card } from "../../components/Card";
-import { EmptyState } from "../../components/EmptyState";
-import { ErrorState } from "../../components/ErrorState";
-import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
+import { WidgetFrame } from "../../components/WidgetFrame";
 import { formatDistanceToNowLabel, formatHourMinuteLabel as formatTime } from "../../utils/date";
 import type { WidgetProps } from "../../types/widget";
 import type { NewsData, NewsSettings } from "./types";
 
 export function NewsWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<NewsSettings, NewsData>) {
   return (
-    <Card className={`flex flex-col ${isHighlighted ? "ring-2 ring-cyan-400/60" : ""}`}>
-      <div className="shrink-0 flex items-start justify-between gap-3">
-        <div className="widget-heading flex items-center gap-3">
-          <span className="widget-heading-icon">
-            <MaterialSymbolIcon name="newspaper" />
-          </span>
-          <p className="text-lg uppercase tracking-[0.2em] text-slate-400">{config.title}</p>
-        </div>
+    <WidgetFrame
+      cardClassName={`flex flex-col ${isHighlighted ? "ring-2 ring-cyan-400/60" : ""}`}
+      error={error}
+      hasData={data !== undefined}
+      headerExtra={
         <div className="text-right text-xs font-semibold text-slate-500">
           {status === "stale" ? <StaleBadge /> : null}
           {data?.generatedAt ? <p className="mt-1">更新 {formatTime(data.generatedAt)}</p> : null}
         </div>
-      </div>
-      {status === "loading" ? <LoadingState /> : null}
-      {status === "error" ? <ErrorState error={error} /> : null}
-      {isEmpty ? <EmptyState /> : null}
-      {data && status !== "error" && status !== "loading" && !isEmpty ? (
-        isHighlighted ? (
-          <NewsDetail data={data} maxItems={config.settings?.maxItems ?? 5} />
-        ) : (
-          <NewsQuickLook data={data} maxItems={config.settings?.maxItems ?? 5} />
-        )
-      ) : null}
-    </Card>
+      }
+      icon={<MaterialSymbolIcon name="newspaper" />}
+      isEmpty={isEmpty}
+      status={status}
+      title={config.title}
+    >
+      {data ? (isHighlighted ? <NewsDetail data={data} maxItems={config.settings?.maxItems ?? 5} /> : <NewsQuickLook data={data} maxItems={config.settings?.maxItems ?? 5} />) : null}
+    </WidgetFrame>
   );
 }
 
