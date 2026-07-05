@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useDashboardContext } from "../contexts/DashboardContext";
@@ -23,10 +23,16 @@ export function useWidgetData(
 ) {
   const { reportWidgetState } = useDashboardContext();
   const cachePolicy = getCachePolicy(definition, config.settings);
-  const cacheRecord = cachePolicy === "publicPersistent" ? readWidgetCache<unknown>(config.id) : null;
-  const cache = cacheRecord !== null && definition?.validateData(cacheRecord.data) === true ? cacheRecord : null;
+  const cache = useMemo(() => {
+    if (cachePolicy !== "publicPersistent") {
+      return null;
+    }
 
-  const query = useQuery<any, WidgetError>({
+    const cacheRecord = readWidgetCache<unknown>(config.id);
+    return cacheRecord !== null && definition?.validateData(cacheRecord.data) === true ? cacheRecord : null;
+  }, [config.id, cachePolicy, definition]);
+
+  const query = useQuery<unknown, WidgetError>({
     queryKey: getWidgetQueryKey(config.id),
     queryFn: async () => {
       if (definition?.createService === undefined || config.settings === undefined) {
