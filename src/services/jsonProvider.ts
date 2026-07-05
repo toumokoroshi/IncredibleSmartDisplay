@@ -2,6 +2,7 @@ import type { WidgetError, WidgetErrorCode } from "../types/widget";
 import { appendCacheBuster } from "../utils/cacheBuster";
 import { resolvePublicAssetPath } from "../utils/publicAssetPath";
 import { withTimeout } from "../utils/timeout";
+import { isRetryableErrorCode, isWidgetErrorCode } from "../utils/widgetError";
 
 type ServiceError = Error & WidgetError;
 
@@ -26,23 +27,6 @@ function createJsonProviderError(code: WidgetErrorCode, message: string, retryab
   error.code = code;
   error.retryable = retryable;
   return error;
-}
-
-function isWidgetErrorCode(value: unknown): value is WidgetErrorCode {
-  return (
-    value === "NETWORK_ERROR" ||
-    value === "CORS_ERROR" ||
-    value === "API_RATE_LIMIT" ||
-    value === "AUTH_ERROR" ||
-    value === "DATA_EMPTY" ||
-    value === "DATA_INVALID" ||
-    value === "TIMEOUT" ||
-    value === "UNKNOWN_ERROR"
-  );
-}
-
-function isRetryableErrorCode(code: WidgetErrorCode) {
-  return code === "NETWORK_ERROR" || code === "CORS_ERROR" || code === "API_RATE_LIMIT" || code === "TIMEOUT" || code === "UNKNOWN_ERROR";
 }
 
 function getStructuredErrorPayload(payload: unknown) {
