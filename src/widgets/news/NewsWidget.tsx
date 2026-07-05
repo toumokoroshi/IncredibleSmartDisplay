@@ -4,7 +4,7 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
-import { formatDistanceToNowLabel } from "../../utils/date";
+import { formatDistanceToNowLabel, formatHourMinuteLabel as formatTime } from "../../utils/date";
 import type { WidgetProps } from "../../types/widget";
 import type { NewsData, NewsSettings } from "./types";
 
@@ -35,14 +35,6 @@ export function NewsWidget({ config, data, error, isEmpty, isHighlighted, status
       ) : null}
     </Card>
   );
-}
-
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date(value));
 }
 
 const NEWS_QUICKLOOK_ITEM_COUNT = 1;

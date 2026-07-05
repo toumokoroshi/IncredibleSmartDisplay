@@ -5,28 +5,12 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
-import { formatShortWeekdayLabel, formatTimeLabel } from "../../utils/date";
+import { addDays, formatMonthTitle, formatShortWeekdayLabel, formatTimeLabel, getDaysInMonth, isSameDay, startOfDay } from "../../utils/date";
 import type { WidgetProps } from "../../types/widget";
 import type { CalendarData, CalendarSettings } from "./types";
 
 type CalendarEvent = CalendarData["items"][number];
 type CalendarViewMode = "week" | "month";
-
-function startOfDay(date: Date) {
-  const nextDate = new Date(date);
-  nextDate.setHours(0, 0, 0, 0);
-  return nextDate;
-}
-
-function addDays(date: Date, days: number) {
-  const nextDate = new Date(date);
-  nextDate.setDate(nextDate.getDate() + days);
-  return nextDate;
-}
-
-function isSameDay(left: Date, right: Date) {
-  return startOfDay(left).getTime() === startOfDay(right).getTime();
-}
 
 function formatDayName(date: Date) {
   return formatShortWeekdayLabel(date);
@@ -42,10 +26,6 @@ function formatDayNumber(date: Date) {
 
 function formatShortDate(date: Date) {
   return `${date.getMonth() + 1}月${date.getDate()}日`;
-}
-
-function formatMonthTitle(date: Date) {
-  return new Intl.DateTimeFormat("ja-JP", { month: "long", year: "numeric" }).format(date);
 }
 
 function formatEventTime(event: CalendarEvent) {
@@ -160,10 +140,6 @@ function CalendarQuickLook({ data, now }: { data: CalendarData; now: Date }) {
       ) : null}
     </div>
   );
-}
-
-function getDaysInMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 }
 
 function LocalDateQuickLook({ now }: { now: Date }) {

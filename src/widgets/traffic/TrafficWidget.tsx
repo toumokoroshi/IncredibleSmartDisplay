@@ -4,16 +4,9 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { MaterialSymbolIcon } from "../../components/MaterialSymbolIcon";
 import { StaleBadge } from "../../components/StaleBadge";
+import { formatHourMinuteLabel as formatTime } from "../../utils/date";
 import type { WidgetProps } from "../../types/widget";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "./types";
-
-function formatTime(value: string) {
-  return new Intl.DateTimeFormat("ja-JP", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date(value));
-}
 
 function getStatusLabel(line: TrafficLineData) {
   if (line.status === "delayed" && typeof line.delayMinutes === "number") {
