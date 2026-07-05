@@ -11,16 +11,11 @@ import type { WidgetProps } from "../../types/widget";
 import type { WeatherDailySummary, WeatherData, WeatherDisplayCondition, WeatherHourlyPoint, WeatherModifier, WeatherSettings, WeatherSunEventPoint, WeatherTimelinePoint } from "./types";
 import { formatConditionLabel, getDisplayCondition, getKindLabel, getMeteoconsIconName, getModifierLabel, unavailableCondition } from "./weatherConditionDisplay";
 import { getDailySummaries } from "./weatherDaily";
-import { formatHour, formatHourNumber, formatMeters, formatMetersPerSecond, formatPercent, formatPrecipitation, formatTemp, formatTimelineTime, formatWindDirection, getSunEventLabel } from "./weatherFormatters";
-import { getDailyJudgementSummary } from "./weatherInsights";
+import { formatHour, formatMeters, formatMetersPerSecond, formatPercent, formatPrecipitation, formatTemp, formatTimelineTime, formatWindDirection, getSunEventLabel } from "./weatherFormatters";
+import { getDailyJudgementSummary, getDailyWeatherNote, getHourlyWeatherNote } from "./weatherInsights";
 import { buildWeatherTimeline, getCurrentHourlyIndex, getDayMarkerIndexes, getTimelineKey } from "./weatherTimeline";
 
 const meteoconsBaseUrl = "https://unpkg.com/@meteocons/svg@0.1.0/flat";
-const noteRainProbabilityThreshold = 50;
-const noteStrongWindThresholdKph = 28;
-const noteHotApparentTempThresholdC = 28;
-const noteStrongUvThreshold = 6;
-const noteLargeTempGapThresholdC = 10;
 
 export function WeatherWidget({ config, data, error, isEmpty, isHighlighted, status }: WidgetProps<WeatherSettings, WeatherData>) {
   return (
@@ -129,9 +124,6 @@ function NowWeatherSummary({
         <p className={`${compact ? "mt-0 text-lg" : "mt-1 text-[1.625rem]"} text-slate-300`}>{data.locationName}</p>
         <div className={`${compact ? "mt-2 flex items-end gap-5" : "mt-1.5"}`}>
           <p className={`font-semibold leading-none text-white ${tempClassName}`}>{formatTemp(data.currentTempC)}</p>
-          {!compact ? (
-            null
-          ) : null}
         </div>
         <p className={`${compact ? "mt-1 text-lg" : "mt-1.5 text-[1.375rem]"} text-slate-300`}>{formatConditionLabel(condition)}</p>
         <div className={`${compact ? "mt-2 flex flex-wrap gap-x-4 gap-y-1" : "mt-2 grid max-w-[21.25rem] grid-cols-[repeat(2,minmax(132px,1fr))] gap-2"}`}>
@@ -245,60 +237,6 @@ function QuickStatChip({ compact = false, dense = false, icon, label, value }: {
       </div>
     </div>
   );
-}
-
-function getDailyWeatherNote(summary: WeatherDailySummary | undefined, scope: "today" | "tomorrow") {
-  if (!summary) {
-    return "";
-  }
-
-  const precipitation = summary.precipitationProbabilityPercent ?? 0;
-  const apparentHigh = summary.apparentHighTempC ?? summary.highTempC;
-  const high = summary.highTempC;
-  const low = summary.lowTempC;
-  const tempGap = high !== undefined && low !== undefined ? high - low : 0;
-
-  if (scope === "today") {
-    if ((summary.uvIndexMax ?? 0) >= noteStrongUvThreshold) {
-      return "UVやや強め。外出時は日差し対策を。";
-    }
-
-    if (apparentHigh !== undefined && apparentHigh >= noteHotApparentTempThresholdC) {
-      return "昼は暑く感じるため、水分補給を。";
-    }
-
-    if (precipitation >= noteRainProbabilityThreshold) {
-      return "雨具があると安心です。";
-    }
-
-    return "雨具なしでも心配なし。";
-  }
-
-  if (precipitation >= noteRainProbabilityThreshold) {
-    return "明日は雨具があると安心です。";
-  }
-
-  if (tempGap >= noteLargeTempGapThresholdC) {
-    return "朝夕の気温差に注意。";
-  }
-
-  return "大きな天気崩れなし。";
-}
-
-function getHourlyWeatherNote(hourly: WeatherHourlyPoint[]) {
-  const rainyPoint = hourly.find((point) => (point.precipitationProbabilityPercent ?? 0) >= noteRainProbabilityThreshold);
-
-  if (rainyPoint) {
-    return `${formatHourNumber(rainyPoint.time)}時以降 雨の可能性`;
-  }
-
-  const windyPoint = hourly.find((point) => (point.windSpeedKph ?? 0) >= noteStrongWindThresholdKph);
-
-  if (windyPoint) {
-    return `${formatHourNumber(windyPoint.time)}時ごろ 風が強め`;
-  }
-
-  return "大きな時間帯変化なし";
 }
 
 function NextHoursStrip({ hourly, iconSize = 34 }: { hourly: WeatherHourlyPoint[]; iconSize?: number }) {
