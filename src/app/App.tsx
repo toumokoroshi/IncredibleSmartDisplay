@@ -5,9 +5,8 @@ import { dashboardConfig } from "../config/dashboard.config";
 import { DashboardProvider } from "../contexts/DashboardContext";
 import { DashboardShell } from "../layouts/DashboardShell";
 
-const queryClient = new QueryClient();
-
 export default function App() {
+  const [queryClient] = useState(() => new QueryClient());
   const [displayMode, setDisplayMode] = useState(dashboardConfig.app.defaultDisplayMode);
 
   return (

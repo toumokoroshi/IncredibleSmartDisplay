@@ -12,4 +12,5 @@ export type DisplayMode =
 export type DashboardCommand =
   | { type: "SET_DISPLAY_MODE"; mode: DisplayMode }
   | { type: "REFRESH_WIDGET"; widgetId: string }
+  | { type: "REFRESH_WIDGETS"; widgetIds: string[] }
   | { type: "TRIGGER_ACTION"; actionId: string };

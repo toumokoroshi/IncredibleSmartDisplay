@@ -8,7 +8,7 @@ export function getDailySummaries(data: WeatherData): WeatherDailySummary[] {
 
   return [
     {
-      label: "Today",
+      label: "今日",
       condition: data.todayCondition ?? getDisplayCondition(data),
       highTempC: data.highTempC,
       lowTempC: data.lowTempC,

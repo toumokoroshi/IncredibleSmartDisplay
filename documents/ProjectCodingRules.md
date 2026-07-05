@@ -37,6 +37,11 @@ These rules are project-level instructions for IncredibleSmartDisplay. Keep fixe
 - When adding a widget, add `widgets/{name}`, `services/{name}`, definition, registry registration, config, and tests together.
 - A failure in one widget must not break the full dashboard.
 - Do not mix mock and real implementations implicitly. Make the provider explicit.
+- Do not let intermediate implementation names become long-term architecture boundaries. If a helper, hook, or service starts as `mock`, `staticJson`, or another narrow provider, keep the reusable transport, validation, cache, command, and layout responsibilities behind provider-neutral interfaces or thin provider wrappers.
+- Depend on stable contracts before concrete providers: `WidgetData`, `WidgetService`, `WidgetDefinition`, settings schemas, query policy, and cache policy. Treat `mock`, `localDate`, `staticJson`, `workerJson`, and vendor-specific integrations as replaceable adapters.
+- A provider migration should usually change service adapters, config, and contract tests. It should not require Dashboard layout or Widget component rewrites unless the user-facing product behavior changes.
+- Keep widget-specific capabilities in `WidgetDefinition` when possible, such as cache TTL, empty-state rules, detail support, or display-mode mapping. Shared hooks and layouts should not grow widget-type switch statements for behavior that belongs to a widget definition.
+- When a temporary MVP path becomes a real extension point, update the implementation and this documentation together so future widgets follow the stable boundary rather than the temporary shape.
 
 ## 4. TypeScript Rules
 
@@ -148,6 +153,7 @@ not be treated as a substitute for smaller commits or smaller assets.
 - Use TODO comments only when the required follow-up condition is clear.
 - Mock, fixed, and placeholder implementations should be named so their temporary nature is obvious.
 - If a user action is required, explain both the steps and the reason.
+- If a required implementation decision is not covered by the specification or project rules, do not silently invent the product behavior. State the recommended interpretation, explain the tradeoff, and ask the user to decide before implementing that behavior.
 
 ## 10. Review Checklist
 

@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calendar Layout Preview</title>
+    <style>
+      :root {
+        --page-bg: #e8ecf2;
+        --screen-bg: #f6f8fb;
+        --panel: #ffffff;
+        --item: #f8fafc;
+        --control: #eef2f7;
+        --stroke: rgba(15, 23, 42, 0.09);
+        --text: #0f172a;
+        --muted: #64748b;
+        --blue: #2563eb;
+        --cyan: #0891b2;
+        --green: #15803d;
+        --amber: #b45309;
+        --red: #dc2626;
+        --shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+        font-family:
+          "Google Sans", "Product Sans", "Noto Sans JP", "Noto Sans",
+          "Roboto", "Aptos", "Segoe UI Variable", "Yu Gothic UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        overflow-x: auto;
+        background: var(--page-bg);
+        color: var(--text);
+      }
+
+      main {
+        display: grid;
+        width: max-content;
+        max-width: 100%;
+        gap: 24px;
+        padding: 24px;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+
+      h1 {
+        font-size: 28px;
+        font-weight: 720;
+      }
+
+      h2 {
+        font-size: 22px;
+        font-weight: 720;
+      }
+
+      .intro,
+      .preview-title {
+        display: grid;
+        max-width: 1120px;
+        gap: 7px;
+      }
+
+      .intro p,
+      .preview-title p {
+        color: #475569;
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .device {
+        width: 1524px;
+        height: 1016px;
+        overflow: hidden;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: var(--screen-bg);
+        padding: 16px;
+        box-shadow: var(--shadow);
+      }
+
+      .dashboard {
+        display: grid;
+        height: 100%;
+        grid-template-rows: 118px minmax(0, 1fr);
+        gap: 16px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.82);
+        padding: 20px 28px;
+      }
+
+      .clock {
+        font-size: 58px;
+        font-weight: 520;
+        line-height: 1;
+      }
+
+      .date {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .status-pill {
+        min-height: 42px;
+        border-radius: 999px;
+        background: var(--control);
+        padding: 10px 14px;
+        color: #475569;
+        font-size: 16px;
+        font-weight: 740;
+      }
+
+      .calendar-detail {
+        display: grid;
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        padding: 24px;
+      }
+
+      .detail-head {
+        display: flex;
+        min-height: 64px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .title-group {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .heading-icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid #bfdbfe;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: var(--blue);
+        font-size: 20px;
+        font-weight: 840;
+      }
+
+      .detail-head h2 {
+        color: #334155;
+        font-size: 23px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .detail-head p {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 16px;
+        font-weight: 650;
+      }
+
+      .mode-switch {
+        display: inline-flex;
+        min-height: 44px;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 999px;
+        background: var(--control);
+        padding: 4px;
+      }
+
+      .mode-switch span {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 8px 15px;
+        color: #64748b;
+        font-size: 15px;
+        font-weight: 820;
+      }
+
+      .mode-switch .active {
+        background: #fff;
+        color: var(--blue);
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+      }
+
+      .panel {
+        min-width: 0;
+        min-height: 0;
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: var(--item);
+      }
+
+      .next-card {
+        display: grid;
+        align-content: center;
+        padding: 20px 24px;
+      }
+
+      .next-grid {
+        display: grid;
+        grid-template-columns: 154px minmax(0, 1fr);
+        align-items: center;
+        gap: 22px;
+      }
+
+      .time-block {
+        display: grid;
+        min-height: 142px;
+        place-items: center;
+        border-radius: 8px;
+        background: #dbeafe;
+        color: var(--blue);
+        text-align: center;
+      }
+
+      .time-block strong {
+        font-size: 42px;
+        line-height: 1;
+      }
+
+      .time-block span {
+        margin-top: 8px;
+        font-size: 16px;
+        font-weight: 780;
+      }
+
+      .eyebrow {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 820;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .next-card h3 {
+        margin-top: 8px;
+        overflow: hidden;
+        color: var(--text);
+        font-size: 34px;
+        font-weight: 780;
+        line-height: 1.08;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .next-card p:last-child {
+        margin-top: 10px;
+        color: #475569;
+        font-size: 19px;
+        font-weight: 680;
+      }
+
+      .summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .metric {
+        display: grid;
+        align-content: center;
+        border-radius: 8px;
+        background: #fff;
+        padding: 16px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      .metric strong {
+        margin-top: 8px;
+        color: var(--text);
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .metric p {
+        margin-top: 8px;
+        overflow: hidden;
+        color: #475569;
+        font-size: 15px;
+        font-weight: 680;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .weekly-option {
+        grid-template-rows: 64px 178px minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .weekly-top {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        gap: 14px;
+      }
+
+      .weekly-board {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 10px;
+        overflow: hidden;
+      }
+
+      .day-column {
+        display: grid;
+        min-width: 0;
+        min-height: 0;
+        grid-template-rows: 64px minmax(0, 1fr);
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: var(--item);
+      }
+
+      .day-head {
+        display: grid;
+        align-content: center;
+        border-bottom: 1px solid var(--stroke);
+        background: #fff;
+        padding: 9px 11px;
+      }
+
+      .day-head.today {
+        background: #dbeafe;
+      }
+
+      .day-name {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 830;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .day-date {
+        margin-top: 3px;
+        color: var(--text);
+        font-size: 22px;
+        font-weight: 820;
+      }
+
+      .day-events {
+        display: grid;
+        min-height: 0;
+        align-content: start;
+        gap: 8px;
+        overflow: hidden;
+        padding: 10px;
+      }
+
+      .event-chip {
+        min-width: 0;
+        border-left: 4px solid var(--blue);
+        border-radius: 8px;
+        background: #fff;
+        padding: 9px 9px 9px 10px;
+      }
+
+      .event-chip.family {
+        border-left-color: var(--amber);
+      }
+
+      .event-chip.home {
+        border-left-color: var(--green);
+      }
+
+      .event-chip time {
+        color: var(--blue);
+        font-size: 14px;
+        font-weight: 850;
+      }
+
+      .event-chip p {
+        margin-top: 4px;
+        overflow: hidden;
+        color: #1e293b;
+        font-size: 16px;
+        font-weight: 740;
+        line-height: 1.12;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .more {
+        border-radius: 999px;
+        background: var(--control);
+        padding: 7px 10px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 820;
+        text-align: center;
+      }
+
+      .split-option {
+        grid-template-rows: 64px minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .toggle-option {
+        grid-template-rows: 64px minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .split-grid {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1.03fr) minmax(0, 0.97fr);
+        gap: 14px;
+      }
+
+      .week-pane {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: 190px minmax(0, 1fr);
+        gap: 12px;
+      }
+
+      .compact-week {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .compact-day {
+        display: grid;
+        min-width: 0;
+        grid-template-rows: 48px minmax(0, 1fr);
+        overflow: hidden;
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        background: #fff;
+      }
+
+      .compact-day .day-head {
+        padding: 7px 8px;
+      }
+
+      .compact-day .day-date {
+        font-size: 18px;
+      }
+
+      .compact-day .event-chip {
+        padding: 7px 8px;
+      }
+
+      .compact-day .event-chip p {
+        font-size: 14px;
+      }
+
+      .month-pane {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: 42px minmax(0, 1fr);
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .toggle-grid {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 14px;
+      }
+
+      .month-main {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: 42px minmax(0, 1fr);
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .selected-day {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: 42px 150px minmax(0, 1fr);
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .selected-date-card {
+        display: grid;
+        align-content: center;
+        border-radius: 8px;
+        background: #dbeafe;
+        padding: 18px;
+      }
+
+      .selected-date-card span {
+        color: var(--blue);
+        font-size: 14px;
+        font-weight: 840;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .selected-date-card strong {
+        margin-top: 8px;
+        color: var(--text);
+        font-size: 42px;
+        font-weight: 820;
+        line-height: 1;
+      }
+
+      .selected-date-card p {
+        margin-top: 9px;
+        color: #475569;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .selected-list {
+        display: grid;
+        min-height: 0;
+        align-content: start;
+        gap: 9px;
+        overflow: hidden;
+      }
+
+      .selected-event {
+        border-radius: 8px;
+        background: #fff;
+        padding: 11px 12px;
+      }
+
+      .selected-event time {
+        color: var(--blue);
+        font-size: 15px;
+        font-weight: 850;
+      }
+
+      .selected-event p {
+        margin-top: 5px;
+        overflow: hidden;
+        color: #1e293b;
+        font-size: 17px;
+        font-weight: 740;
+        line-height: 1.12;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .section-title {
+        color: var(--muted);
+        font-size: 15px;
+        font-weight: 820;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .section-note {
+        color: #475569;
+        font-size: 15px;
+        font-weight: 720;
+      }
+
+      .month-grid {
+        display: grid;
+        min-height: 0;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        grid-template-rows: 30px repeat(5, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      .weekday {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 840;
+        letter-spacing: 0.08em;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .month-day {
+        display: grid;
+        min-width: 0;
+        align-content: start;
+        gap: 4px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #fff;
+        padding: 7px;
+      }
+
+      .month-day.muted {
+        opacity: 0.38;
+      }
+
+      .month-day.today {
+        outline: 3px solid #bfdbfe;
+        outline-offset: -3px;
+      }
+
+      .month-num {
+        color: #334155;
+        font-size: 15px;
+        font-weight: 820;
+      }
+
+      .month-dot-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--blue);
+      }
+
+      .dot.home {
+        background: var(--green);
+      }
+
+      .dot.family {
+        background: var(--amber);
+      }
+
+      .month-label {
+        overflow: hidden;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 720;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .layout-probe {
+        outline: 1px solid rgba(34, 197, 94, 0.28);
+        outline-offset: -1px;
+      }
+
+      .probe-report {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 10;
+        display: grid;
+        gap: 6px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.94);
+        padding: 12px 14px;
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 720;
+      }
+
+      .probe-report .ok {
+        color: var(--green);
+      }
+
+      .probe-report .fail {
+        color: var(--red);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="intro">
+        <h1>Calendar Detail Layout Preview</h1>
+        <p>Target: 1524 x 1016 CSS px. This compares two detail directions: a single weekly board built around the next event, and a split mode where calendar-week and calendar-month are separate layouts.</p>
+      </section>
+
+      <section class="preview-title">
+        <h2>1. Next event + today summary + 7-day weekly board</h2>
+        <p>Recommended default. It keeps the immediate decision point above the weekly scan, with one stable detail mode.</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Thu, May 28 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:40</span>
+              <span class="status-pill">Online</span>
+              <span class="status-pill">Calendar detail</span>
+            </div>
+          </header>
+
+          <article class="layout-probe widget-detail-root calendar-detail-root calendar-detail weekly-option">
+            <div class="detail-head">
+              <div class="title-group">
+                <span class="heading-icon">C</span>
+                <div>
+                  <h2>Calendar</h2>
+                  <p>Next event and 7-day schedule</p>
+                </div>
+              </div>
+              <div class="mode-switch" aria-label="Calendar display mode">
+                <span class="active">Week</span>
+              </div>
+            </div>
+
+            <div class="weekly-top">
+              <section class="layout-probe widget-detail-primary calendar-detail-next panel next-card">
+                <div class="next-grid">
+                  <div class="time-block">
+                    <strong>09:30</strong>
+                    <span>in 1h 48m</span>
+                  </div>
+                  <div>
+                    <p class="eyebrow">Next event</p>
+                    <h3>週次レビューと買い出し前の確認</h3>
+                    <p>Work calendar ・ 45 min ・ Meet link hidden by Worker</p>
+                  </div>
+                </div>
+              </section>
+              <section class="layout-probe widget-detail-secondary calendar-detail-summary panel summary">
+                <div class="metric"><span>Today</span><strong>4</strong><p>events after now</p></div>
+                <div class="metric"><span>Free until</span><strong>09:30</strong><p>next fixed appointment</p></div>
+                <div class="metric"><span>This week</span><strong>17</strong><p>5 work / 8 home / 4 family</p></div>
+              </section>
+            </div>
+
+            <section class="layout-probe widget-detail-list calendar-detail-week weekly-board">
+              <article class="day-column">
+                <header class="day-head today"><p class="day-name">Thu</p><p class="day-date">28</p></header>
+                <div class="day-events">
+                  <section class="event-chip"><time>09:30</time><p>週次レビュー</p></section>
+                  <section class="event-chip home"><time>12:15</time><p>昼休み</p></section>
+                  <section class="event-chip family"><time>18:30</time><p>動物病院の予約確認</p></section>
+                  <div class="more">+1 more</div>
+                </div>
+              </article>
+              <article class="day-column">
+                <header class="day-head"><p class="day-name">Fri</p><p class="day-date">29</p></header>
+                <div class="day-events">
+                  <section class="event-chip home"><time>08:45</time><p>出発前チェック</p></section>
+                  <section class="event-chip"><time>10:00</time><p>プロジェクト定例</p></section>
+                  <section class="event-chip family"><time>19:00</time><p>夕食の予定</p></section>
+                </div>
+              </article>
+              <article class="day-column">
+                <header class="day-head"><p class="day-name">Sat</p><p class="day-date">30</p></header>
+                <div class="day-events">
+                  <section class="event-chip home"><time>All day</time><p>掃除と買い出し</p></section>
+                  <section class="event-chip family"><time>15:00</time><p>家族予定</p></section>
+                </div>
+              </article>
+              <article class="day-column">
+                <header class="day-head"><p class="day-name">Sun</p><p class="day-date">31</p></header>
+                <div class="day-events">
+                  <section class="event-chip home"><time>10:30</time><p>散歩</p></section>
+                  <section class="event-chip family"><time>17:30</time><p>翌週準備</p></section>
+                </div>
+              </article>
+              <article class="day-column">
+                <header class="day-head"><p class="day-name">Mon</p><p class="day-date">1</p></header>
+                <div class="day-events">
+                  <section class="event-chip"><time>09:00</time><p>朝会</p></section>
+                  <section class="event-chip"><time>13:00</time><p>設計レビュー</p></section>
+                  <section class="event-chip home"><time>20:00</time><p>ごみ出し準備</p></section>
+                </div>
+              </article>
+              <article class="day-column">
+                <header class="day-head"><p class="day-name">Tue</p><p class="day-date">2</p></header>
+                <div class="day-events">
+                  <section class="event-chip"><time>11:00</time><p>1on1</p></section>
+                  <section class="event-chip family"><time>18:00</time><p>予約確認</p></section>
+                </div>
+              </article>
+              <article class="day-column">
+                <header class="day-head"><p class="day-name">Wed</p><p class="day-date">3</p></header>
+                <div class="day-events">
+                  <section class="event-chip"><time>10:00</time><p>週次同期</p></section>
+                  <section class="event-chip home"><time>All day</time><p>資源ごみ</p></section>
+                </div>
+              </article>
+            </section>
+          </article>
+        </div>
+      </section>
+
+      <section class="preview-title">
+        <h2>2. Separate calendar-week and calendar-month layouts</h2>
+        <p>Alternative. Week remains action-oriented; month becomes a density overview. This needs explicit mode switching and more implementation surface.</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Thu, May 28 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:40</span>
+              <span class="status-pill">Online</span>
+              <span class="status-pill">Week / Month</span>
+            </div>
+          </header>
+
+          <article class="layout-probe widget-detail-root calendar-detail-root calendar-detail split-option">
+            <div class="detail-head">
+              <div class="title-group">
+                <span class="heading-icon">C</span>
+                <div>
+                  <h2>Calendar</h2>
+                  <p>Separate calendar-week and calendar-month concepts</p>
+                </div>
+              </div>
+              <div class="mode-switch" aria-label="Calendar display mode">
+                <span class="active">Week</span>
+                <span>Month</span>
+              </div>
+            </div>
+
+            <div class="split-grid">
+              <section class="layout-probe calendar-week panel week-pane">
+                <section class="layout-probe calendar-detail-next next-card">
+                  <div class="next-grid">
+                    <div class="time-block">
+                      <strong>09:30</strong>
+                      <span>next</span>
+                    </div>
+                    <div>
+                      <p class="eyebrow">calendar-week</p>
+                      <h3>週次レビュー</h3>
+                      <p>Week mode keeps near-term decisions readable.</p>
+                    </div>
+                  </div>
+                </section>
+                <div class="compact-week">
+                  <article class="compact-day"><header class="day-head today"><p class="day-name">Thu</p><p class="day-date">28</p></header><div class="day-events"><section class="event-chip"><time>09:30</time><p>週次レビュー</p></section><section class="event-chip family"><time>18:30</time><p>動物病院</p></section></div></article>
+                  <article class="compact-day"><header class="day-head"><p class="day-name">Fri</p><p class="day-date">29</p></header><div class="day-events"><section class="event-chip"><time>10:00</time><p>定例</p></section><section class="event-chip home"><time>19:00</time><p>夕食</p></section></div></article>
+                  <article class="compact-day"><header class="day-head"><p class="day-name">Sat</p><p class="day-date">30</p></header><div class="day-events"><section class="event-chip home"><time>All</time><p>買い出し</p></section></div></article>
+                  <article class="compact-day"><header class="day-head"><p class="day-name">Sun</p><p class="day-date">31</p></header><div class="day-events"><section class="event-chip family"><time>17:30</time><p>翌週準備</p></section></div></article>
+                  <article class="compact-day"><header class="day-head"><p class="day-name">Mon</p><p class="day-date">1</p></header><div class="day-events"><section class="event-chip"><time>09:00</time><p>朝会</p></section><div class="more">+2</div></div></article>
+                  <article class="compact-day"><header class="day-head"><p class="day-name">Tue</p><p class="day-date">2</p></header><div class="day-events"><section class="event-chip"><time>11:00</time><p>1on1</p></section></div></article>
+                  <article class="compact-day"><header class="day-head"><p class="day-name">Wed</p><p class="day-date">3</p></header><div class="day-events"><section class="event-chip home"><time>All</time><p>資源ごみ</p></section></div></article>
+                </div>
+              </section>
+
+              <section class="layout-probe calendar-month panel month-pane">
+                <div class="section-head">
+                  <p class="section-title">calendar-month</p>
+                  <p class="section-note">June density overview</p>
+                </div>
+                <div class="month-grid">
+                  <div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div><div class="weekday">Sun</div>
+                  <div class="month-day muted"><p class="month-num">25</p></div>
+                  <div class="month-day muted"><p class="month-num">26</p></div>
+                  <div class="month-day muted"><p class="month-num">27</p></div>
+                  <div class="month-day today"><p class="month-num">28</p><div class="month-dot-row"><span class="dot"></span><span class="dot home"></span><span class="dot family"></span></div><p class="month-label">4 events</p></div>
+                  <div class="month-day"><p class="month-num">29</p><div class="month-dot-row"><span class="dot"></span><span class="dot family"></span></div><p class="month-label">3 events</p></div>
+                  <div class="month-day"><p class="month-num">30</p><div class="month-dot-row"><span class="dot home"></span><span class="dot family"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">31</p><div class="month-dot-row"><span class="dot family"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">1</p><div class="month-dot-row"><span class="dot"></span><span class="dot"></span><span class="dot home"></span></div><p class="month-label">5 events</p></div>
+                  <div class="month-day"><p class="month-num">2</p><div class="month-dot-row"><span class="dot"></span><span class="dot family"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">3</p><div class="month-dot-row"><span class="dot"></span><span class="dot home"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">4</p><div class="month-dot-row"><span class="dot"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">5</p><div class="month-dot-row"><span class="dot"></span><span class="dot family"></span></div><p class="month-label">3 events</p></div>
+                  <div class="month-day"><p class="month-num">6</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">7</p></div>
+                  <div class="month-day"><p class="month-num">8</p><div class="month-dot-row"><span class="dot"></span><span class="dot"></span></div><p class="month-label">4 events</p></div>
+                  <div class="month-day"><p class="month-num">9</p><div class="month-dot-row"><span class="dot"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">10</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">11</p></div>
+                  <div class="month-day"><p class="month-num">12</p><div class="month-dot-row"><span class="dot"></span><span class="dot family"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">13</p></div>
+                  <div class="month-day"><p class="month-num">14</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">15</p><div class="month-dot-row"><span class="dot"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">16</p></div>
+                  <div class="month-day"><p class="month-num">17</p><div class="month-dot-row"><span class="dot"></span><span class="dot home"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">18</p></div>
+                  <div class="month-day"><p class="month-num">19</p><div class="month-dot-row"><span class="dot family"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">20</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">21</p></div>
+                  <div class="month-day"><p class="month-num">22</p><div class="month-dot-row"><span class="dot"></span><span class="dot"></span></div><p class="month-label">4 events</p></div>
+                  <div class="month-day"><p class="month-num">23</p></div>
+                  <div class="month-day"><p class="month-num">24</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">25</p><div class="month-dot-row"><span class="dot"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">26</p></div>
+                  <div class="month-day"><p class="month-num">27</p><div class="month-dot-row"><span class="dot family"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">28</p></div>
+                </div>
+              </section>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="preview-title">
+        <h2>3. Detail button toggles Week / Month</h2>
+        <p>A single Calendar detail mode with an in-screen segmented control. Month view needs a selected-day rail so the screen still answers what happens next.</p>
+      </section>
+      <section class="device">
+        <div class="dashboard">
+          <header class="header">
+            <div>
+              <div class="clock">07:42</div>
+              <div class="date">Thu, May 28 ・ Tokyo</div>
+            </div>
+            <div class="status-row">
+              <span class="status-pill">Updated 07:40</span>
+              <span class="status-pill">Online</span>
+              <span class="status-pill">Month active</span>
+            </div>
+          </header>
+
+          <article class="layout-probe widget-detail-root calendar-detail-root calendar-detail toggle-option">
+            <div class="detail-head">
+              <div class="title-group">
+                <span class="heading-icon">C</span>
+                <div>
+                  <h2>Calendar</h2>
+                  <p>One detail screen, user switches Week / Month</p>
+                </div>
+              </div>
+              <div class="mode-switch" aria-label="Calendar display mode">
+                <span>Week</span>
+                <span class="active">Month</span>
+              </div>
+            </div>
+
+            <div class="toggle-grid">
+              <section class="layout-probe calendar-month panel month-main">
+                <div class="section-head">
+                  <p class="section-title">June 2026</p>
+                  <p class="section-note">Month overview, selected day highlighted</p>
+                </div>
+                <div class="month-grid">
+                  <div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div><div class="weekday">Sun</div>
+                  <div class="month-day muted"><p class="month-num">25</p></div>
+                  <div class="month-day muted"><p class="month-num">26</p></div>
+                  <div class="month-day muted"><p class="month-num">27</p></div>
+                  <div class="month-day today"><p class="month-num">28</p><div class="month-dot-row"><span class="dot"></span><span class="dot home"></span><span class="dot family"></span></div><p class="month-label">selected</p></div>
+                  <div class="month-day"><p class="month-num">29</p><div class="month-dot-row"><span class="dot"></span><span class="dot family"></span></div><p class="month-label">3 events</p></div>
+                  <div class="month-day"><p class="month-num">30</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">31</p><div class="month-dot-row"><span class="dot family"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">1</p><div class="month-dot-row"><span class="dot"></span><span class="dot"></span><span class="dot home"></span></div><p class="month-label">5 events</p></div>
+                  <div class="month-day"><p class="month-num">2</p><div class="month-dot-row"><span class="dot"></span><span class="dot family"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">3</p><div class="month-dot-row"><span class="dot"></span><span class="dot home"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">4</p><div class="month-dot-row"><span class="dot"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">5</p><div class="month-dot-row"><span class="dot"></span><span class="dot family"></span></div><p class="month-label">3 events</p></div>
+                  <div class="month-day"><p class="month-num">6</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">7</p></div>
+                  <div class="month-day"><p class="month-num">8</p><div class="month-dot-row"><span class="dot"></span><span class="dot"></span></div><p class="month-label">4 events</p></div>
+                  <div class="month-day"><p class="month-num">9</p><div class="month-dot-row"><span class="dot"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">10</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">11</p></div>
+                  <div class="month-day"><p class="month-num">12</p><div class="month-dot-row"><span class="dot"></span><span class="dot family"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">13</p></div>
+                  <div class="month-day"><p class="month-num">14</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">15</p><div class="month-dot-row"><span class="dot"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">16</p></div>
+                  <div class="month-day"><p class="month-num">17</p><div class="month-dot-row"><span class="dot"></span><span class="dot home"></span></div><p class="month-label">2 events</p></div>
+                  <div class="month-day"><p class="month-num">18</p></div>
+                  <div class="month-day"><p class="month-num">19</p><div class="month-dot-row"><span class="dot family"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">20</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">21</p></div>
+                  <div class="month-day"><p class="month-num">22</p><div class="month-dot-row"><span class="dot"></span><span class="dot"></span></div><p class="month-label">4 events</p></div>
+                  <div class="month-day"><p class="month-num">23</p></div>
+                  <div class="month-day"><p class="month-num">24</p><div class="month-dot-row"><span class="dot home"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">25</p><div class="month-dot-row"><span class="dot"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">26</p></div>
+                  <div class="month-day"><p class="month-num">27</p><div class="month-dot-row"><span class="dot family"></span></div><p class="month-label">1 event</p></div>
+                  <div class="month-day"><p class="month-num">28</p></div>
+                </div>
+              </section>
+
+              <aside class="layout-probe calendar-detail-selected-day panel selected-day">
+                <div class="section-head">
+                  <p class="section-title">Selected day</p>
+                  <p class="section-note">Thu</p>
+                </div>
+                <div class="selected-date-card">
+                  <span>Today</span>
+                  <strong>May 28</strong>
+                  <p>4 events ・ next at 09:30</p>
+                </div>
+                <div class="selected-list">
+                  <section class="selected-event"><time>09:30</time><p>週次レビューと買い出し前の確認</p></section>
+                  <section class="selected-event"><time>12:15</time><p>昼休み</p></section>
+                  <section class="selected-event"><time>18:30</time><p>動物病院の予約確認</p></section>
+                  <section class="selected-event"><time>All day</time><p>燃えるごみ</p></section>
+                </div>
+              </aside>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <aside class="probe-report" id="probe-report" aria-live="polite">
+        <strong>Layout probes</strong>
+        <span>Measuring preview overflow...</span>
+      </aside>
+    </main>
+    <script>
+      function collectPreviewProbeResults() {
+        const tolerance = 1;
+        return Array.from(document.querySelectorAll(".layout-probe")).map((probe, index) => {
+          const verticalOverflow = probe.scrollHeight > probe.clientHeight + tolerance;
+          const horizontalOverflow = probe.scrollWidth > probe.clientWidth + tolerance;
+          const failed = verticalOverflow || horizontalOverflow;
+          return {
+            failed,
+            horizontalOverflow,
+            index,
+            label: Array.from(probe.classList).filter((name) => name !== "layout-probe").slice(0, 3).join("."),
+            verticalOverflow,
+          };
+        });
+      }
+
+      function renderProbeReport() {
+        const results = collectPreviewProbeResults();
+        const failures = results.filter((result) => result.failed);
+        const report = document.getElementById("probe-report");
+
+        if (!report) {
+          return;
+        }
+
+        if (failures.length === 0) {
+          report.innerHTML = `<strong>Layout probes</strong><span class="ok">${results.length} probes OK</span>`;
+          return;
+        }
+
+        report.innerHTML = [
+          "<strong>Layout probes</strong>",
+          `<span class="fail">${failures.length} / ${results.length} probes failing</span>`,
+          ...failures.map((failure) => `<span class="fail">#${failure.index + 1} ${failure.label}</span>`),
+        ].join("");
+      }
+
+      window.addEventListener("load", renderProbeReport);
+      window.addEventListener("resize", renderProbeReport);
+    </script>
+  </body>
+</html>

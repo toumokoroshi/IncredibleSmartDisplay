@@ -3,9 +3,12 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import { HeaderBar } from "../components/HeaderBar";
 import { UnknownWidget } from "../components/UnknownWidget";
 import { useDashboardContext } from "../contexts/DashboardContext";
+import { useAutoReload } from "../hooks/useAutoReload";
+import { useMidnightRefresh } from "../hooks/useMidnightRefresh";
+import { useOnlineRefresh } from "../hooks/useOnlineRefresh";
 import { useWidgetData } from "../hooks/useWidgetData";
 import { widgetRegistry } from "../registry/widgetRegistry";
-import type { DisplayMode } from "../types/command";
+import { dashboardConfig } from "../config/dashboard.config";
 
 function getHighlightedType(displayMode: string) {
   if (displayMode === "home") {
@@ -14,26 +17,29 @@ function getHighlightedType(displayMode: string) {
   return displayMode === "stocks" ? "stocks" : displayMode;
 }
 
-function getDetailModeForWidgetType(widgetType: string): DisplayMode | null {
-  if (widgetType === "weather" || widgetType === "calendar" || widgetType === "news" || widgetType === "traffic" || widgetType === "petPhoto" || widgetType === "stocks") {
-    return widgetType;
-  }
-  return null;
-}
-
 export function DashboardShell() {
-  const { displayMode, headerStatus, setDisplayMode } = useDashboardContext();
+  const { displayMode, executeCommand, headerStatus, widgetStatuses } = useDashboardContext();
   const { widgets } = validateDashboardConfig();
   const highlightedType = getHighlightedType(displayMode);
-  const weatherWidget = widgets.find((widget) => widget.type === "weather");
-  const weatherSettings = weatherWidget?.settings as { locationName?: unknown } | undefined;
-  const weatherLocationName = typeof weatherSettings?.locationName === "string" ? weatherSettings.locationName : undefined;
   const visibleWidgets = highlightedType === null ? widgets : widgets.filter((widget) => widget.type === highlightedType);
+  useAutoReload(dashboardConfig.app.autoReload);
+  useOnlineRefresh(widgets, widgetStatuses);
+  useMidnightRefresh(widgets);
+
+  const refreshVisibleWidgets = () => {
+    executeCommand({ type: "REFRESH_WIDGETS", widgetIds: visibleWidgets.map((widget) => widget.id) });
+  };
 
   return (
     <main className="min-h-screen overflow-hidden bg-[var(--app-bg)] p-4 text-slate-100">
       <section className="dashboard-grid mx-auto grid h-[calc(100vh-2rem)] max-w-[1600px] gap-3">
-        <HeaderBar isDetailMode={displayMode !== "home"} locationName={weatherLocationName} onHomeClick={() => setDisplayMode("home")} status={headerStatus} />
+        <HeaderBar
+          isDetailMode={displayMode !== "home"}
+          locationName={dashboardConfig.app.locationName}
+          onHomeClick={() => executeCommand({ type: "SET_DISPLAY_MODE", mode: "home" })}
+          onRefreshClick={refreshVisibleWidgets}
+          status={headerStatus}
+        />
         {visibleWidgets.map((widget) => (
           <ErrorBoundary key={widget.id}>
             <WidgetSlot widget={widget} isHighlighted={highlightedType === widget.type} />
@@ -52,9 +58,9 @@ function WidgetSlot({
   isHighlighted: boolean;
 }) {
   const definition = widgetRegistry[widget.type];
-  const detailMode = getDetailModeForWidgetType(widget.type);
-  const canOpenDetail = detailMode !== null && !isHighlighted;
-  const { setDisplayMode } = useDashboardContext();
+  const detailMode = definition?.detailDisplayMode;
+  const canOpenDetail = detailMode !== undefined && !isHighlighted;
+  const { executeCommand } = useDashboardContext();
 
   if (definition === undefined) {
     return <UnknownWidget title={widget.title} type={widget.type} />;
@@ -65,7 +71,7 @@ function WidgetSlot({
       canOpenDetail={canOpenDetail}
       definition={definition}
       isHighlighted={isHighlighted}
-      onOpenDetail={detailMode === null ? undefined : () => setDisplayMode(detailMode)}
+      onOpenDetail={detailMode === undefined ? undefined : () => executeCommand({ type: "SET_DISPLAY_MODE", mode: detailMode })}
       widget={widget}
     />
   );

@@ -25,7 +25,13 @@ export type StaticJsonTrafficSettings = TrafficBaseSettings & {
   cacheBusterIntervalSec?: number;
 };
 
-export type TrafficSettings = MockTrafficSettings | StaticJsonTrafficSettings;
+export type WorkerJsonTrafficSettings = TrafficBaseSettings & {
+  provider: "workerJson";
+  url: string;
+  lines?: TrafficLineConfig[];
+};
+
+export type TrafficSettings = MockTrafficSettings | StaticJsonTrafficSettings | WorkerJsonTrafficSettings;
 
 export type TrafficLineStatus = "normal" | "delayed" | "partiallyDelayed" | "suspended" | "unknown";
 
@@ -44,6 +50,7 @@ export type TrafficLineData = {
 };
 
 export type TrafficData = {
+  generatedAt?: string;
   lines: TrafficLineData[];
   updatedAt: string;
 };

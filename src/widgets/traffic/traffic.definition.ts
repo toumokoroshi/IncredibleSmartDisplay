@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { createTrafficService } from "../../services/traffic/trafficService";
 import { TrafficWidget } from "./TrafficWidget";
+import type { TrafficData } from "./types";
 
 const trafficLineConfigSchema = z.object({
   id: z.string().min(1),
@@ -30,7 +31,36 @@ export const trafficSettingsSchema = z.discriminatedUnion("provider", [
     provider: z.literal("staticJson"),
     url: z.string().min(1),
   }),
+  z.object({
+    ...trafficBaseSettingsSchema,
+    lines: z.array(trafficLineConfigSchema).optional(),
+    provider: z.literal("workerJson"),
+    url: z.string().min(1),
+  }),
 ]);
+
+const trafficDataSchema: z.ZodType<TrafficData> = z.object({
+  generatedAt: z
+    .string()
+    .refine((value) => Number.isNaN(Date.parse(value)) === false)
+    .optional(),
+  updatedAt: z.string().refine((value) => Number.isNaN(Date.parse(value)) === false),
+  lines: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      operator: z.string().optional(),
+      status: z.enum(["normal", "delayed", "partiallyDelayed", "suspended", "unknown"]),
+      updatedAt: z.string().refine((value) => Number.isNaN(Date.parse(value)) === false),
+      delayMinutes: z.number().optional(),
+      statusText: z.string().optional(),
+      detail: z.string().optional(),
+      reason: z.string().optional(),
+      recoveryEstimate: z.string().optional(),
+      alternateTransport: z.string().optional(),
+    }),
+  ),
+});
 
 export const trafficDefinition = {
   type: "traffic",
@@ -39,4 +69,8 @@ export const trafficDefinition = {
   createService: createTrafficService,
   fallbackArea: "sub-left",
   defaultRefreshIntervalSec: 300,
+  cacheTtlHours: 1,
+  validateData: (data: unknown): data is TrafficData => trafficDataSchema.safeParse(data).success,
+  isEmpty: (data: TrafficData) => data.lines.length === 0,
+  detailDisplayMode: "traffic",
 } as const;

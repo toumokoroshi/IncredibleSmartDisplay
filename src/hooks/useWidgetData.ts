@@ -2,32 +2,29 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useDashboardContext } from "../contexts/DashboardContext";
-import type { AnyWidgetDefinition, WidgetError, WidgetStatus } from "../types/widget";
-import { isCacheExpired, readWidgetCache, writeWidgetCache } from "../utils/cache";
+import type { AnyWidgetDefinition, WidgetCachePolicy, WidgetError, WidgetErrorCode, WidgetStatus } from "../types/widget";
+import { readWidgetCache, writeWidgetCache } from "../utils/cache";
 import { widgetQueryPolicy } from "../utils/queryPolicy";
-
-function getTtlHours(widgetType: string) {
-  switch (widgetType) {
-    case "weather":
-      return 3;
-    case "calendar":
-      return 24;
-    case "stocks":
-    case "news":
-      return 12;
-    case "traffic":
-      return 1;
-    case "petPhoto":
-      return 24;
-    default:
-      return 6;
-  }
-}
+import { getWidgetQueryKey } from "../utils/widgetQuery";
+import { resolveWidgetStatus } from "../utils/widgetStatus";
 
 function normalizeError(error: unknown): WidgetError {
   const message = error instanceof Error ? error.message : "Unknown error";
-  const code = message === "TIMEOUT" ? "TIMEOUT" : "UNKNOWN_ERROR";
-  return { code, message, retryable: code === "TIMEOUT" ? false : true };
+  const candidate = error as Partial<WidgetError> | undefined;
+  const code = isWidgetErrorCode(candidate?.code) ? candidate.code : message === "TIMEOUT" ? "TIMEOUT" : message === "NETWORK_ERROR" ? "NETWORK_ERROR" : "UNKNOWN_ERROR";
+  return { code, message, retryable: candidate?.retryable ?? code !== "TIMEOUT" };
+}
+
+function isWidgetErrorCode(value: unknown): value is WidgetErrorCode {
+  return value === "NETWORK_ERROR" || value === "CORS_ERROR" || value === "API_RATE_LIMIT" || value === "AUTH_ERROR" || value === "DATA_EMPTY" || value === "DATA_INVALID" || value === "TIMEOUT" || value === "UNKNOWN_ERROR";
+}
+
+function getCachePolicy(definition: AnyWidgetDefinition | undefined, settings: unknown): WidgetCachePolicy {
+  if (definition?.getCachePolicy === undefined || settings === undefined) {
+    return "publicPersistent";
+  }
+
+  return definition.getCachePolicy(settings);
 }
 
 export function useWidgetData(
@@ -35,17 +32,21 @@ export function useWidgetData(
   definition?: AnyWidgetDefinition,
 ) {
   const { reportWidgetState } = useDashboardContext();
-  const cache = readWidgetCache<any>(config.id);
+  const cachePolicy = getCachePolicy(definition, config.settings);
+  const cacheRecord = cachePolicy === "publicPersistent" ? readWidgetCache<unknown>(config.id) : null;
+  const cache = cacheRecord !== null && definition?.validateData(cacheRecord.data) === true ? cacheRecord : null;
 
   const query = useQuery<any, WidgetError>({
-    queryKey: ["widget-data", config.id],
+    queryKey: getWidgetQueryKey(config.id),
     queryFn: async () => {
       if (definition?.createService === undefined || config.settings === undefined) {
         return undefined;
       }
       const service = definition.createService();
       const result = await service.fetch(config.settings);
-      writeWidgetCache(config.id, result, getTtlHours(config.type));
+      if (cachePolicy === "publicPersistent") {
+        writeWidgetCache(config.id, result, definition.cacheTtlHours);
+      }
       return result;
     },
     enabled: definition?.createService !== undefined && config.settingsError === undefined && config.unknownType === undefined,
@@ -53,26 +54,17 @@ export function useWidgetData(
     ...widgetQueryPolicy,
   });
 
-  const data = query.data ?? cache?.data;
-  const items = data && typeof data === "object" ? (data as { items?: unknown[] }).items : undefined;
-  const lines = data && typeof data === "object" ? (data as { lines?: unknown[] }).lines : undefined;
-  const photo = data && typeof data === "object" ? (data as { photo?: unknown }).photo : undefined;
-  const isEmpty = Array.isArray(items) ? items.length === 0 : Array.isArray(lines) ? lines.length === 0 : data && typeof data === "object" && "photo" in data ? photo === undefined : false;
+  const data = query.isError && cachePolicy === "privateNoStore" ? undefined : query.data ?? cache?.data;
+  const isEmpty = data !== undefined && definition?.isEmpty(data) === true;
 
-  let status: WidgetStatus;
-  if (query.isFetched === false && query.isPending === true && cache?.data === undefined) {
-    status = "loading";
-  } else if (query.isError === true && cache?.data !== undefined) {
-    status = "stale";
-  } else if (query.isError === true && typeof navigator !== "undefined" && navigator.onLine === false) {
-    status = "offline";
-  } else if (query.isError === true) {
-    status = "error";
-  } else if (cache !== null && cache !== undefined && isCacheExpired(cache) && query.isFetching === false) {
-    status = "stale";
-  } else {
-    status = "success";
-  }
+  const status: WidgetStatus = resolveWidgetStatus({
+    cache,
+    isError: query.isError,
+    isFetched: query.isFetched,
+    isFetching: query.isFetching,
+    isOnline: typeof navigator === "undefined" ? true : navigator.onLine,
+    isPending: query.isPending,
+  });
 
   useEffect(() => {
     reportWidgetState(config.id, status, query.isSuccess ? new Date().toISOString() : undefined);

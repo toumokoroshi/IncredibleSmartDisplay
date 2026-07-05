@@ -1,6 +1,5 @@
 import type { WidgetService } from "../../types/widget";
-import { appendCacheBuster } from "../../utils/cacheBuster";
-import { resolvePublicAssetPath } from "../../utils/publicAssetPath";
+import { fetchStaticJson } from "../jsonProvider";
 import { mockNewsData } from "./mockData";
 import type { NewsData, NewsItem, NewsSettings } from "../../widgets/news";
 
@@ -10,7 +9,8 @@ function isNewsData(value: unknown): value is NewsData {
   }
 
   const items = (value as { items?: unknown }).items;
-  return Array.isArray(items) && items.every(isNewsItem);
+  const generatedAt = (value as { generatedAt?: unknown }).generatedAt;
+  return optionalIsoDateTimeString(generatedAt) && Array.isArray(items) && items.every(isNewsItem);
 }
 
 function isNewsItem(value: unknown): value is NewsItem {
@@ -26,7 +26,7 @@ function isNewsItem(value: unknown): value is NewsItem {
     optionalString(item.category) &&
     (item.priority === undefined || item.priority === "top" || item.priority === "normal") &&
     optionalString(item.source) &&
-    optionalString(item.publishedAt)
+    optionalIsoDateTimeString(item.publishedAt)
   );
 }
 
@@ -34,19 +34,21 @@ function optionalString(value: unknown) {
   return value === undefined || typeof value === "string";
 }
 
+function optionalIsoDateTimeString(value: unknown) {
+  return value === undefined || (typeof value === "string" && Number.isNaN(Date.parse(value)) === false);
+}
+
 async function fetchStaticJsonNews(settings: Extract<NewsSettings, { provider: "staticJson" }>) {
-  const response = await fetch(appendCacheBuster(resolvePublicAssetPath(settings.url), settings.cacheBusterIntervalSec));
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch news JSON: ${response.status}`);
-  }
-
-  const payload: unknown = await response.json();
-  if (!isNewsData(payload)) {
-    throw new Error("Invalid news JSON");
-  }
+  const payload = await fetchStaticJson({
+    cacheBusterIntervalSec: settings.cacheBusterIntervalSec,
+    failureMessagePrefix: "Failed to fetch news JSON",
+    invalidMessage: "Invalid news JSON",
+    url: settings.url,
+    validate: isNewsData,
+  });
 
   return {
+    generatedAt: payload.generatedAt,
     items: payload.items.slice(0, settings.maxItems),
   };
 }

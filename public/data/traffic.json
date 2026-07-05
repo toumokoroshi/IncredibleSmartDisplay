@@ -1,61 +1,78 @@
 {
-  "updatedAt": "2026-05-22T07:30:00+09:00",
+  "generatedAt": "2026-05-30T13:48:34.369Z",
+  "updatedAt": "2026-05-30T21:49:14+09:00",
   "lines": [
     {
       "id": "jr-chuo-rapid",
-      "name": "ぶりｂりぶり",
+      "name": "中央線快速",
       "operator": "JR東日本",
-      "status": "normal",
-      "updatedAt": "2026-05-22T07:30:00+09:00"
+      "status": "unknown",
+      "updatedAt": "2026-05-30T21:49:14+09:00",
+      "statusText": "未確認",
+      "detail": "手動更新待ち"
     },
     {
       "id": "tokyo-metro-tozai",
       "name": "東京メトロ東西線",
       "operator": "東京メトロ",
-      "status": "normal",
-      "updatedAt": "2026-05-22T07:30:00+09:00"
+      "status": "unknown",
+      "updatedAt": "2026-05-30T21:49:14+09:00",
+      "statusText": "未確認",
+      "detail": "手動更新待ち"
     },
     {
       "id": "jr-yamanote",
       "name": "山手線",
       "operator": "JR東日本",
-      "status": "normal",
-      "updatedAt": "2026-05-22T07:30:00+09:00"
+      "status": "unknown",
+      "updatedAt": "2026-05-30T21:49:14+09:00",
+      "statusText": "未確認",
+      "detail": "手動更新待ち"
     },
     {
       "id": "jr-sobu-local",
       "name": "総武線各駅停車",
       "operator": "JR東日本",
-      "status": "normal",
-      "updatedAt": "2026-05-22T07:30:00+09:00"
+      "status": "unknown",
+      "updatedAt": "2026-05-30T21:49:14+09:00",
+      "statusText": "未確認",
+      "detail": "手動更新待ち"
     },
     {
       "id": "tokyo-metro-marunouchi",
       "name": "丸ノ内線",
       "operator": "東京メトロ",
-      "status": "normal",
-      "updatedAt": "2026-05-22T07:30:00+09:00"
+      "status": "unknown",
+      "updatedAt": "2026-05-30T21:49:14+09:00",
+      "statusText": "未確認",
+      "detail": "手動更新待ち"
     },
     {
       "id": "tokyo-metro-ginza",
       "name": "銀座線",
       "operator": "東京メトロ",
-      "status": "normal",
-      "updatedAt": "2026-05-22T07:30:00+09:00"
+      "status": "unknown",
+      "updatedAt": "2026-05-30T21:49:14+09:00",
+      "statusText": "未確認",
+      "detail": "手動更新待ち"
     },
     {
       "id": "keio-line",
       "name": "京王線",
       "operator": "京王電鉄",
-      "status": "normal",
-      "updatedAt": "2026-05-22T07:30:00+09:00"
+      "status": "unknown",
+      "updatedAt": "2026-05-30T21:49:14+09:00",
+      "statusText": "未確認",
+      "detail": "手動更新待ち"
     },
     {
       "id": "keio-inokashira",
       "name": "京王井の頭線",
       "operator": "京王電鉄",
-      "status": "normal",
-      "updatedAt": "2026-05-22T07:30:00+09:00"
+      "status": "unknown",
+      "updatedAt": "2026-05-30T21:49:14+09:00",
+      "statusText": "未確認",
+      "detail": "手動更新待ち"
     }
   ]
 }

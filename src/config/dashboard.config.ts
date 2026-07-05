@@ -3,6 +3,7 @@
 export const dashboardConfig: DashboardConfig = {
   app: {
     name: "Living Dashboard",
+    locationName: "Tokyo",
     locale: "ja-JP",
     timezone: "Asia/Tokyo",
     defaultDisplayMode: "home",
@@ -53,7 +54,7 @@ export const dashboardConfig: DashboardConfig = {
       order: 2,
       area: "main-right",
       settings: {
-        provider: "mock",
+        provider: "localDate",
         daysAhead: 2,
         maxTodayEvents: 4,
         maxTomorrowEvents: 2,

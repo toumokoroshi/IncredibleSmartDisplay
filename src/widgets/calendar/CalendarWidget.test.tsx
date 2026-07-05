@@ -1,0 +1,60 @@
+import { render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { WidgetConfig } from "../../types/widget";
+import { CalendarWidget } from "./CalendarWidget";
+import type { CalendarSettings } from "./types";
+
+const calendarConfig: WidgetConfig<CalendarSettings> = {
+  enabled: true,
+  id: "calendar-main",
+  order: 2,
+  refreshIntervalSec: 600,
+  settings: {
+    daysAhead: 7,
+    maxTodayEvents: 0,
+    maxTomorrowEvents: 0,
+    provider: "localDate",
+    showAllDayEvents: false,
+  },
+  size: "large",
+  title: "Calendar",
+  type: "calendar",
+};
+
+describe("CalendarWidget", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-31T08:00:00.000+09:00"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("renders local date information when no calendar events are available", () => {
+    render(<CalendarWidget config={calendarConfig} data={{ items: [] }} isEmpty={false} status="success" />);
+
+    expect(screen.getByText("今日")).toBeInTheDocument();
+    expect(screen.getByText("5月31日")).toBeInTheDocument();
+    expect(screen.getByText("日曜日")).toBeInTheDocument();
+    expect(screen.getByText("明日: 6月1日(月)")).toBeInTheDocument();
+    expect(screen.queryByText("No data available.")).not.toBeInTheDocument();
+  });
+
+  it("keeps the highlighted detail layout useful without private calendar data", () => {
+    render(<CalendarWidget config={calendarConfig} data={{ items: [] }} isEmpty={false} isHighlighted status="success" />);
+
+    expect(screen.getByText("今日と今週")).toBeInTheDocument();
+    expect(screen.getByText("5月31日")).toBeInTheDocument();
+    expect(screen.getByText("明日: 6月1日(月)")).toBeInTheDocument();
+    expect(screen.queryByText("今後の予定はありません")).not.toBeInTheDocument();
+  });
+
+  it("shows reauthentication inside the dashboard for private access errors", () => {
+    render(<CalendarWidget config={calendarConfig} error={{ code: "AUTH_ERROR", message: "Reauthentication required", retryable: false }} isEmpty={false} status="error" />);
+
+    expect(screen.getByText("Reauthentication required")).toBeInTheDocument();
+    expect(screen.getByText("Private data is unavailable until access is restored.")).toBeInTheDocument();
+  });
+});

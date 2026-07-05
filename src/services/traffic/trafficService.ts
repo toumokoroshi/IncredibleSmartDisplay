@@ -1,6 +1,5 @@
 import type { WidgetService } from "../../types/widget";
-import { appendCacheBuster } from "../../utils/cacheBuster";
-import { resolvePublicAssetPath } from "../../utils/publicAssetPath";
+import { fetchStaticJson, fetchWorkerJson } from "../jsonProvider";
 import { mockTrafficLines } from "./mockData";
 import type { TrafficData, TrafficLineData, TrafficSettings } from "../../widgets/traffic";
 
@@ -12,18 +11,23 @@ const statusOrder: Record<TrafficLineData["status"], number> = {
   normal: 4,
 };
 
-function toTrafficLineData(settings: Extract<TrafficSettings, { provider: "mock" }>) {
-  const configuredLineIds = new Set(settings.lines.map((line) => line.id));
-  const configuredLinesById = new Map(settings.lines.map((line) => [line.id, line]));
+function prepareTrafficLines(lines: TrafficLineData[], settings: TrafficSettings) {
+  const configuredLines = "lines" in settings ? settings.lines : undefined;
+  const configuredLineIds = configuredLines ? new Set(configuredLines.map((line) => line.id)) : undefined;
+  const configuredLinesById = new Map(configuredLines?.map((line) => [line.id, line]) ?? []);
 
-  return mockTrafficLines
-    .filter((line) => configuredLineIds.has(line.id))
+  return lines
+    .filter((line) => configuredLineIds === undefined || configuredLineIds.has(line.id))
     .map((line) => {
       const configuredLine = configuredLinesById.get(line.id);
+      if (!settings.allowLocalOverride || configuredLine === undefined) {
+        return line;
+      }
+
       return {
         ...line,
-        name: configuredLine?.displayName ?? configuredLine?.name ?? line.name,
-        operator: configuredLine?.operator ?? line.operator,
+        name: configuredLine.displayName ?? configuredLine.name,
+        operator: configuredLine.operator ?? line.operator,
       };
     })
     .sort((left, right) => {
@@ -43,7 +47,7 @@ function isTrafficData(value: unknown): value is TrafficData {
   }
 
   const payload = value as Partial<TrafficData>;
-  return typeof payload.updatedAt === "string" && Array.isArray(payload.lines) && payload.lines.every(isTrafficLineData);
+  return optionalIsoDateTimeString(payload.generatedAt) && isIsoDateTimeString(payload.updatedAt) && Array.isArray(payload.lines) && payload.lines.every(isTrafficLineData);
 }
 
 function isTrafficLineData(value: unknown): value is TrafficLineData {
@@ -57,7 +61,7 @@ function isTrafficLineData(value: unknown): value is TrafficLineData {
     typeof line.name === "string" &&
     optionalString(line.operator) &&
     isTrafficStatus(line.status) &&
-    typeof line.updatedAt === "string" &&
+    isIsoDateTimeString(line.updatedAt) &&
     (line.delayMinutes === undefined || typeof line.delayMinutes === "number") &&
     optionalString(line.statusText) &&
     optionalString(line.detail) &&
@@ -75,22 +79,44 @@ function optionalString(value: unknown) {
   return value === undefined || typeof value === "string";
 }
 
+function optionalIsoDateTimeString(value: unknown) {
+  return value === undefined || isIsoDateTimeString(value);
+}
+
+function isIsoDateTimeString(value: unknown) {
+  return typeof value === "string" && Number.isNaN(Date.parse(value)) === false;
+}
+
 async function fetchStaticJsonTraffic(settings: Extract<TrafficSettings, { provider: "staticJson" }>) {
-  const response = await fetch(appendCacheBuster(resolvePublicAssetPath(settings.url), settings.cacheBusterIntervalSec));
+  const payload = await fetchStaticJson({
+    cacheBusterIntervalSec: settings.cacheBusterIntervalSec,
+    failureMessagePrefix: "Failed to fetch traffic JSON",
+    invalidMessage: "Invalid traffic JSON",
+    url: settings.url,
+    validate: isTrafficData,
+  });
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch traffic JSON: ${response.status}`);
-  }
-
-  const payload: unknown = await response.json();
-  if (!isTrafficData(payload)) {
-    throw new Error("Invalid traffic JSON");
-  }
-
-  const lineIds = settings.lines ? new Set(settings.lines.map((line) => line.id)) : undefined;
-  const lines = lineIds ? payload.lines.filter((line) => lineIds.has(line.id)) : payload.lines;
+  const lines = prepareTrafficLines(payload.lines, settings);
 
   return {
+    generatedAt: payload.generatedAt,
+    lines: lines.slice(0, settings.maxItems),
+    updatedAt: payload.updatedAt,
+  };
+}
+
+async function fetchWorkerJsonTraffic(settings: Extract<TrafficSettings, { provider: "workerJson" }>) {
+  const payload = await fetchWorkerJson({
+    failureMessagePrefix: "Failed to fetch traffic worker JSON",
+    invalidMessage: "Invalid traffic JSON",
+    url: settings.url,
+    validate: isTrafficData,
+  });
+
+  const lines = prepareTrafficLines(payload.lines, settings);
+
+  return {
+    generatedAt: payload.generatedAt,
     lines: lines.slice(0, settings.maxItems),
     updatedAt: payload.updatedAt,
   };
@@ -103,11 +129,15 @@ export function createTrafficService(): WidgetService<TrafficSettings, TrafficDa
         return fetchStaticJsonTraffic(settings);
       }
 
+      if (settings.provider === "workerJson") {
+        return fetchWorkerJsonTraffic(settings);
+      }
+
       // Operational path: keep the widget contract stable, then replace this mock source with public/static
       // traffic-status.json or a Worker/GitHub Actions generated JSON feed. Station departures should be a separate
       // data source because their freshness and API constraints differ from route operation status.
       return {
-        lines: toTrafficLineData(settings),
+        lines: prepareTrafficLines(mockTrafficLines, settings),
         updatedAt: "2026-05-19T07:40:00+09:00",
       };
     },

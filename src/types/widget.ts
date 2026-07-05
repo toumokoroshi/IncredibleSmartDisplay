@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { ZodType } from "zod";
+import type { DisplayMode } from "./command";
 
 export type WidgetId = string;
 export type WidgetType = "header" | "weather" | "calendar" | "stocks" | "news" | "traffic" | "petPhoto";
@@ -10,6 +11,7 @@ export type DashboardArea =
   | "main-right"
   | "sub-left"
   | "sub-right"
+  | "quick-area"
   | "detail";
 
 export type WidgetStatus = "idle" | "loading" | "success" | "error" | "stale" | "offline";
@@ -29,6 +31,8 @@ export type WidgetError = {
   message: string;
   retryable?: boolean;
 };
+
+export type WidgetCachePolicy = "publicPersistent" | "privateNoStore";
 
 export type WidgetConfig<TSettings = unknown> = {
   id: WidgetId;
@@ -70,6 +74,11 @@ export type WidgetDefinition<TSettings = unknown, TData = unknown> = {
   createService?: () => WidgetService<TSettings, TData>;
   fallbackArea: DashboardArea;
   defaultRefreshIntervalSec: number;
+  cacheTtlHours: number;
+  validateData: (data: unknown) => data is TData;
+  isEmpty: (data: TData) => boolean;
+  getCachePolicy?: (settings: TSettings) => WidgetCachePolicy;
+  detailDisplayMode?: DisplayMode;
 };
 
 export type AnyWidgetDefinition = WidgetDefinition<any, any>;
