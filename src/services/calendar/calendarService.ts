@@ -1,13 +1,10 @@
 import type { WidgetService } from "../../types/widget";
 import { fetchStaticJson, fetchWorkerJson } from "../jsonProvider";
+import { isIsoDateTimeString, optionalIsoDateTimeString, optionalString } from "../validationGuards";
 import { mockCalendarData } from "./mockData";
 import type { CalendarData, CalendarSettings } from "../../widgets/calendar";
 
 type CalendarEvent = CalendarData["items"][number];
-
-function optionalString(value: unknown) {
-  return value === undefined || typeof value === "string";
-}
 
 function isCalendarData(value: unknown): value is CalendarData {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
@@ -27,10 +24,8 @@ function isCalendarEvent(value: unknown): value is CalendarEvent {
   return (
     typeof event.id === "string" &&
     typeof event.title === "string" &&
-    typeof event.startsAt === "string" &&
-    Number.isNaN(Date.parse(event.startsAt)) === false &&
-    optionalString(event.endsAt) &&
-    (event.endsAt === undefined || Number.isNaN(Date.parse(event.endsAt)) === false) &&
+    isIsoDateTimeString(event.startsAt) &&
+    optionalIsoDateTimeString(event.endsAt) &&
     (event.isAllDay === undefined || typeof event.isAllDay === "boolean") &&
     optionalString(event.calendarName) &&
     optionalString(event.location)

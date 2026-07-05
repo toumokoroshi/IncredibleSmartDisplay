@@ -1,5 +1,6 @@
 import type { WidgetService } from "../../types/widget";
 import { fetchStaticJson } from "../jsonProvider";
+import { optionalIsoDateTimeString, optionalString } from "../validationGuards";
 import { mockNewsData } from "./mockData";
 import type { NewsData, NewsItem, NewsSettings } from "../../widgets/news";
 
@@ -28,14 +29,6 @@ function isNewsItem(value: unknown): value is NewsItem {
     optionalString(item.source) &&
     optionalIsoDateTimeString(item.publishedAt)
   );
-}
-
-function optionalString(value: unknown) {
-  return value === undefined || typeof value === "string";
-}
-
-function optionalIsoDateTimeString(value: unknown) {
-  return value === undefined || (typeof value === "string" && Number.isNaN(Date.parse(value)) === false);
 }
 
 async function fetchStaticJsonNews(settings: Extract<NewsSettings, { provider: "staticJson" }>) {
