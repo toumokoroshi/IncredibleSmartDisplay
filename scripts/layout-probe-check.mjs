@@ -37,7 +37,7 @@ const checks = [
       { selector: ".widget-detail-list.calendar-detail-week" },
     ],
     afterDefaultCheck: async (client) => {
-      await evaluate(client, "Array.from(document.querySelectorAll('button')).find((button) => button.textContent?.trim() === 'Month')?.click()");
+      await evaluate(client, "Array.from(document.querySelectorAll('button')).find((button) => button.textContent?.trim() === '月')?.click()");
       await waitForSelector(client, ".calendar-detail-month");
       await new Promise((resolve) => setTimeout(resolve, 150));
       return [

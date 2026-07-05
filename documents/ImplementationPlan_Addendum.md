@@ -490,10 +490,9 @@ cron as part of `deploy-pages.yml` (see section 7, "Artifact-only refresh"). A l
 equivalent local cron/scheduled-task setup to regenerate these files on the same cadence, since there will be no
 GitHub Actions runner producing them anymore.
 
-### Pre-existing `test:layout` script gap (discovered, not introduced, during this refactor)
+### Pre-existing `test:layout` script gap (resolved)
 
-While verifying the Step 8 `WidgetFrame` extraction, `npm run test:layout` failed on the calendar detail check:
-`scripts/layout-probe-check.mjs` clicks a button by its English text `"Month"` to switch the calendar to month view,
-but the button label was localized to `"月"` in an earlier commit ("Localize calendar widget to Japanese"). This
-reproduces identically on `main` before any change in this refactor, so it was left untouched as out of scope; the
-script's button-text selector should be updated to match the Japanese label in a follow-up fix.
+`npm run test:layout` used to fail on the calendar detail check: `scripts/layout-probe-check.mjs` clicked a button by
+its English text `"Month"` to switch the calendar to month view, but the button label was localized to `"月"` in an
+earlier commit ("Localize calendar widget to Japanese"). The script's button-text selector now matches `"月"`, and the
+calendar detail secondary (month view) probe passes in CI.
