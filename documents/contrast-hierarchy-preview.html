@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>境界線コントラスト強化 / 情報階層 徹底 - Before/After Preview</title>
+<style>
+  :root {
+    --app-bg: #f6f8fb;
+    --radius-card: 1.7rem;
+
+    /* BEFORE (current src/index.css values) */
+    --before-panel-stroke: rgba(15, 23, 42, 0.08);
+    --before-panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+    --before-item-bg: #f8fafc;
+    --before-item-stroke: rgba(15, 23, 42, 0.07);
+    --before-item-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+
+    /* AFTER (proposed values) */
+    --after-panel-stroke: rgba(15, 23, 42, 0.16);
+    --after-panel-shadow: 0 20px 48px rgba(15, 23, 42, 0.16);
+    --after-item-bg: #f8fafc;
+    --after-item-stroke: rgba(15, 23, 42, 0.14);
+    --after-item-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+
+    /* Identity colors, copied as-is from src/index.css */
+    --identity-weather-border: #5b8def;
+    --identity-weather-icon: #1a73e8;
+    --identity-weather-icon-bg: #e8f0fe;
+    --identity-weather-icon-border: #d2e3fc;
+
+    --identity-calendar-border: #7c6fe0;
+    --identity-calendar-icon: #5b4fc4;
+    --identity-calendar-icon-bg: #eeecfd;
+    --identity-calendar-icon-border: #ddd8fb;
+
+    --identity-traffic-border: #64748b;
+    --identity-traffic-icon: #475569;
+    --identity-traffic-icon-bg: #eef2f7;
+    --identity-traffic-icon-border: #e2e8f0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 2rem;
+    background: var(--app-bg);
+    color: #0f172a;
+    font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+  }
+
+  h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+  h2 { font-size: 1.05rem; margin: 0 0 0.75rem; color: #334155; }
+  .intro { max-width: 72rem; margin: 0 0 2rem; color: #334155; line-height: 1.7; font-size: 0.95rem; }
+  .intro code { background: rgba(15,23,42,0.06); padding: 0.1rem 0.35rem; border-radius: 0.3rem; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 72rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .col-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+  .col-label.after { color: #1a73e8; }
+
+  /* ---- generic widget card shell, mirrors .widget-card in index.css ---- */
+  .widget-card {
+    position: relative;
+    background: #ffffff;
+    border-radius: var(--radius-card);
+    padding: 1.5rem;
+  }
+  .before .widget-card {
+    border: 1px solid var(--before-panel-stroke);
+    box-shadow: var(--before-panel-shadow);
+  }
+  .after .widget-card {
+    border: 1px solid var(--after-panel-stroke);
+    box-shadow: var(--after-panel-shadow);
+  }
+  .widget-card.identity-calendar { border-top: 5px solid var(--identity-calendar-border); }
+  .widget-card.identity-traffic { border-top: 5px solid var(--identity-traffic-border); }
+
+  .widget-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1rem;
+    color: #334155;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  .widget-icon {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font-size: 1.1rem;
+  }
+  .widget-icon.calendar { background: var(--identity-calendar-icon); }
+  .widget-icon.traffic { background: var(--identity-traffic-icon); }
+
+  /* ---- primary / secondary detail panels ---- */
+  .panel {
+    border-radius: 0.85rem;
+    padding: 1rem 1.1rem;
+  }
+  .before .panel {
+    border: 1px solid var(--before-item-stroke);
+    background: var(--before-item-bg);
+    box-shadow: var(--before-item-shadow);
+  }
+  .after .panel.primary {
+    border: 1px solid var(--identity-calendar-border);
+    background: var(--identity-calendar-icon-bg);
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+  }
+  .after .panel.secondary {
+    border: 1px solid var(--after-item-stroke);
+    background: #f1f5f9;
+    box-shadow: none;
+  }
+  .after.traffic-set .panel.primary {
+    border-color: var(--identity-traffic-border);
+    background: var(--identity-traffic-icon-bg);
+  }
+
+  .eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #64748b; margin: 0; }
+  .headline { font-size: 1.9rem; font-weight: 800; line-height: 1; margin: 0.5rem 0 0; color: #1a3fa8; }
+  .headline.traffic { color: #16603f; font-size: 1.6rem; }
+  .title-line { font-size: 1.25rem; font-weight: 700; margin: 0.5rem 0 0; color: #0f172a; }
+  .sub-line { font-size: 0.9rem; font-weight: 600; margin: 0.4rem 0 0; color: #64748b; }
+
+  .panel-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .metric { border-radius: 0.6rem; padding: 0.6rem 0.7rem; background: #fff; }
+  .before .metric { border: 1px solid var(--before-item-stroke); }
+  .after .metric { border: 1px solid var(--after-item-stroke); }
+  .metric .label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; }
+  .metric .value { display: block; margin-top: 0.35rem; font-size: 1.15rem; font-weight: 800; color: #0f172a; }
+
+  .list-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0.1rem;
+  }
+  .before .list-row { border-bottom: 1px solid var(--before-item-stroke); }
+  .after .list-row { border-bottom: 1px solid var(--after-item-stroke); }
+  .list-row .name { font-weight: 600; font-size: 0.95rem; }
+  .list-row .status { font-size: 0.8rem; font-weight: 800; padding: 0.15rem 0.55rem; border-radius: 999px; }
+  .status.normal { color: #047857; background: #d1fae5; }
+  .status.delay { color: #b45309; background: #fef3c7; }
+
+  .callout {
+    max-width: 72rem;
+    background: #fff;
+    border: 1px solid rgba(15,23,42,0.1);
+    border-radius: 0.9rem;
+    padding: 1.1rem 1.3rem;
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #334155;
+  }
+  .callout b { color: #0f172a; }
+</style>
+</head>
+<body>
+  <h1>境界線コントラスト強化 / 情報階層の徹底 — Before / After プレビュー</h1>
+  <p class="intro">
+    対象は <code>src/index.css</code> のトークンのみ（<code>--panel-stroke</code> / <code>--panel-shadow</code> /
+    <code>--item-stroke</code> / <code>--item-shadow</code>）と、既存の共有プローブクラス
+    <code>.widget-detail-primary</code> / <code>.widget-detail-secondary</code>
+    （Weather / Calendar / Traffic / News / PetPhoto の詳細ビューで既に共通利用されている）への
+    ウィジェット識別色（<code>--identity-*</code>）を使ったスタイル付与。サイズ・余白・DOM構造は変更しないため、
+    <code>1524 x 1016</code> ビューポートでのクリッピングへの影響は無い想定。
+  </p>
+
+  <div class="callout">
+    <b>変更点まとめ</b><br />
+    1) 境界線コントラスト強化: カード外枠・リスト項目の枠線alphaを約2倍に。影も濃く。<br />
+    2) 情報階層の徹底: 詳細ビューの「一番読むべき情報(primary)」パネルに、そのウィジェットの識別色を薄く敷いた背景+同色の枠線を付与。「補足情報(secondary)」パネルは逆に彩度を落として無彩色寄りにし、primaryとの差を強める。
+  </div>
+
+  <h2>カレンダー詳細ビュー（次の予定 / 週間サマリー）</h2>
+  <div class="row">
+    <div class="before">
+      <div class="col-label">Before（現状）</div>
+      <div class="widget-card identity-calendar">
+        <div class="widget-title"><span class="widget-icon calendar">📅</span>今日と今週</div>
+        <div class="panel-grid">
+          <div class="panel">
+            <p class="eyebrow">次の予定</p>
+            <p class="headline">14:30</p>
+            <p class="title-line">歯科検診</p>
+            <p class="sub-line">1時間後・Family</p>
+          </div>
+          <div class="panel">
+            <div class="metric-grid">
+              <div class="metric"><span class="label">今日</span><span class="value">3</span></div>
+              <div class="metric"><span class="label">次まで</span><span class="value">14:30</span></div>
+              <div class="metric"><span class="label">今週</span><span class="value">11</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="after">
+      <div class="col-label after">After（提案）</div>
+      <div class="widget-card identity-calendar">
+        <div class="widget-title"><span class="widget-icon calendar">📅</span>今日と今週</div>
+        <div class="panel-grid">
+          <div class="panel primary">
+            <p class="eyebrow">次の予定</p>
+            <p class="headline">14:30</p>
+            <p class="title-line">歯科検診</p>
+            <p class="sub-line">1時間後・Family</p>
+          </div>
+          <div class="panel secondary">
+            <div class="metric-grid">
+              <div class="metric"><span class="label">今日</span><span class="value">3</span></div>
+              <div class="metric"><span class="label">次まで</span><span class="value">14:30</span></div>
+              <div class="metric"><span class="label">今週</span><span class="value">11</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>交通詳細ビュー（重要な影響 / 登録路線）</h2>
+  <div class="row">
+    <div class="before">
+      <div class="col-label">Before（現状）</div>
+      <div class="widget-card identity-traffic">
+        <div class="widget-title"><span class="widget-icon traffic">🚃</span>交通情報</div>
+        <div class="panel-grid">
+          <div class="panel">
+            <p class="eyebrow">現在の状況</p>
+            <p class="headline traffic">一部で遅延</p>
+          </div>
+          <div class="panel">
+            <div class="list-row"><span class="name">中央線</span><span class="status delay">遅延</span></div>
+            <div class="list-row"><span class="name">山手線</span><span class="status normal">通常</span></div>
+            <div class="list-row"><span class="name">京王線</span><span class="status normal">通常</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="after traffic-set">
+      <div class="col-label after">After（提案）</div>
+      <div class="widget-card identity-traffic">
+        <div class="widget-title"><span class="widget-icon traffic">🚃</span>交通情報</div>
+        <div class="panel-grid">
+          <div class="panel primary">
+            <p class="eyebrow">現在の状況</p>
+            <p class="headline traffic">一部で遅延</p>
+          </div>
+          <div class="panel secondary">
+            <div class="list-row"><span class="name">中央線</span><span class="status delay">遅延</span></div>
+            <div class="list-row"><span class="name">山手線</span><span class="status normal">通常</span></div>
+            <div class="list-row"><span class="name">京王線</span><span class="status normal">通常</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>カード外枠・影の強さ（全ウィジェット共通トークン）</h2>
+  <div class="row">
+    <div class="before">
+      <div class="col-label">Before（現状 border alpha 0.08 / shadow 0.10）</div>
+      <div class="widget-card identity-calendar">
+        <div class="widget-title"><span class="widget-icon calendar">📅</span>枠線・影のみ比較用</div>
+        <p class="sub-line" style="margin-top:0;">薄いグレー背景（--app-bg）の上に白カードを置いたとき、枠線と影がどの程度知覚できるか。</p>
+      </div>
+    </div>
+    <div class="after">
+      <div class="col-label after">After（提案 border alpha 0.16 / shadow 0.16）</div>
+      <div class="widget-card identity-calendar">
+        <div class="widget-title"><span class="widget-icon calendar">📅</span>枠線・影のみ比較用</div>
+        <p class="sub-line" style="margin-top:0;">同じ配色のまま、境界の視認性だけを強化。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    自己レビュー所見: identityカラーをprimaryパネルの背景に使うことで、ウィジェックごとに色が変わっても
+    「そのウィジェットの中で一番大事な情報がどこか」は常に同じ視覚パターン（色つき背景+同色枠）で示せる。
+    懸念点は、カレンダーとpetPhotoなど識別色が近い場合の見分けだが、各ウィジェットは同時に1つしか展開されない
+    (isHighlighted時のみdetailビュー)ため、隣接比較の心配は小さいと判断。
+  </div>
+</body>
+</html>

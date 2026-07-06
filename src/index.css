@@ -7,8 +7,8 @@
   --control-bg: #f1f5f9;
   --accent-bg: #e8f0fe;
   --accent-border: rgba(66, 133, 244, 0.34);
-  --panel-stroke: rgba(15, 23, 42, 0.08);
-  --panel-shadow: 0 18px 44px rgba(15, 23, 42, 0.1);
+  --panel-stroke: rgba(15, 23, 42, 0.16);
+  --panel-shadow: 0 20px 48px rgba(15, 23, 42, 0.16);
   --radius-card: 1.7rem;
   --title-transform: none;
   --title-spacing: 0;
@@ -27,8 +27,8 @@
   --weather-icon-bg: #4285f4;
   --weather-icon-shadow: 0 18px 38px rgba(66, 133, 244, 0.2);
   --item-bg: #f8fafc;
-  --item-stroke: rgba(15, 23, 42, 0.07);
-  --item-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+  --item-stroke: rgba(15, 23, 42, 0.14);
+  --item-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
 
   /* Widget identity colors: which card this is. Kept out of the red/amber/emerald
      family so a widget's own color never reads as a status signal (see Traffic,
@@ -398,6 +398,31 @@ body {
   color: var(--identity-petphoto-icon);
   background: var(--identity-petphoto-icon-bg);
   border-color: var(--identity-petphoto-icon-border);
+}
+
+/* Detail-view hierarchy: the single most important panel takes the widget's
+   identity tint so it reads as "primary" regardless of which widget is expanded;
+   the supporting panel goes flatter/neutral by contrast. */
+.widget-calendar .calendar-detail-next {
+  background: var(--identity-calendar-icon-bg);
+  border-color: var(--identity-calendar-border);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+}
+
+.widget-calendar .calendar-detail-summary {
+  background: #f1f5f9;
+  box-shadow: none;
+}
+
+.widget-traffic .traffic-detail-impact {
+  background: var(--identity-traffic-icon-bg);
+  border-color: var(--identity-traffic-border);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+}
+
+.widget-traffic .traffic-detail-summary {
+  background: #f1f5f9;
+  box-shadow: none;
 }
 
 .widget-traffic .traffic-card-compact {
