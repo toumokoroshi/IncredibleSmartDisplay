@@ -278,11 +278,11 @@ Pass criteria:
 
 Use `collectLayoutProbeResults` from `src/utils/layoutProbe.ts` when browser automation is available.
 
-## 11. Widget layout comparison previews
+## 11. UI change comparison previews
 
-Weather widget layout changes require a comparison/debug HTML preview in `documents/` before applying the app change.
-The preview should show the target 3:2 viewport and the expected quick-look or detail layout variants.
-This before/after HTML preview practice extends to other widgets' quick-look/detail layout changes (not only Weather) whenever a change reshapes spacing or adds/removes content blocks, since it lets the user sign off on the visual direction before code changes land.
+Any UI change — widget layout, global styles (colors, borders, typography, spacing tokens), or shared components — requires a comparison/debug HTML preview in `documents/`, a self-review against the change's goal, and user review before applying the app change.
+The preview should show the target 3:2 viewport and the expected quick-look or detail layout variants where applicable.
+This before/after HTML preview practice is not limited to Weather or to widget layout; it applies whenever a change reshapes spacing, adds/removes content blocks, or changes color/contrast/typography tokens, since it lets the user sign off on the visual direction before code changes land.
 
 ### Measure real dimensions before mocking flexible-space layouts
 

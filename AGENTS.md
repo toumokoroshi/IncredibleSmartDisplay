@@ -55,7 +55,7 @@ When adding or changing a Widget provider, update:
 
 ## Layout Changes
 
-For weather widget layout changes, first create or update a comparison/debug HTML preview in documents/ and have the user review the layout before applying the change to the app.
+For any UI change — widget layout, global styles (colors, borders, typography, spacing), or shared components — first create or update a comparison/debug HTML preview in documents/, perform a self-review against the change's goal, and then have the user review the preview before applying the change to the app.
 
 For detail layout changes, preserve measurement probe classes described in the implementation documents and update tests when the probe contract changes.
 

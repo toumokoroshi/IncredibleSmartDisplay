@@ -56,6 +56,7 @@ These rules are project-level instructions for IncredibleSmartDisplay. Keep fixe
 
 ## 5. React And UI Rules
 
+- For any UI change (widget layout, global styles such as colors/borders/typography, or shared components), first build a static HTML comparison/debug preview in `documents/`, self-review it against the change's goal, and get user review before applying the change to app code.
 - Optimize for a Xiaomi Pad 6S Pro 12.4 inch tablet in landscape orientation. Its target aspect ratio is 3:2, not 16:9.
 - Treat `1524 x 1016` CSS px as the primary viewport target for tablet layout checks. Fully Kiosk Browser should use `Set initial scale for older websites: 200%` on the target device to reach this viewport.
 - Use the extra vertical room of the 3:2 tablet layout instead of compressing dense weather or status information into narrow horizontal chips.
