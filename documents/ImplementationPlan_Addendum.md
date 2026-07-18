@@ -496,3 +496,50 @@ GitHub Actions runner producing them anymore.
 its English text `"Month"` to switch the calendar to month view, but the button label was localized to `"月"` in an
 earlier commit ("Localize calendar widget to Japanese"). The script's button-text selector now matches `"月"`, and the
 calendar detail secondary (month view) probe passes in CI.
+
+## 17. Local server trial (2026-07-18)
+
+A trial of local-server delivery runs on the development Windows PC before buying the planned home server
+(used x86 mini PC, see the home-server plan discussed 2026-07-04). Goal: experience the operational feel of
+server-hosted data (always-on host, periodic regeneration, failure modes) with zero hardware cost, while writing
+only code that carries over to the future mini PC unchanged.
+
+### Architecture
+
+`server/local-server.mjs` (run with `npm run serve:local`, after `npm run build`) is a dependency-free Node HTTP
+server that:
+
+- serves the static `dist/` build (SPA fallback for extension-less paths),
+- overlays `/data/news.json` and `/data/traffic.json` with freshly generated files from `server/generated/data/`
+  (gitignored), falling back to the copies bundled in `dist/`,
+- runs the existing generators (`scripts/generate-news-json.mjs`, `scripts/generate-traffic-json.mjs`) as in-process
+  interval jobs (news 30 min, traffic 5 min; override via `NEWS_REFRESH_MINUTES` / `TRAFFIC_REFRESH_MINUTES`),
+- exposes `/healthz` with per-job last-success/last-error timestamps.
+
+The frontend is unchanged: widgets keep `provider: "staticJson"` with the same relative `/data/...` URLs, which the
+local server answers with regenerated content. Tablet access uses `http://<pc-ip>:8080/` on the LAN. GitHub Pages
+deployment stays frozen on its existing GitHub Actions flow (ITmedia/Hacker News feeds); do not point the Pages
+build at the local feeds.
+
+### News feeds and licensing boundary
+
+The local server defaults to NHK RSS (cat0 主要 + cat5 経済). NHK headlines are for LAN-only display: the generated
+`news.json` must never be committed or deployed to GitHub Pages (public redistribution of NHK headlines is not
+clearly licensed). `NEWS_FEEDS_JSON` overrides the feed list.
+
+### Traffic: ODPT plan (registration pending)
+
+Required lines changed to 東急目黒線 / 都営三田線 / JR山手線 (dashboard.config.ts still lists the old 8 lines; update it
+together with the ODPT fetcher). Source survey (2026-07-18):
+
+- 都営三田線: ODPT Center, permanent, CC BY.
+- 東急目黒線, JR山手線 (JR東日本アイステイションズ): ODPT チャレンジ2026 limited — data guaranteed only until the
+  challenge ends 2027-03-12; past challenges did terminate their APIs (2022 precedent). Register as developer only;
+  do NOT enter the contest (entry requires public release of the app, which conflicts with the privacy policy).
+- No individual-accessible commercial API exists (NAVITIME/駅すぱあと restrict 運行情報 to corporate plans).
+- Fallback per line: 鉄道コム運行情報RSS (official aggregate feed); scraping official sites was evaluated and rejected
+  (terms risk, maintenance cost, and silent-failure mode where a broken scraper renders as 平常運転).
+
+The traffic job currently regenerates from `data-sources/traffic.manual.json` as a placeholder; the ODPT fetcher
+replaces the job's `run` function once API keys arrive. Requirements for that fetcher: per-line pluggable sources,
+and stale detection — a fetch failure or stale upstream must surface as an error/stale state, never as implied 平常運転.
