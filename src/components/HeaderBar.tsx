@@ -2,6 +2,7 @@ import { House, RefreshCw } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { formatHeaderDateLabel, formatTimeLabel } from "../utils/date";
+import { useNow } from "../hooks/useNow";
 import type { HeaderStatus } from "../types/dashboard";
 
 export function HeaderBar({
@@ -17,7 +18,7 @@ export function HeaderBar({
   onRefreshClick: () => void;
   status: HeaderStatus;
 }) {
-  const now = new Date();
+  const now = useNow();
   const syncLabel = status.lastSyncedAt ? `更新 ${formatTimeLabel(new Date(status.lastSyncedAt))}` : "更新待ち";
 
   return (

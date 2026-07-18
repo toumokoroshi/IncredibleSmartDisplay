@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -58,5 +58,36 @@ describe("HeaderBar", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "更新" }));
     expect(onRefreshClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("advances the clock without an external re-render trigger", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-31T08:00:00.000+09:00"));
+
+    try {
+      render(
+        <HeaderBar
+          isDetailMode={false}
+          onHomeClick={vi.fn()}
+          onRefreshClick={vi.fn()}
+          status={{
+            errorCount: 0,
+            online: true,
+            refreshingCount: 0,
+            staleCount: 0,
+          }}
+        />,
+      );
+
+      expect(screen.getByText("08:00")).toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(60_000);
+      });
+
+      expect(screen.getByText("08:01")).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
