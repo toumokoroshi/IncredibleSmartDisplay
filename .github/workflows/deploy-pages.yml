@@ -1,11 +1,13 @@
 name: Deploy Pages
 
+# Scheduled refresh retired 2026-07-19: the kiosk tablet is served by the local
+# server (documents/ImplementationPlan_Addendum.md §17). Push/manual deploys remain
+# for an optional public demo build; unpublish the Pages site once the local
+# server has proven stable.
 on:
   push:
     branches:
       - main
-  schedule:
-    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 env:

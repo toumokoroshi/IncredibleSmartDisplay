@@ -198,6 +198,11 @@ Rules:
 
 ## 7. Artifact-only refresh
 
+**Status (2026-07-19): retired.** The kiosk tablet is now served by the local server (§17), which regenerates
+News/Traffic in-process. The deploy workflow's 15-minute cron trigger was removed; push/manual deploys remain for an
+optional public demo build. Unpublish the Pages site (Settings → Pages) once the local server has proven stable.
+The rules below are kept for reference while Pages remains available as a fallback.
+
 News と Traffic の scheduled refresh は、当面 Pages artifact 生成時に JSON を生成する方式を優先する。
 
 Rules:
