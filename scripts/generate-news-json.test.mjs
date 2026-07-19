@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildNewsData, parseFeedItems } from "./generate-news-json.mjs";
+import { buildNewsData, parseFeedItems, SUMMARY_MAX_CHARS } from "./generate-news-json.mjs";
 
 const feed = {
   id: "fixture",
@@ -41,6 +41,25 @@ describe("generate-news-json", () => {
       source: "Fixture News",
       summary: "Newer summary",
     });
+  });
+
+  it("keeps summaries up to the relaxed clamp for the full-summary overlay", () => {
+    const longDescription = "あ".repeat(SUMMARY_MAX_CHARS + 100);
+    const items = parseFeedItems(
+      `<?xml version="1.0"?>
+      <rss><channel>
+        <item>
+          <title>Long summary story</title>
+          <link>https://example.test/long</link>
+          <description>${longDescription}</description>
+          <pubDate>Sat, 30 May 2026 12:00:00 GMT</pubDate>
+        </item>
+      </channel></rss>`,
+      feed,
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0].summary).toBe(`${"あ".repeat(SUMMARY_MAX_CHARS - 1)}...`);
   });
 
   it("normalizes Atom fixture links and falls back to feed category", () => {

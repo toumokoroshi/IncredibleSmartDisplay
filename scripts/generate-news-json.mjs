@@ -2,6 +2,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+// The news detail screen shows the full summary in a tap-to-expand overlay,
+// so keep enough text for a few sentences while still bounding JSON size.
+export const SUMMARY_MAX_CHARS = 400;
+
 export const DEFAULT_NEWS_FEEDS = [
   {
     id: "itmedia-news",
@@ -120,7 +124,7 @@ function normalizeFeedEntry(entry, feed, index) {
   return {
     id: `${feed.id}-${stableHash(`${link || title}-${publishedAt}-${index}`)}`,
     title: clampText(title, 120),
-    summary: clampText(stripHtml(normalizeWhitespace(getFirst(entry, ["description", "summary", "content:encoded", "content"])) ?? ""), 180),
+    summary: clampText(stripHtml(normalizeWhitespace(getFirst(entry, ["description", "summary", "content:encoded", "content"])) ?? ""), SUMMARY_MAX_CHARS),
     category: normalizeWhitespace(getFirst(entry, ["category"])) || feed.category,
     priority: "normal",
     source: feed.name,

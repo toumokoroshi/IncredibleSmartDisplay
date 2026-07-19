@@ -548,3 +548,19 @@ together with the ODPT fetcher). Source survey (2026-07-18):
 The traffic job currently regenerates from `data-sources/traffic.manual.json` as a placeholder; the ODPT fetcher
 replaces the job's `run` function once API keys arrive. Requirements for that fetcher: per-line pluggable sources,
 and stale detection — a fetch failure or stale upstream must surface as an error/stale state, never as implied 平常運転.
+
+## 18. News detail full-summary overlay (2026-07-19)
+
+The news detail screen truncated summaries twice: the generator clamped `summary` to 180 chars, and the UI used
+`line-clamp-4` (featured) / one-line `truncate` (headline list). Tapping any article in the detail screen now opens
+an in-widget overlay showing the title and full summary (backdrop tap, close button, and a 20-second auto-close for
+the always-on display). Alternatives evaluated and rejected: navigating to the original article URL (leaves the
+kiosk dashboard; Fully Kiosk return-path and whitelist issues), iframe embedding (blocked by news sites'
+`X-Frame-Options`/CSP), and in-place accordion expansion (breaks the fixed no-scroll grid). Preview:
+`documents/news-detail-summary-expand-comparison.html`.
+
+Supporting change: the generator summary clamp was relaxed to 400 chars (`SUMMARY_MAX_CHARS` in
+`scripts/generate-news-json.mjs`) so the overlay has meaningful content; the summary is still bounded because RSS
+descriptions are the only body text available (full-article scraping was rejected for licensing and fragility).
+The overlay's scrollable summary region carries `widget-scroll-region` so layout probes treat it as an explicitly
+scrollable area. `NewsItem` and the service contract are unchanged.
