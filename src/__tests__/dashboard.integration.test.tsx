@@ -95,8 +95,10 @@ describe("dashboard integration", () => {
     fireEvent.click(screen.getByRole("button", { name: "Traffic detail" }));
     expect(await screen.findByRole("button", { name: "ホーム" })).toBeInTheDocument();
 
+    // Returning home pops the pushed history entry, so the mode change arrives
+    // asynchronously via popstate.
     fireEvent.click(screen.getByRole("button", { name: "ホーム" }));
-    expect(screen.getByRole("button", { name: "Weather detail" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Weather detail" })).toBeInTheDocument();
   }, 10000);
 
   it("does not refetch when display mode changes", async () => {

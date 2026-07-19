@@ -3,11 +3,12 @@ import { useState } from "react";
 
 import { dashboardConfig } from "../config/dashboard.config";
 import { DashboardProvider } from "../contexts/DashboardContext";
+import { useDisplayModeHistory } from "../hooks/useDisplayModeHistory";
 import { DashboardShell } from "../layouts/DashboardShell";
 
 export default function App() {
   const [queryClient] = useState(() => new QueryClient());
-  const [displayMode, setDisplayMode] = useState(dashboardConfig.app.defaultDisplayMode);
+  const [displayMode, setDisplayMode] = useDisplayModeHistory(dashboardConfig.app.defaultDisplayMode);
 
   return (
     <QueryClientProvider client={queryClient}>

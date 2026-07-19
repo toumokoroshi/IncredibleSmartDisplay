@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<title>ライト/ダークテーマ 比較プレビュー</title>
+<style>
+  /* =========================================================
+     テーマ変数
+     LIGHT 列 = 現行 src/index.css の値そのまま
+     DARK 列 = 提案値([data-theme="dark"] で上書きする想定)
+     ========================================================= */
+  .theme-light {
+    --app-bg: #f6f8fb;
+    --header-bg: rgba(255, 255, 255, 0.78);
+    --panel-bg: #ffffff;
+    --control-bg: #f1f5f9;
+    --accent-bg: #e8f0fe;
+    --accent-border: rgba(66, 133, 244, 0.34);
+    --panel-stroke: rgba(15, 23, 42, 0.16);
+    --panel-shadow: 0 20px 48px rgba(15, 23, 42, 0.16);
+    --widget-title-color: #334155;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --item-bg: #f8fafc;
+    --item-stroke: rgba(15, 23, 42, 0.14);
+    --item-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    --pill-bg: rgba(241, 245, 249, 0.62);
+    --card-tint: linear-gradient(180deg, rgba(66, 133, 244, 0.035), transparent 28%);
+    --brand-accent: #4285f4;
+
+    --identity-weather-border: #5b8def;
+    --identity-weather-icon: #1a73e8;
+    --identity-weather-icon-bg: #e8f0fe;
+    --identity-weather-icon-border: #d2e3fc;
+    --identity-calendar-border: #7c6fe0;
+    --identity-calendar-icon: #5b4fc4;
+    --identity-calendar-icon-bg: #eeecfd;
+    --identity-calendar-icon-border: #ddd8fb;
+    --identity-news-border: #2f9e8f;
+    --identity-news-icon: #12766a;
+    --identity-news-icon-bg: #e1f5f2;
+    --identity-news-icon-border: #c9ebe6;
+    --identity-traffic-border: #64748b;
+    --identity-traffic-icon: #475569;
+    --identity-traffic-icon-bg: #eef2f7;
+    --identity-traffic-icon-border: #e2e8f0;
+    --identity-petphoto-border: #ec7fa3;
+    --identity-petphoto-icon: #be185d;
+    --identity-petphoto-icon-bg: #fce7f3;
+    --identity-petphoto-icon-border: #f9d0e3;
+
+    --status-ok-text: #047857;
+    --status-ok-bg: #ecfdf5;
+    --status-ok-border: #a7f3d0;
+    --status-warn-text: #b45309;
+    --status-warn-bg: #fffbeb;
+    --status-warn-border: #fde68a;
+  }
+
+  .theme-dark {
+    --app-bg: #0b1120;
+    --header-bg: rgba(17, 26, 44, 0.78);
+    --panel-bg: #121b2e;
+    --control-bg: #1c2740;
+    --accent-bg: rgba(138, 180, 248, 0.14);
+    --accent-border: rgba(138, 180, 248, 0.42);
+    --panel-stroke: rgba(148, 163, 184, 0.24);
+    --panel-shadow: 0 20px 48px rgba(2, 6, 17, 0.6);
+    --widget-title-color: #a5b1c4;
+    --text-main: #e5eaf2;
+    --text-muted: #93a1b7;
+    --item-bg: rgba(255, 255, 255, 0.045);
+    --item-stroke: rgba(148, 163, 184, 0.2);
+    --item-shadow: 0 10px 20px rgba(2, 6, 17, 0.35);
+    --pill-bg: rgba(28, 39, 64, 0.62);
+    --card-tint: linear-gradient(180deg, rgba(138, 180, 248, 0.05), transparent 28%);
+    --brand-accent: #8ab4f8;
+
+    --identity-weather-border: #6f9ff5;
+    --identity-weather-icon: #a5c5fa;
+    --identity-weather-icon-bg: rgba(138, 180, 248, 0.16);
+    --identity-weather-icon-border: rgba(138, 180, 248, 0.34);
+    --identity-calendar-border: #9488ea;
+    --identity-calendar-icon: #beb4f8;
+    --identity-calendar-icon-bg: rgba(167, 157, 240, 0.16);
+    --identity-calendar-icon-border: rgba(167, 157, 240, 0.34);
+    --identity-news-border: #3fb3a2;
+    --identity-news-icon: #7cdccd;
+    --identity-news-icon-bg: rgba(63, 179, 162, 0.15);
+    --identity-news-icon-border: rgba(63, 179, 162, 0.34);
+    --identity-traffic-border: #7d8ba1;
+    --identity-traffic-icon: #aeb9cc;
+    --identity-traffic-icon-bg: rgba(148, 163, 184, 0.14);
+    --identity-traffic-icon-border: rgba(148, 163, 184, 0.32);
+    --identity-petphoto-border: #ef8fb1;
+    --identity-petphoto-icon: #f6accB;
+    --identity-petphoto-icon-bg: rgba(236, 127, 163, 0.15);
+    --identity-petphoto-icon-border: rgba(236, 127, 163, 0.34);
+
+    --status-ok-text: #6ee7b7;
+    --status-ok-bg: rgba(16, 185, 129, 0.13);
+    --status-ok-border: rgba(110, 231, 183, 0.32);
+    --status-warn-text: #fbd38d;
+    --status-warn-bg: rgba(245, 158, 11, 0.13);
+    --status-warn-border: rgba(251, 211, 141, 0.32);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 2rem;
+    background: #e6eaf1;
+    color: #0f172a;
+    font-family: "Google Sans", "Noto Sans JP", "Segoe UI", sans-serif;
+  }
+
+  h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+  .intro { max-width: 76rem; margin: 0 0 1.5rem; color: #334155; line-height: 1.7; font-size: 0.95rem; }
+  .intro code { background: rgba(15,23,42,0.06); padding: 0.1rem 0.35rem; border-radius: 0.3rem; }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 100rem;
+  }
+
+  .col-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+  .col-label.dark { color: #1a73e8; }
+
+  /* ---------- ミニダッシュボード(実 index.css の構造を縮小再現) ---------- */
+  .mini-dash {
+    background: var(--app-bg);
+    border-radius: 1rem;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 0.9fr;
+    grid-template-areas:
+      "header header header"
+      "weather traffic calendar"
+      "weather pet news";
+    gap: 0.8rem;
+    color: var(--text-main);
+  }
+
+  .mini-header {
+    grid-area: header;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    background: var(--header-bg);
+    border: 1px solid var(--panel-stroke);
+    border-radius: 1.2rem;
+    box-shadow: var(--panel-shadow);
+    padding: 0.9rem 1.2rem;
+  }
+  .mini-clock { font-size: 2.6rem; font-weight: 500; letter-spacing: -0.04em; line-height: 1; }
+  .mini-date { margin-top: 0.4rem; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; }
+  .pills { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--panel-stroke);
+    background: var(--pill-bg);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .pill.ok { color: var(--status-ok-text); }
+  .pill.warn { color: var(--status-warn-text); }
+  .ctrl-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border: 1px solid var(--panel-stroke);
+    background: var(--control-bg);
+    border-radius: 0.8rem;
+    color: var(--text-main);
+    font-size: 0.95rem;
+  }
+
+  .mini-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-stroke);
+    border-radius: 1.2rem;
+    box-shadow: var(--panel-shadow);
+    padding: 0.9rem 1rem;
+    color: var(--text-main);
+  }
+  .mini-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: var(--card-tint);
+  }
+  .mini-card > * { position: relative; }
+
+  .mini-card.weather { grid-area: weather; border-top: 4px solid var(--identity-weather-border); }
+  .mini-card.traffic { grid-area: traffic; border-top: 4px solid var(--identity-traffic-border); }
+  .mini-card.calendar { grid-area: calendar; border-top: 4px solid var(--identity-calendar-border); }
+  .mini-card.pet { grid-area: pet; border-top: 4px solid var(--identity-petphoto-border); }
+  .mini-card.news { grid-area: news; border-top: 4px solid var(--identity-news-border); }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--widget-title-color);
+    margin-bottom: 0.6rem;
+  }
+  .h-icon {
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+  }
+  .weather .h-icon { color: var(--identity-weather-icon); background: var(--identity-weather-icon-bg); border-color: var(--identity-weather-icon-border); }
+  .traffic .h-icon { color: var(--identity-traffic-icon); background: var(--identity-traffic-icon-bg); border-color: var(--identity-traffic-icon-border); }
+  .calendar .h-icon { color: var(--identity-calendar-icon); background: var(--identity-calendar-icon-bg); border-color: var(--identity-calendar-icon-border); }
+  .pet .h-icon { color: var(--identity-petphoto-icon); background: var(--identity-petphoto-icon-bg); border-color: var(--identity-petphoto-icon-border); }
+  .news .h-icon { color: var(--identity-news-icon); background: var(--identity-news-icon-bg); border-color: var(--identity-news-icon-border); }
+
+  .big-temp { font-size: 3rem; font-weight: 420; line-height: 1.05; }
+  .temp-sub { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem; }
+
+  .metric-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.7rem; }
+  .metric {
+    background: var(--item-bg);
+    border: 1px solid var(--item-stroke);
+    box-shadow: var(--item-shadow);
+    border-radius: 0.7rem;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .metric b { display: block; color: var(--text-main); font-size: 0.95rem; margin-top: 0.1rem; }
+
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--item-bg);
+    border: 1px solid var(--item-stroke);
+    box-shadow: var(--item-shadow);
+    border-radius: 0.7rem;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.78rem;
+    margin-bottom: 0.45rem;
+  }
+  .list-item .sub { color: var(--text-muted); font-size: 0.7rem; }
+
+  .badge {
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge.ok { color: var(--status-ok-text); background: var(--status-ok-bg); border: 1px solid var(--status-ok-border); }
+  .badge.warn { color: var(--status-warn-text); background: var(--status-warn-bg); border: 1px solid var(--status-warn-border); }
+
+  .pet-photo {
+    height: 5.2rem;
+    border-radius: 0.7rem;
+    border: 1px solid var(--item-stroke);
+    background:
+      radial-gradient(circle at 30% 40%, #f0abfc 0%, transparent 45%),
+      radial-gradient(circle at 70% 60%, #93c5fd 0%, transparent 50%),
+      var(--item-bg);
+    display: grid;
+    place-items: center;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+
+  /* ---------- 仕様説明 ---------- */
+  .spec {
+    max-width: 76rem;
+    margin-top: 2rem;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    line-height: 1.8;
+    font-size: 0.9rem;
+    color: #1e293b;
+  }
+  .spec h2 { font-size: 1.05rem; margin: 0 0 0.5rem; }
+  .spec code { background: rgba(15,23,42,0.06); padding: 0.1rem 0.35rem; border-radius: 0.3rem; }
+  .spec ul { margin: 0.25rem 0 0.75rem; padding-left: 1.4rem; }
+</style>
+</head>
+<body>
+
+<h1>ライト/ダークテーマ 比較プレビュー(時間帯自動切替)</h1>
+<p class="intro">
+  左 = 現行ライトテーマ(変更なし)、右 = 提案ダークテーマ。
+  ダーク側は夜間のリビング視聴を想定し、純黒ではなく紺系の低グレア背景(<code>#0b1120</code>)+
+  彩度を落として明度を上げたアイデンティティ色で構成しています。
+  実装は <code>&lt;html data-theme="dark"&gt;</code> でのCSS変数上書きが中心で、レイアウトは一切変更しません。
+</p>
+
+<div class="compare">
+  <div>
+    <div class="col-label">Light(現行・日中)</div>
+    <div class="mini-dash theme-light">
+      <div class="mini-header">
+        <div>
+          <div class="mini-clock">21:24</div>
+          <div class="mini-date">7月19日(日) · Tokyo</div>
+        </div>
+        <div class="pills">
+          <span class="ctrl-btn">⟳</span>
+          <span class="pill">更新 21:20</span>
+          <span class="pill ok">オンライン</span>
+          <span class="pill warn">更新遅延 1</span>
+        </div>
+      </div>
+      <div class="mini-card weather">
+        <div class="card-title"><span class="h-icon">☀</span>Weather</div>
+        <div class="big-temp">31°</div>
+        <div class="temp-sub">晴れ · 体感 34° · 東京</div>
+        <div class="metric-row">
+          <div class="metric">湿度<b>62%</b></div>
+          <div class="metric">降水確率<b>10%</b></div>
+        </div>
+      </div>
+      <div class="mini-card traffic">
+        <div class="card-title"><span class="h-icon">🚆</span>Traffic</div>
+        <div class="list-item"><span>中央線快速</span><span class="badge ok">平常運転</span></div>
+        <div class="list-item"><span>東西線</span><span class="badge warn">遅延</span></div>
+        <div class="list-item"><span>山手線</span><span class="badge ok">平常運転</span></div>
+      </div>
+      <div class="mini-card calendar">
+        <div class="card-title"><span class="h-icon">📅</span>Calendar</div>
+        <div class="list-item"><div>ゴミの日<div class="sub">終日</div></div></div>
+        <div class="list-item"><div>歯医者<div class="sub">15:00</div></div></div>
+      </div>
+      <div class="mini-card pet">
+        <div class="card-title"><span class="h-icon">🐾</span>今日のぐり</div>
+        <div class="pet-photo">写真</div>
+      </div>
+      <div class="mini-card news">
+        <div class="card-title"><span class="h-icon">📰</span>News</div>
+        <div class="list-item"><div>ニュース見出しのサンプル<div class="sub">NHK · 20:45</div></div></div>
+        <div class="list-item"><div>2件目の見出しサンプル<div class="sub">NHK · 19:30</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label dark">Dark(提案・夜間)</div>
+    <div class="mini-dash theme-dark">
+      <div class="mini-header">
+        <div>
+          <div class="mini-clock">21:24</div>
+          <div class="mini-date">7月19日(日) · Tokyo</div>
+        </div>
+        <div class="pills">
+          <span class="ctrl-btn">⟳</span>
+          <span class="pill">更新 21:20</span>
+          <span class="pill ok">オンライン</span>
+          <span class="pill warn">更新遅延 1</span>
+        </div>
+      </div>
+      <div class="mini-card weather">
+        <div class="card-title"><span class="h-icon">☀</span>Weather</div>
+        <div class="big-temp">31°</div>
+        <div class="temp-sub">晴れ · 体感 34° · 東京</div>
+        <div class="metric-row">
+          <div class="metric">湿度<b>62%</b></div>
+          <div class="metric">降水確率<b>10%</b></div>
+        </div>
+      </div>
+      <div class="mini-card traffic">
+        <div class="card-title"><span class="h-icon">🚆</span>Traffic</div>
+        <div class="list-item"><span>中央線快速</span><span class="badge ok">平常運転</span></div>
+        <div class="list-item"><span>東西線</span><span class="badge warn">遅延</span></div>
+        <div class="list-item"><span>山手線</span><span class="badge ok">平常運転</span></div>
+      </div>
+      <div class="mini-card calendar">
+        <div class="card-title"><span class="h-icon">📅</span>Calendar</div>
+        <div class="list-item"><div>ゴミの日<div class="sub">終日</div></div></div>
+        <div class="list-item"><div>歯医者<div class="sub">15:00</div></div></div>
+      </div>
+      <div class="mini-card pet">
+        <div class="card-title"><span class="h-icon">🐾</span>今日のぐり</div>
+        <div class="pet-photo">写真</div>
+      </div>
+      <div class="mini-card news">
+        <div class="card-title"><span class="h-icon">📰</span>News</div>
+        <div class="list-item"><div>ニュース見出しのサンプル<div class="sub">NHK · 20:45</div></div></div>
+        <div class="list-item"><div>2件目の見出しサンプル<div class="sub">NHK · 19:30</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spec">
+  <h2>実装方針(適用時)</h2>
+  <ul>
+    <li><b>切替方式:</b> 時間帯で自動切替。<code>dashboard.config.ts</code> の <code>theme</code> を
+      <code>{ mode: "auto", darkStartHour: 19, darkEndHour: 6 }</code> に拡張(現在の未使用フィールド <code>mode: "dark"</code> を置き換え)。</li>
+    <li><b>適用方法:</b> 既存の <code>useNow</code> 系フックで現在時刻から <code>light | dark</code> を判定し、
+      <code>&lt;html&gt;</code> に <code>data-theme</code> 属性を設定。<code>index.css</code> に
+      <code>[data-theme="dark"]</code> の変数上書きブロックを追加。</li>
+    <li><b>ハードコード色の変数化:</b> <code>index.css</code> 内の直書き <code>#0f172a</code> / <code>#64748b</code> 等と、
+      各Widget内のTailwind色クラス(約220箇所)は、既存の <code>.widget-card</code> 再マッピングの仕組みに寄せて
+      変数参照に段階的に置き換え。レイアウト・サイズは不変更。</li>
+    <li><b>ステータス色:</b> Trafficの運行状態バッジ(緑/黄/赤系)はダークでは明度を上げた変種
+      (<code>#6ee7b7</code> / <code>#fbd38d</code> 系)+低透過の背景にし、暗背景でもコントラスト比 4.5:1 以上を維持。</li>
+    <li><b>検証:</b> 1524×1016 のタブレットビューポートで両テーマの表示確認、
+      <code>npm run build / test:run / lint</code>、切替時刻境界のユニットテスト追加。</li>
+  </ul>
+</div>
+
+</body>
+</html>
